@@ -1,0 +1,76 @@
+# Global statistics
+
+
+Read the data
+
+```{r, echo=TRUE, include=TRUE}
+data_confirmed = read.csv("output/data_confirmed.csv", header=FALSE)
+data_deaths = read.csv("output/data_deaths.csv", header=FALSE)
+data_recovered = read.csv("output/data_recovered.csv", header=FALSE)
+
+world_confirmed = as.numeric(colSums(data_confirmed[2:nrow(data_confirmed),
+    2:ncol(data_confirmed)]))
+world_deaths = as.numeric(colSums(data_deaths[2:nrow(data_deaths),
+    2:ncol(data_deaths)]))
+world_recovered = as.numeric(colSums(data_recovered[2:nrow(data_recovered),
+    2:ncol(data_recovered)]))
+```
+
+# Plots {.tabset}
+
+## Total
+
+```{r, echo=TRUE, include=TRUE, fig.height=6}
+times = as.numeric(data_confirmed[1, 2:ncol(data_confirmed)])
+max_stat = max(c(world_deaths, world_recovered, world_confirmed))
+plot(x=times, y=world_confirmed,
+    col="yellow", type="l", lwd=4, ylim=c(0, max_stat),
+    xlab="day", ylab="cases",
+    main="Cumulative")
+lines(x=times, y=world_recovered,
+    col="green", type="l", lwd=4)
+lines(x=times, y=world_deaths,
+    col="red", type="l", lwd=4)
+
+legend(2, 0.95 * max_stat,
+    legend=c("cases", "recoveries", "deaths"),
+    col=c("yellow", "green", "red"), lwd=2)
+```
+
+## Log
+
+```{r, echo=TRUE, include=TRUE, fig.height=6}
+max_stat = max(c(log2(world_deaths), log2(world_recovered), log2(world_confirmed)))
+plot(x=times, y=log2(world_confirmed),
+    col="yellow", type="l", lwd=4, ylim=c(0, max_stat),
+    xlab="day", ylab="cases",
+    main="Log2 cumulative")
+lines(x=times, y=log2(world_recovered),
+    col="green", type="l", lwd=4)
+lines(x=times, y=log2(world_deaths),
+    col="red", type="l", lwd=4)
+
+legend(2, 0.95 * max_stat,
+    legend=c("cases", "recoveries", "deaths"),
+    col=c("yellow", "green", "red"), lwd=2)
+```
+
+## Daily
+
+```{r, echo=TRUE, include=TRUE, fig.height=6}
+max_stat = max(c(diff(world_deaths), diff(world_recovered), diff(world_confirmed)))
+plot(x=times, y=c(world_confirmed[1], diff(world_confirmed)),
+    col="yellow", type="h", lwd=2, ylim=c(0, max_stat),
+    xlab="day", ylab="cases",
+    main="Daily")
+lines(x=times, y=c(world_recovered[1], diff(world_recovered)),
+    col="green", type="h", lwd=2)
+lines(x=times, y=c(world_deaths[1], diff(world_deaths)),
+    col="red", type="h", lwd=2)
+
+legend(2, 0.95 * max_stat,
+    legend=c("cases", "recoveries", "deaths"),
+    col=c("yellow", "green", "red"), lwd=2)
+```
+
+# Analysis Metadata

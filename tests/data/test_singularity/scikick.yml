@@ -1,0 +1,11 @@
+analysis:
+  code/analysis_normalization.Rmd:
+  - code/analysis_summary.Rmd
+  code/analysis_summary.Rmd:
+  - code/data_generate.Rmd
+  code/data_generate.Rmd:
+  code/index.Rmd:
+  code/test_bash.Rmd:
+report:
+reportdir: report
+snakemake_args:

@@ -1,0 +1,5 @@
+ ??? 	code/data_generate.Rmd
+ --i 	code/test_bash.Rmd
+Scripts to execute: 1
+HTMLs to compile ('---'): 1
+Missing ('???'): 1

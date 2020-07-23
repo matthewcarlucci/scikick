@@ -1,0 +1,35 @@
+# Summarize Data
+
+```{r arguments}
+pathCase <- "output/data_generate/saveData_dCase.RDS"
+pathCtrl <- "output/data_generate/saveData_dCtrl.RDS"
+
+plotHist <- function(input, main, xlab, ylab = "Frequency", brk = 100) {
+    hist(input, breaks = brk, main = main, xlab = xlab, ylab = ylab)
+}
+
+dCase <- readRDS(pathCase)
+dCtrl <- readRDS(pathCtrl)
+```
+
+### Input data
+
+Experiment contains `r ncol(dCase)` cases and `r ncol(dCtrl)` controls. 
+Each sample has `r nrow(dCase)` probes.
+
+### Within group correlation {.tabset}
+
+Correlation between samples within group. Outputting figures in pdf.
+
+#### Case
+
+```{r out.width=750, out.height=750, dev = "pdf"}
+plotHist(cor(dCase), "Case", "r")
+```
+
+#### Control
+```{r out.width=750, out.height=750, dev = "pdf"}
+plotHist(cor(dCtrl), "Control", "r")
+```
+
+### Metadata

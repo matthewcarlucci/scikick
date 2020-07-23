@@ -1,0 +1,3 @@
+```{r, echo = TRUE, include = TRUE}
+write.csv(x = 1:10, file = "output/a.csv")
+```

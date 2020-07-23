@@ -1,0 +1,16 @@
+analysis:
+  code/analysis_normalization.Rmd:
+  - code/analysis_summary.Rmd
+  code/analysis_summary.Rmd:
+  - code/data_generate.Rmd
+  code/data_generate.Rmd: null
+  code/index.Rmd: null
+  code/test_bash.Rmd:
+  - code/test_bash.sh
+  code/test_python.Rmd:
+  - code/test_python.py
+conda: env.yml
+report:
+reportdir: report
+singularity: ''
+snakemake_args: --use-conda

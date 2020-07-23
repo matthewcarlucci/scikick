@@ -1,0 +1,8 @@
+analysis:
+  code/data_generate.Rmd: null
+  code/index.Rmd: null
+  code/test_spin.R:
+  - code/data_generate.Rmd
+report: null
+reportdir: report
+singularity: ''

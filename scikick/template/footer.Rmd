@@ -1,0 +1,104 @@
+<div class="container">
+  <button type="button" class="btn btn-default btn-sm btn-block" data-toggle="collapse" data-target="#METAbutton">Analysis Metadata</button>
+  <div id="METAbutton" class="collapse">
+
+
+```{r, include = TRUE, echo = FALSE}
+
+# VARIABLES PASSED FROM PARENT:
+# reportFile
+# reportName
+
+```
+
+```{r results='asis',echo=F}
+fintime <- Sys.time()
+timediff <- difftime(fintime,.scikick$starttime)
+cat(sprintf("Computation Started: %s", .scikick$starttime))
+cat("\n\n")
+cat(sprintf("Finished in %s %s",
+	round(as.numeric(timediff),3),
+	units(timediff)))
+```
+
+---
+
+### Git Log ###
+
+```{r, include=TRUE, echo=FALSE}
+gitlog = tryCatch({
+	# !!! variable 'input' comes from 'scikick/scripts/knit.R'
+	git2r::commits(git2r::repository("."), path = input)
+}, error = function(e){
+	list()
+})
+if(length(gitlog) > 0) {
+	gitlog = data.frame(author = sapply(gitlog, function(x) x$author$name),
+		summary = sapply(gitlog, function(x) x$summary),
+		date = sapply(gitlog, function(x) as.character(x$author$when)),
+		stringsAsFactors = FALSE)
+} else{
+	gitlog <- data.frame(author = "user", date = Sys.Date(),
+		summary = "no git history", stringsAsFactors = FALSE)
+}
+
+# trim if subject line is too long to fit on screen
+gitlog$summary <- sapply(gitlog$summary, function(s){
+	if(nchar(s) > 80){
+		s = paste0(strtrim(s, 80), "...")}
+	return(s)
+})
+knitr::kable(gitlog, "markdown", align = rep("l", 4))
+```
+
+---
+
+### Functions ###
+
+```{r, include=TRUE, echo=FALSE, results="asis"}
+
+funs   <- lsf.str(envir=sys.frame())
+fnames <- sapply(funs, `[`)
+funs   <- lapply(funs, get)
+names(funs) <- fnames
+
+for(fun in fnames) {
+  cat("  \n", fun, "\n")
+  cat("```r\n")
+  print(funs[[fun]])
+  cat("```\n")
+}
+
+```
+
+### Packages ###
+
+```{r, echo=FALSE}
+pkgs <- loadedNamespaces()
+desc <- Map(packageDescription, pkgs)
+ver  <- sapply(desc, getElement, "Version")
+bld  <- sapply(desc, getElement, "Built")
+bld  <- as.character(bld)
+date <- format(as.Date(sapply(strsplit(bld, "; "), "[", 3)), "%Y-%m-%d")
+pk <- data.frame(package = pkgs, version = ver, date = date)
+knitr::kable(pk, "markdown", align = "l", row.names = FALSE)
+```
+
+---
+
+### Session Info ###
+
+```{r, echo=FALSE}
+si <- sessionInfo()
+systemInfo <- c(version = si$R.version$version.string,
+	platform = si$platform, locale = Sys.getlocale("LC_COLLATE"),
+	OS = si$running, UI = .Platform$GUI)
+systemInfo <- as.data.frame(systemInfo)
+knitr::kable(systemInfo, "markdown", align = "l")
+```
+
+---
+
+  </div>
+</div>
+

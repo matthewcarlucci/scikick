@@ -1,0 +1,137 @@
+###########################################
+# Imports
+###########################################
+
+from scikick.config import read_deps, ScikickConfig, read_snakefile_arg
+from scikick.utils import git_info, warn, get_sk_exe_dir
+import yaml
+import tempfile
+
+# trying to eventually remove this
+# configfile: 'scikick.yml'
+# Instead of snakemake config file,
+# import the scikick.yml config file directly.
+skconfig=ScikickConfig()
+config=skconfig.config
+
+###########################################
+# Workflow variables
+###########################################
+
+snakefile_args = dict()
+for arg in ["singularity", "conda", "benchmark", "threads"]:
+    snakefile_args[arg] = read_snakefile_arg(arg)
+    if snakefile_args[arg] is None:
+        if arg != "threads":
+            snakefile_args[arg] = ""
+        else:
+            snakefile_args[arg] = 1
+
+# Importing report_step basenames
+analysis = skconfig.analysis
+
+# directories
+report_dir = skconfig.report_dir
+# bin files
+exe_dir=get_sk_exe_dir()
+script_dir = os.path.join(exe_dir, "scripts")
+template_dir = os.path.join(exe_dir, "template")
+snake_src = os.path.join(exe_dir, "usr", "Snakefile")
+
+data_parent = "output"
+
+inner_ymls = [os.path.join(report_dir, "out_md", dir, "_site.yml")
+	for dir in set([os.path.dirname(a) for a in analysis.keys()])]
+###########################################
+# Dependencies
+###########################################
+rmd_dict = {}
+for key in analysis:
+	rmd_dict[os.path.splitext(key)[0]] = key
+
+rmd_deps = skconfig.inferred_deps
+
+# add index if doesn't exist
+if 'index' not in rmd_dict.keys():
+	sys_index = os.path.join(template_dir, 'index.Rmd')
+	warn("sk: Include an index.Rmd to add content " +\
+		"to the required index.html page.")
+	rmd_dict['index'] = sys_index
+	rmd_deps['index'] = sys_index
+# git information
+rep_info = ["", ""]
+try:
+	rep_info = git_info()
+except:
+	warn("sk: Warning: Failed to parse git info, " +\
+		"'More' tab will not function properly")
+	rep_info = ["", ""]
+
+###########################################
+# Workflow rules
+###########################################
+
+# Rules that should never require cluster execution
+localrules: siteYAML, pageRender, AWdone
+
+rule AWdone:
+	input:
+		expand('{report_dir}/out_html/{report_step}.html',
+			report_step = list(rmd_dict.keys()), report_dir = report_dir)
+	message: "All rules from {snake_src} are complete"
+
+# TODO: specify this for rmd files only
+rule reportRendering:
+	input:
+		deps = lambda wildcards: rmd_deps[wildcards.report_step],
+		rmd = lambda wildcards: rmd_dict[wildcards.report_step]
+	output:
+		md = os.path.join(report_dir, "out_md", "{report_step}.md")
+	message: "Executing R chunks in {input.rmd}, " + \
+			"outputting to {output.md}"
+	params:
+		simplified_input = len("{input.rmd}"),
+		data_parent = data_parent,
+		template_dir = template_dir,
+		script_dir = script_dir
+	conda: snakefile_args["conda"]
+	singularity: snakefile_args["singularity"]
+	threads: int(snakefile_args["threads"])
+	benchmark: snakefile_args["benchmark"] + "{report_step}" if snakefile_args["benchmark"] != "" else ""
+	shell: "Rscript %s {input.rmd} {output.md} {params.template_dir} \
+		{params.data_parent} {params.script_dir} {logger.logfile}" \
+		% os.path.join(script_dir, "reportRendering.R")
+# 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
+
+# Generate all _site.yml files
+rule siteYAML:
+	input: yaml = "scikick.yml"
+	output:
+		main_yml = os.path.join(report_dir, "out_md", "_site.yml"),
+		inner_ymls = inner_ymls
+	message: "Creating site layout from scikick.yml"
+	params:
+		git_repository = rep_info[0],
+		git_branch = rep_info[1]
+	script: os.path.join(script_dir, 'yamlgen.py')
+
+# md => HTML via rmarkdown::render
+rule pageRender:
+	input:
+		yaml = "{report_dir}/out_md/_site.yml",
+		md = "{report_dir}/out_md/{report_step}.md"
+	output:
+		"{report_dir}/out_html/{report_step}.html"
+	message: "Generating {wildcards.report_step} html page"
+	params:
+		template_dir = template_dir,
+		index_html = lambda w: os.path.join(os.path.relpath(
+			os.path.join(report_dir, "out_md"),
+			os.path.dirname(os.path.join(report_dir,
+				"out_md", "%s.md" % w.report_step))), "index.html")
+	script: os.path.join(script_dir, 'render.R')
+
+user_snakefile = os.path.join(os.getcwd(), "Snakefile")
+if os.path.isfile(user_snakefile):
+	warn("sk: Using Snakefile found in working directory")
+	include: user_snakefile

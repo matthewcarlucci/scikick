@@ -1,0 +1,21 @@
+build/
+dist/
+scikick.egg-info/
+.eggs/
+__pycache__/
+.snakemake
+
+# files from tests
+report
+*RDS
+
+.idea
+
+*.pyc
+*.simg
+*.swp
+*.swo
+*~
+_build
+_static
+_templates

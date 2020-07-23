@@ -1,0 +1,5 @@
+.DS_Store
+.snakemake
+report
+output
+input

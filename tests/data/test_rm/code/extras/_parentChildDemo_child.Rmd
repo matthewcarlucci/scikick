@@ -1,0 +1,3 @@
+### Child Rmd
+
+This text is from the child Rmd. Objects in the parent environment will be passed to this section.

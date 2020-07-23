@@ -1,0 +1,3 @@
+ --i 	code/test_bash.Rmd
+Scripts to execute: 1
+HTMLs to compile ('---'): 1

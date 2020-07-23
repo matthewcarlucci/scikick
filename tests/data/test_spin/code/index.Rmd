@@ -1,0 +1,8 @@
+### Test Project
+
+This is a project to demonstrate and test features of scikick.
+
+[Summary](analysis_summary.html) - Importing the raw data and summarizing  
+[Normalization](analysis_normalization.html) - Data was normalized here  
+[Oscillations](analysis_oscillations.html) - Biological effects are explored here  
+

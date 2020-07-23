@@ -1,0 +1,219 @@
+"""basic functions used to modify and read scikick.yml"""
+import os
+import re
+import ruamel.yaml as yaml
+from ruamel.yaml.compat import ordereddict
+from scikick.utils import reterr, warn
+
+supported_extensions = [".R", ".Rmd"]
+
+def rm_commdir(text, commpath):
+    """removes path (prefix) commpath from text
+    with a check if the commpath is of length 0
+    text - string to be modified
+    commpath - the prefix that is removed
+    """
+    if len(commpath) != 0:
+        ntxt = text[(len(commpath) + 1):]
+        return ntxt if ntxt != "" else "./"
+    return text
+
+def yaml_dump(ymli):
+    """Write a dictionary to scikick.yml.
+    ymli -- dict
+    """
+    ymlo = yaml.YAML()
+    ymlo.dump(ymli, open("scikick.yml", "w"))
+
+def yaml_in(ymlpath='scikick.yml'):
+    """Read scikick.yml.
+    Returns an ordereddict.
+    """
+    #Exit with an error message if scikick.yml is not found
+    if not os.path.isfile(ymlpath):
+        reterr(f"sk: Error: {ymlpath} not found," + \
+               "to get a template, run\nsk: sk init")
+
+    ymli = yaml.YAML()
+    ymli = ymli.load(open(ymlpath, "r"))
+    return ymli
+
+def rename(name_a, name_b):
+    """Rename file 'a' in scikick.yml to 'b'
+    a -- string (filename)
+    b -- string (filename)
+    """
+    found = 0
+    ymli = yaml_in()
+    ## rename keys (ana)
+    if name_a in ymli["analysis"].keys():
+        index_a = list(ymli["analysis"].keys()).index(name_a)
+        ymli["analysis"].insert(index_a, name_b, ymli["analysis"].pop(name_a))
+        found = 1
+    ## rename values (deps)
+    if ymli["analysis"] is not None:
+        for k in ymli["analysis"].keys():
+            if ymli["analysis"][k] is not None and \
+                name_a in ymli["analysis"][k]:
+                ymli["analysis"][k][ymli["analysis"][k].index(name_a)] = \
+                    name_b
+                found = 1
+    yaml_dump(ymli)
+    return found
+
+def set_arg(arg, val):
+    """Set value of 'arg' in scikick.yml to 'val'.
+    Result: scikick.yml:
+    arg -- string
+    val -- string
+    """
+    ymli = yaml_in()
+    ymli[arg] = val
+    warn("sk: Argument \'%s\' set to \'%s\'" % (arg, val))
+    yaml_dump(ymli)
+
+def get_arg(arg):
+    """Read value of field 'arg' in scikick.yml.
+    Returns a string
+    arg -- string
+    """
+    ymli = yaml_in()
+    if arg in ymli.keys():
+        return ymli[arg]
+    return ""
+
+def add_check(fname, ymli):
+    """Performs a check if fname can be added to scikick.yml as a key"""
+    # if the filename(s) have wildcard symbols
+    wildcard_symbols = ["*", "?", "[", "{", "]", "}", "\\"]
+    if True in [i in fname for i in wildcard_symbols]:
+        warn(f"sk: Error: filename cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
+        return False
+    # check if the file extension is supported
+    if not ((re.match(".*.Rmd$", fname, re.I) is not None) or \
+        (re.match(".*.R$", fname, re.I) is not None)):
+        extension_list_str = ', '.join(supported_extensions)
+        warn("sk: Error: only %s files can be added as pages (%s)" % \
+            (extension_list_str, fname))
+        return False
+    # if an .R/.Rmd with the same basename exists
+    if fname not in ymli["analysis"].keys() and \
+        os.path.splitext(fname)[0] in \
+            map(lambda x: os.path.splitext(x)[0], ymli["analysis"].keys()):
+        warn(f"sk: Error: page {os.path.splitext(fname)[0]} is already to be compiled.")
+        return False
+    return True
+
+def add(files, deps):
+    """ Add files and dependencies to them
+    files - page file list
+    deps - dependency file list
+    """
+    if deps is None:
+        deps = list()
+    ymli = yaml_in()
+    if ymli['analysis'] is None:
+        ymli['analysis'] = ordereddict()
+    # add files
+    for fname in files:
+        if not add_check(fname, ymli):
+            continue
+        if not os.path.isfile(fname):
+            warn(f"sk: Warning: File {fname} doesn't exist")
+            warn(f"sk: Creating new file {fname}")
+            open(fname, "a").close()
+        if fname in ymli['analysis'].keys() and len(deps) == 0:
+            warn(f"sk: {fname} is already included")
+        elif fname not in ymli['analysis'].keys():
+            if len(ymli["analysis"].keys()) > 0:
+                commpath = os.path.commonpath(list(ymli["analysis"].keys()))
+            else:
+                commpath = ""
+            tab_name = os.path.dirname(rm_commdir(fname, commpath))
+            all_tabs = list(map(lambda f:
+                os.path.dirname(rm_commdir(f, commpath)),
+                ymli["analysis"].keys()))
+            tab_matches = list(filter(lambda i:
+                all_tabs[i] == tab_name, range(len(all_tabs))))
+            if (tab_name != "") and (len(tab_matches) != 0):
+                ymli["analysis"].insert(tab_matches[-1] + 1, fname, None)
+            else:
+                ymli['analysis'][fname] = None
+            warn(f"sk: Added {fname}")
+        # add dependencies
+        for dep in deps:
+            if ymli['analysis'][fname] is None:
+                ymli['analysis'][fname] = []
+            if not os.path.isfile(dep):
+                warn(f"sk: Warning: {dep} does not exist or is not a file")
+            if dep in ymli['analysis'][fname]:
+                warn(f"sk: {dep} is already a dependency of {fname}")
+            else:
+                ymli['analysis'][fname].append(dep)
+                warn(f"sk: Added dependency {dep} to {fname}")
+    yaml_dump(ymli)
+
+def rm(files, deps):
+    """ Delete files and dependencies from them
+    files - page file list
+    deps - dependency file list
+    """
+    if deps is None:
+        deps = list()
+    ymli = yaml_in()
+    if ymli['analysis'] is None:
+        warn("sk: Warning: Nothing to remove")
+        return
+    for fname in files:
+        # check if rmd included
+        if fname not in ymli['analysis'].keys():
+            warn(f"sk: Warning: File {fname} not included")
+            continue
+        # del page files if no dependencies spedified
+        if len(deps) == 0:
+            if fname in ymli['analysis'].keys():
+                del ymli['analysis'][fname]
+                warn(f"sk: {fname} removed")
+        # delete only deps if deps specified
+        else:
+            if ymli['analysis'][fname] is None:
+                warn(f"sk: Warning: File {fname} has no dependencies")
+                continue
+            for dep in deps:
+                if ymli['analysis'][fname] is None:
+                    break
+                if dep in ymli['analysis'][fname]:
+                    ymli['analysis'][fname].remove(dep)
+                    warn(f"sk: {dep} removed from {fname}")
+                else:
+                    warn(f"sk: {dep} is not in {fname}")
+                if len((ymli['analysis'][fname])) == 0:
+                    ymli['analysis'][fname] = None
+    yaml_dump(ymli)
+
+def site(args):
+    """Adds the custom link to the 'More' tab"""
+    ymli = yaml_in()
+    if "site" not in ymli.keys():
+        ymli["site"] = dict()
+    # print the links
+    if args.get:
+        for k in ymli["site"].keys():
+            print(f"{k} => {ymli['site'][k]}")
+        return
+    if args.delete and args.name is None:
+        reterr("sk: Error: '--name' has to be specified for deletion")
+    if args.delete:
+        # handle deletion
+        del_ret = ymli["site"].pop(args.name[0], None)
+        if del_ret is not None:
+            print(f"sk: Removed link named '{args.name[0]}'")
+        else:
+            print(f"sk: Link '{args.name[0]}' not found")
+        yaml_dump(ymli)
+        return
+    if (args.name is None) or (args.link is None):
+        reterr("sk: Error: both '--name' and '--link' have to be specified")
+    ymli["site"][args.name[0]] = args.link[0]
+    print(f"sk: Added link {args.link[0]} under {args.name[0]}")
+    yaml_dump(ymli)

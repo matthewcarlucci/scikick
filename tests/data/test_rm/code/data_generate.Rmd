@@ -1,0 +1,38 @@
+```{r}
+outDataDir <- "output/data_generate"
+```
+
+
+```{r arguments}
+nSample <- 100
+nProbe  <- 1000
+```
+
+
+```{r functions}
+generateBeta <- function(
+    noise = 0, 
+    name  = NULL,
+    ns    = nSample,
+    np    = nProbe) {
+    reference <- rbeta(np , 0.1, 0.1)
+    d <- sapply(1:ns, function(x) jitter(reference, noise))
+    colnames(d) <- paste0(name, "_", 1:ns, "_", sample(1:24))
+    rownames(d) <- paste0("probe_", 1:np)
+    return(d)
+}
+```
+
+
+```{r generateRandomData}
+dCase <- generateBeta(5e2, "Case")
+dCtrl <- generateBeta(1e3, "Control")
+```
+
+
+```{r saveData}
+# Using predefined outDataDir object to save data
+dir.create(outDataDir, recursive=T)
+saveRDS(dCase,file=file.path(outDataDir,"saveData_dCase.RDS"))
+saveRDS(dCtrl,file=file.path(outDataDir,"saveData_dCtrl.RDS"))
+```

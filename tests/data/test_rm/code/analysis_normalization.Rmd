@@ -1,0 +1,29 @@
+```{r setup}
+outDataDir <- "output/analysis_normalization"
+```
+
+# Normalizing Data
+
+```{r arguments}
+pathCase <- "output/data_generate/saveData_dCase.RDS"
+pathCtrl <- "output/data_generate/saveData_dCtrl.RDS"
+
+rmRowEffect <- function(input) {
+    input - rowMeans(input)
+}
+
+dCase <- readRDS(pathCase)
+dCtrl <- readRDS(pathCtrl)
+```
+
+Samples were normalized using rmRowEffect() function (Mean centering)
+
+```{r normalizeData}
+dCaseN <- rmRowEffect(dCase)
+dCtrlN <- rmRowEffect(dCtrl)
+
+# Using predefined outDataDir object to save data
+dir.create(outDataDir,recursive=T)
+saveRDS(dCaseN,file=file.path(outDataDir,"saveData_dCaseN_rmRowEffect.RDS"))
+saveRDS(dCtrlN,file=file.path(outDataDir,"saveData_dCtrlN_rmRowEffect.RDS"))
+```

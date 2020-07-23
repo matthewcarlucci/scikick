@@ -1,0 +1,9 @@
+analysis:
+  code/index.Rmd:
+  code/test_bash.Rmd:
+  - code/test_bash.sh
+  code/test_python.Rmd:
+  - code/test_python.py
+report:
+reportdir: report
+singularity: ''

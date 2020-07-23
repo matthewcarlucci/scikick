@@ -1,0 +1,7 @@
+1:  f
+2:  subdir
+3:  subdir/subsub
+1:  f.r
+1:  subdir/a.Rmd
+2:  subdir/b.Rmd
+1:  subdir/subsub/inside.Rmd

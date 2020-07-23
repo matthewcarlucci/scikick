@@ -1,0 +1,6 @@
+ --- 	subdir/b.Rmd
+ --- 	subdir/a.Rmd
+ --- 	e.r
+Scripts to execute: 0
+HTMLs to compile ('---'): 3
+Up to date ('   '): 0

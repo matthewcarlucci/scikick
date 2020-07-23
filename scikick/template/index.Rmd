@@ -1,0 +1,48 @@
+
+### Git History ###
+
+```{r, include=TRUE, echo=FALSE}
+
+glog <- character()
+
+tryCatch({
+  glog <- system(paste('git log --pretty=format:"%an\t%ad\t%s" --date=short --no-merges'), intern=TRUE)
+}, error = function(e) {
+  message("error parsing git logs")
+}, warning = function(e) {
+  message("warning while parsing git logs")
+})
+
+if(length(glog) > 0) {
+  glog <- read.delim(textConnection(glog), as.is=TRUE, header=FALSE)
+  names(glog) <- c("author", "date", "subject")
+} else {
+  glog <- data.frame(author="user", date=Sys.Date(), subject="no git history",
+                     stringsAsFactors=FALSE
+                     )
+}
+
+```
+
+### List of Contributors ###  
+
+```{r, include=TRUE, echo=FALSE}
+
+authors <- as.data.frame(table(glog$author))
+colnames(authors) <- c("author", "commits")
+
+knitr::kable(authors, "markdown", align=rep("l", 2))
+
+```
+
+### List of Changes ###  
+
+```{r, include=TRUE, echo=FALSE}
+
+# trim if subject line is too long to fit on screen
+glog$subject <- ifelse(nchar(glog$subject) > 80, paste0(strtrim(glog$subject, 80), "..."), glog$subject)
+glog$subject <- gsub("_", " ", glog$subject)
+knitr::kable(glog, "markdown", align=rep("l", 4))
+
+```
+

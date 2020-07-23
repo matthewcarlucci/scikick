@@ -1,0 +1,8 @@
+ m-- 	code/analysis_normalization.Rmd
+ m-- 	code/analysis_summary.Rmd
+ m-- 	code/data_generate.Rmd
+ m-- 	code/index.Rmd
+ m-- 	code/test_bash.Rmd
+ m-- 	code/test_python.Rmd
+Scripts to execute: 6
+HTMLs to compile ('---'): 6

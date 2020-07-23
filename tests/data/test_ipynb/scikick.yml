@@ -1,0 +1,7 @@
+analysis:
+  code/data_generate.Rmd:
+  code/index.Rmd:
+  code/jupyter_example.ipynb:
+report:
+reportdir: report
+singularity: ''
