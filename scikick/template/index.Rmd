@@ -3,33 +3,32 @@
 
 ```{r, include=TRUE, echo=FALSE}
 
-glog <- character()
 
-tryCatch({
-  glog <- system(paste('git log --pretty=format:"%an\t%ad\t%s" --date=short --no-merges'), intern=TRUE)
-}, error = function(e) {
-  message("error parsing git logs")
-}, warning = function(e) {
-  message("warning while parsing git logs")
+commits = tryCatch({
+    suppressWarnings({git2r::commits(git2r::repository("."))})
+}, error=function(e) {
+    list()
+}, warning=function(e) {
+    list()
 })
 
-if(length(glog) > 0) {
-  glog <- read.delim(textConnection(glog), as.is=TRUE, header=FALSE)
-  names(glog) <- c("author", "date", "subject")
+glog = data.frame()
+if(length(commits) > 0) {
+    glog = data.frame(author=sapply(commits, function(x) x$author$name),
+        date=sapply(commits, function(x)
+            format(x$author$when, "%Y $M %D %H %M")),
+        subject=sapply(commits, function(x) x$message), stringsAsFactors=FALSE)
 } else {
-  glog <- data.frame(author="user", date=Sys.Date(), subject="no git history",
-                     stringsAsFactors=FALSE
-                     )
+    glog = data.frame(author="user", date=Sys.Date(), subject="no git history",
+        stringsAsFactors=FALSE)
 }
-
 ```
 
 ### List of Contributors ###  
 
 ```{r, include=TRUE, echo=FALSE}
-
-authors <- as.data.frame(table(glog$author))
-colnames(authors) <- c("author", "commits")
+authors = as.data.frame(table(glog$author))
+colnames(authors) = c("author", "commits")
 
 knitr::kable(authors, "markdown", align=rep("l", 2))
 
@@ -40,8 +39,8 @@ knitr::kable(authors, "markdown", align=rep("l", 2))
 ```{r, include=TRUE, echo=FALSE}
 
 # trim if subject line is too long to fit on screen
-glog$subject <- ifelse(nchar(glog$subject) > 80, paste0(strtrim(glog$subject, 80), "..."), glog$subject)
-glog$subject <- gsub("_", " ", glog$subject)
+glog$subject = ifelse(nchar(glog$subject) > 80, paste0(strtrim(glog$subject, 80), "..."), glog$subject)
+glog$subject = gsub("_", " ", glog$subject)
 knitr::kable(glog, "markdown", align=rep("l", 4))
 
 ```

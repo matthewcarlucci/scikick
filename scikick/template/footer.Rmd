@@ -28,7 +28,7 @@ cat(sprintf("Finished in %s %s",
 ```{r, include=TRUE, echo=FALSE}
 gitlog = tryCatch({
 	# !!! variable 'input' comes from 'scikick/scripts/knit.R'
-	git2r::commits(git2r::repository("."), path = input)
+	suppressWarnings({git2r::commits(git2r::repository("."), path = input)})
 }, error = function(e){
 	list()
 })
