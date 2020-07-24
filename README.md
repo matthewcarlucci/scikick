@@ -1,9 +1,16 @@
-## Introduction 
+[![PyPI version](https://badge.fury.io/py/scikick.svg)](https://badge.fury.io/py/scikick)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/scikick)](https://pypistats.org/packages/scikick)
+[](https://pypi.python.org/pypi/scikick/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/scikick.svg)](https://pypi.python.org/pypi/scikick/)
+![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
 
-### A Simple Model of Complex Data Analysis Workflows
+### Preface: simple workflow definitions for complex notebooks
 
-A thorough data analysis will involve multiple notebooks and they may require a specific order of 
-execution. Consider this two stage data analysis with QC and modelling where `model.Rmd` reads in the cleaned dataset:
+A thorough data analysis in 
+[Rmarkdown](https://rmarkdown.rstudio.com/) or [Jupyter](https://jupyter.org/) 
+will involve multiple notebooks which must be executed in a specific order. 
+Consider this two stage data analysis where `QC.Rmd` provides a cleaned dataset 
+for `model.Rmd` to perform modelling:
 
 ```
 |-- input/raw_data.csv
@@ -20,19 +27,23 @@ execution. Consider this two stage data analysis with QC and modelling where `mo
 |   |-- model.html
 ```
 
-Each notebook may be internally complex, but the essence of this workflow is:
+Each of these notebooks may be internally complex, but the essence of this workflow is:
 
 **`QC.Rmd` must run before `model.Rmd`**
 
-This simplified definition is sufficient to prevent unnecessary re-execution of 
-`QC.Rmd` and to also reproducibly build a website from the notebook collection.
+This simple definition can be applied to:
 
-## **scikick** - your side-kick for managing notebook collections
+- Reproducibly re-execute the notebook collection.
+- Avoid unecessary execution of `QC.Rmd` when `model.Rmd` changes.
+- Build a shareable report from the rendered notebooks (*e.g.* using `rmarkdown::render_website()`).
 
-*scikick* is a command-line-tool for connecting data analysis 
-notebooks (currently R/Rmarkdown) with a few simple commands. 
-The `sk run` command will execute notebooks to build a website of results.
-Users can specify notebook dependencies to control execution of the notebooks.
+Researchers need to be able to get these benefits from simple workflow definitions 
+to allow for focus to be on the data analysis.
+
+## **scikick** - your sidekick for managing notebook collections
+
+*scikick* is a command-line-tool for integrating data analyses 
+with a few simple commands. The `sk run` command will apply dependency definitions to execute steps in the correct order and build a website of results. 
 
 Common tasks for *ad hoc* data analysis are managed through scikick:
 
@@ -47,6 +58,8 @@ Common tasks for *ad hoc* data analysis are managed through scikick:
 Commands are inspired by git for configuring the workflow: `sk init`, `sk add`, `sk status`, `sk del`, `sk mv`.
 
 [Example Output](https://petronislab.camh.ca/pub/scikick_tests/master/)
+
+Scikick currently supports `.R` and `.Rmd` for notebook rendering.
 
 ### Getting Started
 
@@ -75,7 +88,7 @@ Begin by executing the demo project or reviewing the main commands of scikick be
 
 ### Demo Project
 
-To initiate a walkthrough of scikick commands through a demo project.
+To initiate a walkthrough of scikick commands (using a demo project).
 
 ```
 mkdir sk_demo
@@ -85,7 +98,7 @@ sk init --demo
 
 ### Main Commands
 
-Below are some breif descriptions of the most useful commands. Run `sk <command> --help` for details and available arguments. Run `sk --help` for the full list of commands.
+Below are some brief descriptions of the most useful commands. Run `sk <command> --help` for details and available arguments. Run `sk --help` for the full list of commands.
 
 ##### sk init
 
