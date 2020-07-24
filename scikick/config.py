@@ -3,7 +3,7 @@ import os
 import re
 from ruamel.yaml.compat import ordereddict
 from scikick.utils import reterr, warn
-from scikick.yaml import yaml_in, yaml_dump, rm_commdir
+from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes
 
 
 class ScikickConfig:
@@ -84,9 +84,13 @@ def get_tabs(config):
     'analysis:' dict
     config -- scikick.yml as an ordereddict
     """
+    # remove index file beforehand
+    index_list = get_indexes(config)
+    if len(index_list) == 1:
+        config["analysis"].pop(index_list[0], None)
     # get tab strucutre
     tabs = {}
-    for i in config['analysis'].keys():
+    for i in config["analysis"].keys():
         tabname = os.path.dirname(i)
         if tabname == "":
             tabname = "./"

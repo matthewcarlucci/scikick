@@ -3,9 +3,17 @@ import os
 import re
 import ruamel.yaml as yaml
 from ruamel.yaml.compat import ordereddict
-from scikick.utils import reterr, warn
+from scikick.utils import reterr, warn, get_sk_exe_dir
 
 supported_extensions = [".R", ".Rmd"]
+
+def get_indexes(config):
+    """Returns a list of 'index.R(md)' files in scikick.yml
+    config -- dict of scikick.yml
+    """
+    return list(filter(lambda f: \
+        os.path.splitext(os.path.basename(f))[0] == "index", \
+        config["analysis"].keys()))
 
 def rm_commdir(text, commpath):
     """removes path (prefix) commpath from text
@@ -82,8 +90,25 @@ def get_arg(arg):
         return ymli[arg]
     return ""
 
-def add_check(fname, ymli):
+def add_check(fname, ymli, force):
     """Performs a check if fname can be added to scikick.yml as a key"""
+    # check for "index.Rmd"s
+    if fname not in ymli["analysis"].keys():
+        index_list = get_indexes(ymli)
+        if os.path.splitext(os.path.basename(fname))[0] == "index":
+            if len(index_list) == 0:
+                warn(f"sk: An index file {fname} has been added and will be used as the homepage")
+                # touch the added index file to ensure execution
+                os.utime(fname, None)
+            elif len(index_list) >= 1:
+                if not force:
+                    reterr(f"sk: Error: An index file {index_list[0]} already exists\n" + \
+                        "sk: Error: An additional one can be added, but neither will be used as a homepage\n" + \
+                        f"sk: Error: To persist, use 'sk add --force {fname}'")
+                else:
+                    warn(f"sk: Warning: A redundant index file has been added\n" +
+                        "sk: Warning: Neither of the added index files will be used as a homepage")
+                    os.utime(os.path.join(get_sk_exe_dir(), "template", "index.Rmd"), None)
     # if the filename(s) have wildcard symbols
     wildcard_symbols = ["*", "?", "[", "{", "]", "}", "\\"]
     if True in [i in fname for i in wildcard_symbols]:
@@ -104,10 +129,11 @@ def add_check(fname, ymli):
         return False
     return True
 
-def add(files, deps):
+def add(files, deps, force):
     """ Add files and dependencies to them
-    files - page file list
-    deps - dependency file list
+    files -- page file list
+    deps -- dependency file list
+    force -- bool whether to add additional index files
     """
     if deps is None:
         deps = list()
@@ -116,15 +142,15 @@ def add(files, deps):
         ymli['analysis'] = ordereddict()
     # add files
     for fname in files:
-        if not add_check(fname, ymli):
+        if fname in ymli['analysis'].keys() and len(deps) == 0:
+            warn(f"sk: {fname} is already included")
+        if not add_check(fname, ymli, force):
             continue
         if not os.path.isfile(fname):
             warn(f"sk: Warning: File {fname} doesn't exist")
             warn(f"sk: Creating new file {fname}")
             open(fname, "a").close()
-        if fname in ymli['analysis'].keys() and len(deps) == 0:
-            warn(f"sk: {fname} is already included")
-        elif fname not in ymli['analysis'].keys():
+        if fname not in ymli['analysis'].keys():
             if len(ymli["analysis"].keys()) > 0:
                 commpath = os.path.commonpath(list(ymli["analysis"].keys()))
             else:
@@ -189,6 +215,13 @@ def rm(files, deps):
                     warn(f"sk: {dep} is not in {fname}")
                 if len((ymli['analysis'][fname])) == 0:
                     ymli['analysis'][fname] = None
+        if os.path.splitext(os.path.basename(fname))[0] == "index":
+            index_list = get_indexes(ymli)
+            if len(index_list) == 0:
+                warn(f"sk: {fname} hae been removed, using system template index.Rmd as homepage")
+                os.utime(os.path.join(get_sk_exe_dir(), "template", "index.Rmd"), None)
+            elif len(index_list) == 1:
+                os.utime(index_list[0], None)
     yaml_dump(ymli)
 
 def site(args):

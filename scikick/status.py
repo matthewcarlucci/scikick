@@ -26,6 +26,11 @@ def snake_status(snakefile, workdir, verbose):
             "--directory", workdir, \
             "--dryrun", "--reason"], \
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    # get the index file
+    index_list = list(filter(lambda f: \
+        os.path.splitext(os.path.basename(f))[0] == "index", \
+        scripts))
+    index_file = None if len(index_list) != 1 else index_list[0]
     # get snakemake dryrun output with '--reason'
     stdout = status.stdout.decode("utf-8").split("\n")
     stdout = list(filter(lambda l: re.match(r"^Job \d+:.*$", l) is not None or \
@@ -57,7 +62,11 @@ def snake_status(snakefile, workdir, verbose):
             _file_md = os.path.join(md_dir, os.path.splitext(_file)[0] + ".md")
             # script's md does not exist
             if not os.path.isfile(_file_md):
-                markers[_file] = ["m", "-", "-"]
+                if _file != index_file:
+                    markers[_file] = ["m", "-", "-"]
+                elif not os.path.isfile(os.path.join(\
+                    reportdir, "out_md", "index.md")):
+                    markers[_file] = ["m", "-", "-"]
                 continue
             # html is to be generated
             if "_site.yml" in map(os.path.basename, extupds[_file]):

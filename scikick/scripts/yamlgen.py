@@ -28,9 +28,6 @@ nav_left = [{"text": text, "href": "%s.html" % tabs[text][0]} \
     {"text": text, "menu": \
     [{"text": basename(hr), "href": "%s.html" % hr} for hr in tabs[text]] \
     } for text in tabs.keys()]
-# Remove the redundant 'index' tab
-nav_left = list(filter(lambda t: \
-    t["text"].lower() != "index" or "menu" in t.keys(), nav_left))
 
 nav_more = {"text": "More", \
     "menu": list()}

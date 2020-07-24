@@ -33,7 +33,7 @@ if(file.exists(knitmeta_file)){
 }
 # save knitmeta only if it's not empty
 if(length(knitmeta_obj) != 0){
-    message = sprintf("sk: Saving interactive plot JS libraries to %s",
+    message = sprintf("Saving interactive plot JS libraries to %s",
         knitmeta_file)
     write(message, stderr())
     saveRDS(knitmeta_obj, file = knitmeta_file)
