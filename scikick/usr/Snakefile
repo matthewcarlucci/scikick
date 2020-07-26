@@ -56,10 +56,6 @@ sys_index = os.path.join(template_dir, 'index.Rmd')
 index_list = list(filter(lambda f: os.path.basename(f) == "index", \
 	rmd_dict.keys()))
 #if 'index' not in rmd_dict.keys():
-print("DICT")
-print(rmd_dict)
-print("DEPS")
-print(rmd_deps)
 if len(index_list) != 1:
 	warn("sk: Include an index.Rmd to add content " +\
 		"to the required index.html page")
