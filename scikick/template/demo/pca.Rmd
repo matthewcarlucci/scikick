@@ -1,0 +1,45 @@
+# Setup
+
+## Data Import
+
+Reading in 'iris' data exported from `generate.Rmd`.
+
+```{r}
+iris = read.csv("output/iris.csv")
+```
+
+## PCA Parameters
+
+Using an analysis configuration file to set parameters.
+
+```{r}
+ana_species = readLines("code/analysis_config.txt")
+```
+
+```{r}
+# remove the first column
+iris = iris[, -1]
+
+# leave only the species to be analysed
+iris = iris[iris$Species %in% ana_species, ]
+```
+
+# PCA
+
+```{r}
+# calculate principal compomnents for 'iris' dataset
+iris_pca = prcomp(iris[, c(1,2,3,4)])
+# save the first two PCs, along with the species names
+iris_pca = data.frame(iris_pca$x[, c(1, 2)])
+iris_pca = cbind(iris_pca, data.frame(Species=iris$Species))
+# write to 'output/iris_pca.csv'
+write.csv(iris_pca, file="output/iris_pca.csv")
+```
+
+## Generated data
+
+data.frame of the generated data (first 10 rows)
+
+```{r, echo = TRUE, include = TRUE}
+print(iris_pca[1:10, ])
+```

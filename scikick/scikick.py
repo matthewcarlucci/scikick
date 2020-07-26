@@ -43,7 +43,7 @@ def run(args):
 
 def init_loc(args):
     """Initialize scikick project"""
-    if not (args.git or args.dirs or args.yaml or args.readme):
+    if not (args.git or args.dirs or args.yaml or args.readme or args.demo):
         args.yaml = True
         warn("sk: No arguments supplied, defaulting to sk init -y")
         init(get_sk_exe_dir(), args)
@@ -178,8 +178,10 @@ parser_init.add_argument("--dirs", "-d", action="store_true", \
 		help="Create directories: input (raw data), output (script outputs), code (scripts/code), report (website)")			 
 parser_init.add_argument("--git", "-g", action="store_true", \
                          help="Append relevant directories to .gitignore (only useful when using -d)")
-parser_init.add_argument("--readme", "-r", action="store_true", \
+parser_init.add_argument("--readme", action="store_true", \
                          help="Print a message to stdout for a README.md file to clearly indicate scikick is in use for the project")
+parser_init.add_argument("--demo", action="store_true", \
+                         help="Create and run a demo project demonstrating scikick usage")
 parser_init.set_defaults(func=init_loc)
 
 parser_add = subparsers.add_parser("add", \
