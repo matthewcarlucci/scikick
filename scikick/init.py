@@ -192,18 +192,17 @@ def run_demo_stage4():
     print_demo("3. Start managing your own notebooks with scikick!")
 
 def run_demo_stage5():
-    print_demo("----------   Rerunning the workflow ----------")
-    print_demo("Trying to rerun the workflow")
+    print_demo("----------   Rerunning The Workflow ----------")
+    print_demo("Trying to rerun the workflow.")
     print_exec("sk run")
     print_demo("Since no changes have been made, the workflow is not reexecuted.")
     print_demo("Run sk init --demo again to continue.")
 
 def run_demo_stage6():
-    print_demo("---------- Intermediate file change ----------")
-    print_demo("Let's change some intermediate file in the workflow")
+    print_demo("---------- Intermediate File Change ----------")
+    print_demo("Let's change some intermediate file in the workflow.")
     print_exec("echo -e 'versicolor\\nvirginica' > code/analysis_config.txt")
-    print_demo("Now flower data only of species 'versicolor' and 'virginica'")
-    print_demo("will be processed with PCA")
+    print_demo("Now flower data only of species versicolor and virginica will be processed with PCA.")
     print_exec("sk run")
-    print_demo("'code/generate.Rmd' wasn't executed, since it does not depend of the file that was changed")
-    print_demo("----------     The demo is done     ----------")
+    print_demo("code/generate.Rmd was not executed, since it does not depend on the file that was changed.")
+    print_demo("----------     The Demo Is Done     ----------")
