@@ -158,7 +158,7 @@ def run_demo_stage1():
     print_exec("sk init -yd")
     # copy the files
     demo_templatedir = os.path.join(get_sk_exe_dir(), "template", "demo")
-    for f in ["generate.Rmd", "pca.Rmd", "plot.Rmd", "analysis_config.txt", \
+    for f in ["generate.Rmd", "pca.Rmd", "analysis_config.txt", \
         "pc_score_statistics.Rmd", "index.Rmd"]:
         shutil.copy(os.path.join(demo_templatedir, f), os.path.join("code", f))
     print_demo("Demo project has been initialized.")
