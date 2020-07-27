@@ -1,0 +1,9 @@
+
+Loading in the [PCA](pca.html) results `output/iris_pca.csv`.
+
+```{r}
+iris_pca = read.csv("output/iris_pca.csv",header=T)
+```
+
+Coming soon...
+

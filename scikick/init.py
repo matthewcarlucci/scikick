@@ -147,15 +147,19 @@ def init_demo():
 
 def run_demo_stage1():
     print_demo("A demo project will be used to demonstrate some features of scikick.")
-    print_demo("")
+    print("")
     print_demo("----------  Starting a New Project  ----------")
     print_demo("A new scikick project can be initialized by adding")
     print_demo("the scikick.yml config (-y) and making some")
     print_demo("useful directories (-d) with sk init.")
+    print_demo("useful directories (-d) with sk init. Some")
+    print_demo("key dependencies will be checked.")
+
     print_exec("sk init -yd")
     # copy the files
     demo_templatedir = os.path.join(get_sk_exe_dir(), "template", "demo")
-    for f in ["generate.Rmd", "pca.Rmd", "plot.Rmd", "analysis_config.txt"]:
+    for f in ["generate.Rmd", "pca.Rmd", "plot.Rmd", "analysis_config.txt", \
+        "pc_score_statistics.Rmd", "index.Rmd"]:
         shutil.copy(os.path.join(demo_templatedir, f), os.path.join("code", f))
     print_demo("Demo project has been initialized.")
     print_demo("Run sk init --demo again to continue.")
@@ -164,26 +168,33 @@ def run_demo_stage2():
     print_demo("----------  Adding Some Notebooks  -----------")
     print_demo("Notebooks can be added to the project with sk add.")
     print_demo("-d is used to specify which notebooks must run")
-    print_demo("before the added notebook.")
+    print_demo("before or are used by the added notebook. ")
+
+    print_exec("sk add code/index.Rmd")
     print_exec("sk add code/generate.Rmd")
     print_exec("sk add code/pca.Rmd -d code/generate.Rmd code/analysis_config.txt")
-    print_exec("sk add code/plot.Rmd -d code/pca.Rmd")
+    print_exec("sk add code/pc_score_statistics.Rmd -d code/pca.Rmd")
+
     print_demo("Run sk init --demo again to continue.")
 
 def run_demo_stage3():
     print_demo("----------       Check Status       ----------")
     print_demo("sk status will show which notebooks require execution.")
+
     print_exec("sk status")
+
     print_demo("Run sk init --demo again to continue.")
 
 def run_demo_stage4():
     print_demo("----------     Execute Notebooks    ----------")
     print_demo("sk run will execute all tasks needed to generate the final website.")
+
     print_exec("sk run")
+
     print_demo("The completed site is located at")
     print_demo(f"{os.getcwd()}/report/out_html/")
     print_demo("The index.html homepage can be opened in any web-browser.")
-    print_demo("")
+    print("")
     print_demo("----------        What Next?        ----------")
     print_demo("This should be all you need to get started. After reviewing")
     print_demo("the resulting website you could do one of:")
@@ -194,15 +205,21 @@ def run_demo_stage4():
 def run_demo_stage5():
     print_demo("----------   Rerunning The Workflow ----------")
     print_demo("Trying to rerun the workflow.")
+
     print_exec("sk run")
+
     print_demo("Since no changes have been made, the workflow is not reexecuted.")
     print_demo("Run sk init --demo again to continue.")
 
 def run_demo_stage6():
     print_demo("---------- Intermediate File Change ----------")
     print_demo("Let's change some intermediate file in the workflow.")
+
     print_exec("echo -e 'versicolor\\nvirginica' > code/analysis_config.txt")
+
     print_demo("Now flower data only of species versicolor and virginica will be processed with PCA.")
+
     print_exec("sk run")
+
     print_demo("code/generate.Rmd was not executed, since it does not depend on the file that was changed.")
     print_demo("----------     The Demo Is Done     ----------")

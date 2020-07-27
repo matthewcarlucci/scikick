@@ -2,7 +2,7 @@
 
 ## Data Import
 
-Reading in 'iris' data exported from `generate.Rmd`.
+Reading in 'iris' data exported from the [generate](generate.html) page.
 
 ```{r}
 iris = read.csv("output/iris.csv")
@@ -10,11 +10,14 @@ iris = read.csv("output/iris.csv")
 
 ## PCA Parameters
 
-Using an analysis configuration file to set parameters.
+Using an analysis configuration file (`code/analysis_config.txt`) to control some parameters. Using the following species:
 
 ```{r}
 ana_species = readLines("code/analysis_config.txt")
+ana_species
 ```
+
+Tabulating rows remaining for each species:
 
 ```{r}
 # remove the first column
@@ -22,24 +25,61 @@ iris = iris[, -1]
 
 # leave only the species to be analysed
 iris = iris[iris$Species %in% ana_species, ]
+
+table(iris$Species)
 ```
 
 # PCA
 
+Using the first 4 columns for principal component analysis.
+
+```{r}
+mat = iris[, c(1,2,3,4)]
+head(iris)
+```
+
+Calculating principal component scores.
+
 ```{r}
 # calculate principal compomnents for 'iris' dataset
-iris_pca = prcomp(iris[, c(1,2,3,4)])
-# save the first two PCs, along with the species names
-iris_pca = data.frame(iris_pca$x[, c(1, 2)])
-iris_pca = cbind(iris_pca, data.frame(Species=iris$Species))
+iris_pca = prcomp(mat,scale.=TRUE)
+
+# save all PCs, along with the species names
+iris_pca = data.frame(iris_pca$x)
+iris_pca = cbind(iris_pca,iris)
+```
+
+## PCA Results
+
+The set of scores was combined with the original data to obtain this data.frame:
+
+```{r}
+print(iris_pca[1:10, ])
+```
+
+### Score Pair Visualization
+
+Plotting pairs of principal components with `pairs()`.
+
+```{r}
+species = iris_pca[, 9]
+
+# plot
+pairs(iris_pca[,1:4], col=as.factor(species), main="iris")
+```
+
+Comparing this to the original columns.
+
+```{r}
+pairs(iris_pca[,5:8],col=as.factor(species))
+```
+
+## Export PC Scores
+
+The results will be exported for downstream statistical analysis.
+
+```{r}
 # write to 'output/iris_pca.csv'
 write.csv(iris_pca, file="output/iris_pca.csv")
 ```
 
-## Generated data
-
-data.frame of the generated data (first 10 rows)
-
-```{r, echo = TRUE, include = TRUE}
-print(iris_pca[1:10, ])
-```
