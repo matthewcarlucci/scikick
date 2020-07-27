@@ -95,21 +95,26 @@ def add_check(fname, ymli, force):
     # if the filename(s) have wildcard symbols
     wildcard_symbols = ["*", "?", "[", "{", "]", "}", "\\"]
     if True in [i in fname for i in wildcard_symbols]:
-        warn(f"sk: Error: filename cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
+        warn(f"sk: Error: Filename cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
         return False
     # check if the file extension is supported
     if not ((re.match(".*.Rmd$", fname, re.I) is not None) or \
         (re.match(".*.R$", fname, re.I) is not None)):
         extension_list_str = ', '.join(supported_extensions)
-        warn("sk: Error: only %s files can be added as pages (%s)" % \
+        warn("sk: Error: Only %s files can be added as pages (%s)" % \
             (extension_list_str, fname))
         return False
     # if an .R/.Rmd with the same basename exists
     if fname not in ymli["analysis"].keys() and \
         os.path.splitext(fname)[0] in \
             map(lambda x: os.path.splitext(x)[0], ymli["analysis"].keys()):
-        warn(f"sk: Error: page {os.path.splitext(fname)[0]} is already to be compiled.")
+        warn(f"sk: Error: Page {os.path.splitext(fname)[0]} is already to be compiled.")
         return False
+    # error if the directory doesn't exist
+    dirname = os.path.dirname(fname)
+    if dirname != "":
+        if not os.path.isdir(dirname):
+            reterr(f"sk: Error: Directory {dirname} does not exist.")
     # create the file if it doesn't exist
     if not os.path.isfile(fname):
         warn(f"sk: Warning: File {fname} doesn't exist")
@@ -123,7 +128,7 @@ def add_check(fname, ymli, force):
                 warn(f"sk: An index file {fname} has been added and will be used as the homepage")
                 # touch the added index file to ensure execution
                 os.utime(fname, None)
-            elif len(index_list) >= 1:
+            elif len(index_list) == 1:
                 if not force:
                     reterr(f"sk: Error: An index file {index_list[0]} already exists\n" + \
                         "sk: Error: An additional one can be added, but neither will be used as a homepage\n" + \
@@ -132,6 +137,9 @@ def add_check(fname, ymli, force):
                     warn(f"sk: Warning: A redundant index file has been added\n" +
                         "sk: Warning: Neither of the added index files will be used as a homepage")
                     os.utime(os.path.join(get_sk_exe_dir(), "template", "index.Rmd"), None)
+            elif len(index_list) > 1:
+                warn(f"sk: Warning: A redundant index file has been added\n" +
+                    "sk: Warning: Neither of the added index files will be used as a homepage")
     return True
 
 def add(files, deps, force):
@@ -219,7 +227,7 @@ def rm(files, deps):
         if os.path.splitext(os.path.basename(fname))[0] == "index":
             index_list = get_indexes(ymli)
             if len(index_list) == 0:
-                warn(f"sk: {fname} hae been removed, using system template index.Rmd as homepage")
+                warn(f"sk: Using system template index.Rmd as homepage")
                 os.utime(os.path.join(get_sk_exe_dir(), "template", "index.Rmd"), None)
             elif len(index_list) == 1:
                 os.utime(index_list[0], None)
