@@ -8,6 +8,7 @@ template_dir = args[3]
 data_parent = args[4]
 script_dir = args[5]
 logfile = args[6]
+index_rmd = args[7]
 
 simplified_input = input
 if(dirname(input) == template_dir){
@@ -31,9 +32,8 @@ run_system = function(cmd){
 }
 
 if(length(grep(x=input, pattern=".rmd$", ignore.case=TRUE)) > 0){
-    cmd = paste("Rscript", file.path(script_dir, "knit.R"),
-        input, out_md, template_dir, data_parent)
-    run_system(cmd)
+    run_system(paste("Rscript", file.path(script_dir, "knit.R"),
+        input, out_md, template_dir, data_parent, index_rmd))
 } else if(length(grep(x=input, pattern=".r$", ignore.case=TRUE)) > 0){
     tmp_dir = tempdir()
     tmp_r = file.path(tmp_dir, basename(input))
@@ -44,5 +44,5 @@ if(length(grep(x=input, pattern=".rmd$", ignore.case=TRUE)) > 0){
     run_system(paste("Rscript", file.path(script_dir, "spin.R"), tmp_r))
     # Rmd => md
     run_system(paste("Rscript", file.path(script_dir, "knit.R"),
-        rmd_out, out_md, template_dir, data_parent))
+        rmd_out, out_md, template_dir, data_parent, index_rmd))
 }

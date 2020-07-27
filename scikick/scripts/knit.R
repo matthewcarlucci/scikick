@@ -4,14 +4,24 @@ input = args[1]
 output = args[2]
 templatedir = args[3]
 dataparent = args[4]
+index_rmd = args[5]
 reportfile = input
 reportname = gsub("\\.Rmd$", "", basename(input),ignore.case=TRUE)
 outdatadir = paste0(file.path(dataparent, reportname), "/")
 source(file.path(templatedir, "outputLook.R"))
 knitr::opts_chunk$set(optionsRender$knitr$opts_chunk)
 rmd <- readLines(input)
-footer <- readLines(file.path(templatedir, "footer.Rmd"))
-rmd <- c(rmd, footer)
+if(input == index_rmd){
+    index <- readLines(file.path(templatedir, "index.Rmd"))
+    # when no index.Rmd exists - template is passed
+    if(!identical(rmd, index)){
+        # if that's the case - we don't include it
+        rmd <- c(rmd, index)
+    }
+} else {
+    footer <- readLines(file.path(templatedir, "footer.Rmd"))
+    rmd <- c(rmd, footer)
+}
 
 knitr::opts_knit$set(root.dir = "./")
 knitr::opts_knit$set(base.dir = dirname(output))

@@ -63,7 +63,7 @@ if len(index_list) != 1:
 else:
 	rmd_dict['index'] = rmd_dict.pop(os.path.splitext(index_list[0])[0], None)
 	rmd_deps['index'] = rmd_deps.pop(os.path.splitext(index_list[0])[0], None)
-
+index_rmd = rmd_dict["index"]
 # git information
 rep_info = ["", ""]
 try:
@@ -105,7 +105,8 @@ rule reportRendering:
 	threads: int(snakefile_args["threads"])
 	benchmark: snakefile_args["benchmark"] + "{report_step}" if snakefile_args["benchmark"] != "" else ""
 	shell: "Rscript %s {input.rmd} {output.md} {params.template_dir} \
-		{params.data_parent} {params.script_dir} {logger.logfile}" \
+		{params.data_parent} {params.script_dir} {logger.logfile} \
+		{index_rmd}" \
 		% os.path.join(script_dir, "reportRendering.R")
 # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
 
