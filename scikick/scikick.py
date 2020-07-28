@@ -43,7 +43,7 @@ def run(args):
 
 def init_loc(args):
     """Initialize scikick project"""
-    if not (args.git or args.dirs or args.yaml or args.readme):
+    if not (args.git or args.dirs or args.yaml or args.readme or args.demo):
         args.yaml = True
         warn("sk: No arguments supplied, defaulting to sk init -y")
         init(get_sk_exe_dir(), args)
@@ -60,7 +60,7 @@ def init_loc(args):
 
 def add(args):
     """Add Rmds to scikick.yml"""
-    scikick.yaml.add(args.rmd, args.deps)
+    scikick.yaml.add(args.rmd, args.deps, args.force)
 
 
 def delete(args):
@@ -178,8 +178,10 @@ parser_init.add_argument("--dirs", "-d", action="store_true", \
 		help="Create directories: input (raw data), output (script outputs), code (scripts/code), report (website)")			 
 parser_init.add_argument("--git", "-g", action="store_true", \
                          help="Append relevant directories to .gitignore (only useful when using -d)")
-parser_init.add_argument("--readme", "-r", action="store_true", \
+parser_init.add_argument("--readme", action="store_true", \
                          help="Print a message to stdout for a README.md file to clearly indicate scikick is in use for the project")
+parser_init.add_argument("--demo", action="store_true", \
+                         help="Create and run a demo project demonstrating scikick usage")
 parser_init.set_defaults(func=init_loc)
 
 parser_add = subparsers.add_parser("add", \
@@ -190,6 +192,8 @@ parser_add.add_argument("rmd", nargs="+", \
 parser_add.add_argument("-d", "--deps", \
                         nargs="+", \
                         help="Dependencies to be added to the script(s)")
+parser_add.add_argument("--force", action="store_true", \
+                         help="Force addition of a script(s)")
 parser_add.set_defaults(func=add)
 
 parser_del = subparsers.add_parser("del", \

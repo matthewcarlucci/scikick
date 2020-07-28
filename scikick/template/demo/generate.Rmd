@@ -1,0 +1,23 @@
+# Data generation
+
+This page simulates the common data analysis task of downloading or importing 
+a raw dataset by using a 5 second system delay.
+
+```{r import}
+# Simulating data import with a 5 second wait
+Sys.sleep(5)
+```
+
+Inspecting the "results" (iris built-in dataset):
+
+```{r inspect}
+head(iris)
+```
+
+Exporting data for downstream use as `output/iris.csv`.
+
+```{r export}
+write.csv(iris, file="output/iris.csv")
+```
+
+

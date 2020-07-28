@@ -28,9 +28,6 @@ nav_left = [{"text": text, "href": "%s.html" % tabs[text][0]} \
     {"text": text, "menu": \
     [{"text": basename(hr), "href": "%s.html" % hr} for hr in tabs[text]] \
     } for text in tabs.keys()]
-# Remove the redundant 'index' tab
-nav_left = list(filter(lambda t: \
-    t["text"].lower() != "index" or "menu" in t.keys(), nav_left))
 
 nav_more = {"text": "More", \
     "menu": list()}
@@ -62,8 +59,6 @@ for inyml in inymls:
                 join(relpath(dirname(hr), indir), basename(hr)) \
             } for hr in tabs[text]] \
         } for text in tabs.keys()]
-    nav_left = list(filter(lambda t: \
-        t["text"].lower() != "index" or "menu" in t.keys(), nav_left))
     output_yaml = {"output_dir": relpath("../out_html", indir), \
         "navbar": {"title": basename(getcwd()), \
             "left": nav_left, "right": [nav_more]}}

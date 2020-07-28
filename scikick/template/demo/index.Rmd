@@ -1,0 +1,9 @@
+This is the homepage to a short data analysis to demostrate the features of
+[scikick](https://github.com/matthewcarlucci/scikick).
+
+The example is a principal componenet analysis of the iris built-in dataset.
+
+All code can be viewed by clicking "Code > Show All Code" at the top of each page.
+
+
+
