@@ -1,1 +1,0 @@
-cli_name = "sk"

@@ -1,13 +1,6 @@
-     	code/analysis_normalization.Rmd
-     	  code/analysis_summary.Rmd
-     	code/analysis_summary.Rmd
-     	  code/data_generate.Rmd
-     	code/data_generate.Rmd
-     	code/index.Rmd
- --i 	code/test_bash.Rmd
-(s--)	  code/test_bash.sh
-     	code/test_python.Rmd
-     	  code/test_python.py
-Scripts to execute: 1
-HTMLs to compile ('---'): 1
-Up to date ('   '): 5
+ s-- 	code/page1.Rmd
+ -e- 	code/page2.Rmd
+(s--)	  code/page1.Rmd
+Scripts to execute: 2
+HTMLs to compile ('---'): 2
+Up to date ('   '): 0

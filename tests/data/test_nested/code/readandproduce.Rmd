@@ -1,4 +1,0 @@
-```{r, echo = TRUE, include = TRUE}
-write.table(x = read.csv(file = file.path("inside", "output", "a.csv")),
-	sep = "shakalaka", file = file.path("output", "b.csv"))
-```

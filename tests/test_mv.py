@@ -4,80 +4,78 @@ import tempfile
 import shutil
 import functools
 import subprocess
+from nose.tools import with_setup
 from scikick.yaml import yaml_in
 
 exe_dir = os.path.dirname(os.path.realpath(__file__))
 test_datadir = os.path.join(exe_dir, "data", "test_mv")
-# get scikick cli name
-#exec(open(os.path.join(exe_dir, "cli_name.py")).read())
-cli_name = "sk"
-command = "tree; cat scikick.yml"
+project_dir = tempfile.TemporaryDirectory()
 
-class TestMv:
-	# copy test project to a separate temporary directory
-	def setup(self):
-		self.project_dir = tempfile.TemporaryDirectory()
-		shutil.rmtree(self.project_dir.name)
-		shutil.copytree(test_datadir, self.project_dir.name)
-		# go to the project dir, where scikick will be run
-		os.chdir(self.project_dir.name)
-	# delete the tmpdir/everything that was created
-	def teardown(self):
-		self.project_dir.cleanup()
-	# running scikick with different arguments
-	def test_mv1(self):
-		os.chdir("file_to_file")
-		assert os.system("sk run") == 0
-		assert os.system("`cat command.txt`") == 0
-		out_file = open("out.txt")
-		desired_output = out_file.read()
-		out_file.close()
-		command_result = subprocess.run(command, shell=True,
-			stdout=subprocess.PIPE).stdout.decode()
-		assert command_result == desired_output
-	def test_mv2(self):
-		os.chdir("file_to_dir")
-		assert os.system("sk run") == 0
-		assert os.system("`cat command.txt`") == 0
-		out_file = open("out.txt")
-		desired_output = out_file.read()
-		out_file.close()
-		command_result = subprocess.run(command, shell=True,
-			stdout=subprocess.PIPE).stdout.decode()
-		assert command_result == desired_output
-	def test_mv3(self):
-		os.chdir("dir_to_existing_dir")
-		assert os.system("sk run") == 0
-		assert os.system("`cat command.txt`") == 0
-		out_file = open("out.txt")
-		desired_output = out_file.read()
-		out_file.close()
-		command_result = subprocess.run(command, shell=True,
-			stdout=subprocess.PIPE).stdout.decode()
-		assert command_result == desired_output
-	def test_mv4(self):
-		os.chdir("dir_to_nonexisting_dir")
-		assert os.system("sk run") == 0
-		assert os.system("`cat command.txt`") == 0
-		out_file = open("out.txt")
-		desired_output = out_file.read()
-		out_file.close()
-		command_result = subprocess.run(command, shell=True,
-			stdout=subprocess.PIPE).stdout.decode()
-		assert command_result == desired_output
-	def test_mv5(self):
-		os.chdir("multiple_to_dir")
-		assert os.system("sk run") == 0
-		assert os.system("`cat command.txt`") == 0
-		out_file = open("out.txt")
-		desired_output = out_file.read()
-		out_file.close()
-		command_result = subprocess.run(command, shell=True,
-			stdout=subprocess.PIPE).stdout.decode()
-		assert command_result == desired_output
-	def test_mv6(self):
-		os.chdir("multiple_to_file")
-		assert os.system("`cat command.txt`") != 0
-	def test_mv7(self):
-		os.chdir("multiple_to_nonexistant")
-		assert os.system("`cat command.txt`") != 0
+def setup():
+    if os.path.isdir(project_dir.name):
+        shutil.rmtree(project_dir.name)
+    shutil.copytree(test_datadir, project_dir.name)
+    os.chdir(project_dir.name)
+def teardown():
+    project_dir.cleanup()
+
+@with_setup(setup, teardown)
+def test_mv_file2file():
+    assert os.system("sk run") == 0
+    assert os.system("sk mv code/page1.Rmd code/page3.Rmd") == 0
+    # check the files
+    assert os.path.isfile("code/page3.Rmd")
+    assert os.path.isfile("report/out_md/code/page3.md")
+    # check the yaml
+    assert "code/page3.Rmd" in yaml_in()["analysis"].keys()
+
+@with_setup(setup, teardown)
+def test_mv_file2dir():
+    assert os.system("sk run") == 0
+    assert os.system("sk mv code/page1.Rmd code/subdir") == 0
+    # check the files
+    assert os.path.isfile("code/subdir/page1.Rmd")
+    assert os.path.isfile("report/out_md/code/subdir/page1.md")
+    # check the yaml
+    assert "code/subdir/page1.Rmd" in yaml_in()["analysis"].keys()
+
+@with_setup(setup, teardown)
+def test_mv_dir2exdir():
+    assert os.system("sk run") == 0
+    assert os.system("sk mv code/subdf code/subdir") == 0
+    # check the files
+    assert os.path.isfile("code/subdir/subdf/pagesd.Rmd")
+    assert os.path.isfile("report/out_md/code/subdir/subdf/pagesd.md")
+    # check the yaml
+    assert "code/subdir/subdf/pagesd.Rmd" in yaml_in()["analysis"].keys()
+
+@with_setup(setup, teardown)
+def test_mv_dir2nonexdir():
+    assert os.system("sk run") == 0
+    assert os.system("sk mv code/subdf code/subdf2") == 0
+    # check the files
+    assert os.path.isfile("code/subdf2/pagesd.Rmd")
+    assert os.path.isfile("report/out_md/code/subdf2/pagesd.md")
+    # check the yaml
+    assert "code/subdf2/pagesd.Rmd" in yaml_in()["analysis"].keys()
+
+@with_setup(setup, teardown)
+def test_mv_mul2dir():
+    assert os.system("sk run") == 0
+    assert os.system("sk mv code/*.Rmd code/subdir") == 0
+    # check the files
+    assert os.path.isfile("code/subdir/page1.Rmd")
+    assert os.path.isfile("code/subdir/page2.Rmd")
+    assert os.path.isfile("report/out_md/code/subdir/page1.md")
+    assert os.path.isfile("report/out_md/code/subdir/page2.md")
+    # check the yaml
+    assert "code/subdir/page1.Rmd" in yaml_in()["analysis"].keys()
+    assert "code/subdir/page2.Rmd" in yaml_in()["analysis"].keys()
+
+@with_setup(setup, teardown)
+def test_mv_mul2onef():
+    assert os.system("sk mv code/*.Rmd code/subdf/pagesd.Rmd") != 0
+
+@with_setup(setup, teardown)
+def test_mv_mul2nonex():
+    assert os.system("sk mv code/*.Rmd nonexistf.Rmd") != 0

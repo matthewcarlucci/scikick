@@ -1,7 +1,0 @@
-## Begin
-
-This text is from the parent Rmd
-
-```{r child='code/extras/_parentChildDemo_child.Rmd'}
-
-```

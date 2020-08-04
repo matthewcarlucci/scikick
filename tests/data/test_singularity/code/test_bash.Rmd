@@ -1,3 +1,0 @@
-```{r}
- system("./code/test_bash.sh")
-```

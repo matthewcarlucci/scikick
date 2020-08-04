@@ -1,8 +1,0 @@
-analysis:
-  code/data_generate.Rmd: null
-  code/depson.Rmd:
-  - code/dep.R
-  code/index.Rmd: null
-report: null
-reportdir: report
-singularity: ''

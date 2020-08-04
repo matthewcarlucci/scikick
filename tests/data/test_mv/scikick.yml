@@ -15,6 +15,7 @@ analysis: !!omap
 - code/page1.Rmd:
 - code/page2.Rmd:
   - code/page1.Rmd
+- code/subdf/pagesd.Rmd:
 version_info:
   snakemake: 5.20.1
   ruamel.yaml: 0.16.5

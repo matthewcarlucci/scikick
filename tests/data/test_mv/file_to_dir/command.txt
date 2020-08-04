@@ -1,1 +1,0 @@
-sk mv code/t1.Rmd code/destdir

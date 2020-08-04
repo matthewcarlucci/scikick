@@ -1,2 +1,0 @@
-a = []
-a.append("test")

@@ -1,3 +1,0 @@
-```{r}
-system("python -t ./code/test_python.py")
-```

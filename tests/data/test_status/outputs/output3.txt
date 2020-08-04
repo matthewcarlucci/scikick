@@ -1,3 +1,4 @@
- --i 	code/test_bash.Rmd
-Scripts to execute: 1
-HTMLs to compile ('---'): 1
+ s-- 	code/page1.Rmd
+ -e- 	code/page2.Rmd
+Scripts to execute: 2
+HTMLs to compile ('---'): 2

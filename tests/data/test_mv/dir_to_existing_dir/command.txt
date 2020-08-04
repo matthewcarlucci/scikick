@@ -1,1 +1,0 @@
-sk mv code/targetdir/ code/destdir/
