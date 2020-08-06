@@ -12,22 +12,30 @@ commits = tryCatch({
     list()
 })
 
-glog = data.frame()
+default_gitlog = data.frame(author="user", date=Sys.Date(), subject="no git history",
+    stringsAsFactors=FALSE)
+
 if(length(commits) > 0) {
-    glog = data.frame(author=sapply(commits, function(x) x$author$name),
-        date=sapply(commits, function(x)
-            format(x$author$when, "%Y $M %D %H %M")),
-        subject=sapply(commits, function(x) x$message), stringsAsFactors=FALSE)
+    gitlog = tryCatch(
+        expr = {data.frame(author=sapply(commits, function(x) x$author$name),
+            date=sapply(commits, function(x)
+                format(x$author$when, "%Y $M %D %H %M")),
+            subject=sapply(commits, function(x) x$message), stringsAsFactors=FALSE)},
+        error = function(e){
+            if(packageVersion("git2r") < "0.27"){
+                write("Warning: Version of R package git2r is older than 0.27, index page will lack git logs", stderr())
+            }
+            return(default_gitlog)
+        })
 } else {
-    glog = data.frame(author="user", date=Sys.Date(), subject="no git history",
-        stringsAsFactors=FALSE)
+    gitlog = default_gitlog
 }
 ```
 
 ### List of Contributors ###  
 
 ```{r, include=TRUE, echo=FALSE}
-authors = as.data.frame(table(glog$author))
+authors = as.data.frame(table(gitlog$author))
 colnames(authors) = c("author", "commits")
 
 knitr::kable(authors, "markdown", align=rep("l", 2))
@@ -39,9 +47,9 @@ knitr::kable(authors, "markdown", align=rep("l", 2))
 ```{r, include=TRUE, echo=FALSE}
 
 # trim if subject line is too long to fit on screen
-glog$subject = ifelse(nchar(glog$subject) > 80, paste0(strtrim(glog$subject, 80), "..."), glog$subject)
-glog$subject = gsub("_", " ", glog$subject)
-knitr::kable(glog, "markdown", align=rep("l", 4))
+gitlog$subject = ifelse(nchar(gitlog$subject) > 80, paste0(strtrim(gitlog$subject, 80), "..."), gitlog$subject)
+gitlog$subject = gsub("_", " ", gitlog$subject)
+knitr::kable(gitlog, "markdown", align=rep("l", 4))
 
 ```
 

@@ -17,7 +17,7 @@ def setup():
 def teardown():
     project_dir.cleanup()
 
-def test_add(self):
+def test_add():
     assert os.system("sk add code/page1.Rmd") == 0
     assert os.system("sk add code/page2.Rmd -d code/page1.Rmd") == 0
     assert os.system("sk run") == 0

@@ -17,8 +17,8 @@ timediff <- difftime(fintime,.scikick$starttime)
 cat(sprintf("Computation Started: %s", .scikick$starttime))
 cat("\n\n")
 cat(sprintf("Finished in %s %s",
-	round(as.numeric(timediff),3),
-	units(timediff)))
+    round(as.numeric(timediff),3),
+    units(timediff)))
 ```
 
 ---
@@ -27,26 +27,36 @@ cat(sprintf("Finished in %s %s",
 
 ```{r, include=TRUE, echo=FALSE}
 gitlog = tryCatch({
-	# !!! variable 'input' comes from 'scikick/scripts/knit.R'
-	suppressWarnings({git2r::commits(git2r::repository("."), path = input)})
+    # !!! variable 'input' comes from 'scikick/scripts/knit.R'
+    suppressWarnings({git2r::commits(git2r::repository("."), path = input)})
 }, error = function(e){
-	list()
+    list()
 })
+
+default_gitlog = data.frame(author = "user", date = Sys.Date(),
+    summary = "no git history", stringsAsFactors = FALSE)
+
 if(length(gitlog) > 0) {
-	gitlog = data.frame(author = sapply(gitlog, function(x) x$author$name),
-		summary = sapply(gitlog, function(x) x$summary),
-		date = sapply(gitlog, function(x) as.character(x$author$when)),
-		stringsAsFactors = FALSE)
+    gitlog = tryCatch(
+        expr = {data.frame(author = sapply(gitlog, function(x) x$author$name),
+            summary = sapply(gitlog, function(x) x$summary),
+            date = sapply(gitlog, function(x) as.character(x$author$when)),
+            stringsAsFactors = FALSE)},
+        error = function(e) {
+            if(packageVersion("git2r") < "0.27"){
+                write("Warning: Version of R package git2r is older than 0.27, page footer will lack git logs", stderr())
+            }
+            return(default_gitlog)
+        })
 } else{
-	gitlog <- data.frame(author = "user", date = Sys.Date(),
-		summary = "no git history", stringsAsFactors = FALSE)
+    gitlog = default_gitlog
 }
 
 # trim if subject line is too long to fit on screen
 gitlog$summary <- sapply(gitlog$summary, function(s){
-	if(nchar(s) > 80){
-		s = paste0(strtrim(s, 80), "...")}
-	return(s)
+    if(nchar(s) > 80){
+        s = paste0(strtrim(s, 80), "...")}
+    return(s)
 })
 knitr::kable(gitlog, "markdown", align = rep("l", 4))
 ```
@@ -63,10 +73,10 @@ funs   <- lapply(funs, get)
 names(funs) <- fnames
 
 for(fun in fnames) {
-  cat("  \n", fun, "\n")
-  cat("```r\n")
-  print(funs[[fun]])
-  cat("```\n")
+    cat("  \n", fun, "\n")
+    cat("```r\n")
+    print(funs[[fun]])
+    cat("```\n")
 }
 
 ```
@@ -91,8 +101,8 @@ knitr::kable(pk, "markdown", align = "l", row.names = FALSE)
 ```{r, echo=FALSE}
 si <- sessionInfo()
 systemInfo <- c(version = si$R.version$version.string,
-	platform = si$platform, locale = Sys.getlocale("LC_COLLATE"),
-	OS = si$running, UI = .Platform$GUI)
+    platform = si$platform, locale = Sys.getlocale("LC_COLLATE"),
+    OS = si$running, UI = .Platform$GUI)
 systemInfo <- as.data.frame(systemInfo)
 knitr::kable(systemInfo, "markdown", align = "l")
 ```

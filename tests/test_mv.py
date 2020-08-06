@@ -16,6 +16,7 @@ def setup():
         shutil.rmtree(project_dir.name)
     shutil.copytree(test_datadir, project_dir.name)
     os.chdir(project_dir.name)
+    os.mkdir("code/subdir")
 def teardown():
     project_dir.cleanup()
 

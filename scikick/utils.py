@@ -16,8 +16,20 @@ def get_sk_snakefile():
     """Returns the path to the scikick's Snakefile"""
     return os.path.join(get_sk_exe_dir(), 'usr', 'Snakefile')
 
+def check_version_r(package, version):
+    """Check check whether supplied R libraries are installed
+    and wether their versions are higher than
+    packages -- library name
+    versions -- version string
+    """
+    earlier_version = subprocess.run( \
+        """ Rscript -e 'cat(packageVersion("%s") < "%s", "\n")' """ \
+        % (package, version), shell = True, stdout = subprocess.PIPE)
+    earlier_version = earlier_version.stdout.decode().strip().split("\n")[-1]
+    if earlier_version == "TRUE":
+        warn(f"sk: Warning: Version of {package} needs to be at least {version}")
 
-def check_version_r(packages):
+def check_package_r(packages):
     """Check vhether Rscript is available,
     then check whether supplied R libraries are installed
     packages -- list of libraries to be checked if installed
@@ -78,7 +90,8 @@ def check_requirements():
     """Performs a check for necessary and optional applications/packages"""
     # check for required package versions
     pandoc_ver_stat = check_version_generic((2, 0), "pandoc", "Error")
-    r_ver_stat = check_version_r(['yaml', 'knitr', 'rmarkdown'])
+    r_ver_stat = check_package_r(["yaml", "knitr", "rmarkdown", "git2r"])
+    check_version_r("git2r", "0.27")
     # exit if not sufficient / found
     if r_ver_stat == 0 or pandoc_ver_stat == 0:
         reterr("sk: Error: Required packages not found")
