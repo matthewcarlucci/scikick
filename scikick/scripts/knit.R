@@ -5,10 +5,12 @@ output = args[2]
 templatedir = args[3]
 dataparent = args[4]
 index_rmd = args[5]
+original_input = args[6]
 reportfile = input
 reportname = gsub("\\.Rmd$", "", basename(input),ignore.case=TRUE)
 outdatadir = paste0(file.path(dataparent, reportname), "/")
 source(file.path(templatedir, "outputLook.R"))
+source(file.path(templatedir, "functions.R"))
 knitr::opts_chunk$set(optionsRender$knitr$opts_chunk)
 rmd <- readLines(input)
 if(input == index_rmd){

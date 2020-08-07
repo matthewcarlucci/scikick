@@ -33,7 +33,7 @@ run_system = function(cmd){
 
 if(length(grep(x=input, pattern=".rmd$", ignore.case=TRUE)) > 0){
     run_system(paste("Rscript", file.path(script_dir, "knit.R"),
-        input, out_md, template_dir, data_parent, index_rmd))
+        input, out_md, template_dir, data_parent, index_rmd, input))
 } else if(length(grep(x=input, pattern=".r$", ignore.case=TRUE)) > 0){
     tmp_dir = tempdir()
     tmp_r = file.path(tmp_dir, basename(input))
@@ -44,5 +44,5 @@ if(length(grep(x=input, pattern=".rmd$", ignore.case=TRUE)) > 0){
     run_system(paste("Rscript", file.path(script_dir, "spin.R"), tmp_r))
     # Rmd => md
     run_system(paste("Rscript", file.path(script_dir, "knit.R"),
-        rmd_out, out_md, template_dir, data_parent, index_rmd))
+        rmd_out, out_md, template_dir, data_parent, index_rmd, input))
 }
