@@ -44,8 +44,10 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     """
     exe_dir = get_sk_exe_dir()
     yml = yaml_in()
+    # what comes before 'snakemake'
+    env_vars = f'SINGULARITY_BINDPATH="{exe_dir}"'
+    # what comes after 'snakemake'
     snakemake_args = ""
-    snakemake_args += f" --singularity-args=\"--bind {exe_dir}\" "
     snakemake_args += f" --snakefile {snakefile}"
     snakemake_args += f" --directory {workdir}"
     snakemake_args += " --cores 1"
@@ -59,7 +61,8 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
         snakemake_args += f" {' '.join(yml['snakemake_args'])}"
 
     if verbose:
-        sys.exit(subprocess.call(f"snakemake {snakemake_args}", shell=True))
+        sys.exit(subprocess.call(f"{env_vars} snakemake {snakemake_args}",
+            shell=True))
     else:
         snake_p = subprocess.Popen(f"snakemake {snakemake_args}", \
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

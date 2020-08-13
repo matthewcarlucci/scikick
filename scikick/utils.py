@@ -107,7 +107,7 @@ def git_repo_url():
     """
     # result in case of error that would not break later
     remote = subprocess.run("Rscript -e 'cat(git2r::remote_url()[1])'",
-        shell=True, stdout=subprocess.PIPE)
+        shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     if remote.returncode != 0:
         return "."
     # remote url
