@@ -3,8 +3,6 @@ import os
 import subprocess
 import re
 import sys
-from git import Repo
-from git import InvalidGitRepositoryError, NoSuchPathError
 
 # getting the dir of the 'scikick' executable (i.e. this file)
 def get_sk_exe_dir():
@@ -101,38 +99,27 @@ def check_requirements():
     check_version_generic((0, 0), "singularity")
     check_version_generic((0, 0), "conda")
 
-def git_info():
+def git_repo_url():
     """Parse git info regarding branches of the current repository.
     Returns a list of two elements:
     	- url to git repository
-    	- url to git repository of the current branch
-    Works with gitlab and github
-    In case of error, [".", "."] is returned
-    Used in scikick/usr/Snakefile
+    In case of error, "." is returned
     """
     # result in case of error that would not break later
-    rep_branch = [".", "."]
-    try:
-        gitobj = Repo()
-    except NoSuchPathError:
-        warn("sk: Warning: invalid path to a git repository")
-        return rep_branch
-    except InvalidGitRepositoryError:
-        warn("sk: Warning: not a git repository")
-        return rep_branch
+    remote = subprocess.run("Rscript -e 'cat(git2r::remote_url()[1])'",
+        shell=True, stdout=subprocess.PIPE)
+    if remote.returncode != 0:
+        return "."
     # remote url
-    remote = list(gitobj.remote().urls)[0]
-    ssh_match = re.match("^git@.*:.*.git$", remote)
-    https_match = re.match("^https://.*.git$", remote)
+    remote_url = remote.stdout.decode()
+    ssh_match = re.match("^git@.*:.*.git$", remote_url)
+    https_match = re.match("^https://.*.git$", remote_url)
     if ssh_match is not None:
-        remote = re.sub("^git@(.*):(.*).git$", "https://\\1/\\2", remote)
-    elif https_match is None:
-        warn("sk: Unrecognized git repository format")
-        return rep_branch
-    # branch url
-    rep_branch[0] = remote
-    rep_branch[1] = "%s/tree/%s" % (remote, gitobj.active_branch.name)
-    return rep_branch
+        return re.sub("^git@(.*):(.*).git$", "https://\\1/\\2", remote_url)
+    elif https_match is not None:
+        return re.sub(".git$", "", remote_url)
+    else:
+        return "."
 
 def reterr(msg):
     """Print msg to stderr and exit with a non-zero status"""

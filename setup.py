@@ -24,7 +24,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'snakemake>=5.6.0',
-        'gitpython>=2.1.13',
         'ruamel.yaml>=0.16.5'
         ],
     include_package_data = True,

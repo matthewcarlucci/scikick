@@ -3,7 +3,7 @@
 ###########################################
 
 from scikick.config import read_deps, ScikickConfig, read_snakefile_arg
-from scikick.utils import git_info, warn, get_sk_exe_dir
+from scikick.utils import warn, get_sk_exe_dir
 import yaml
 import tempfile
 
@@ -64,15 +64,6 @@ else:
 	rmd_dict['index'] = rmd_dict.pop(os.path.splitext(index_list[0])[0], None)
 	rmd_deps['index'] = rmd_deps.pop(os.path.splitext(index_list[0])[0], None)
 index_rmd = rmd_dict["index"]
-# git information
-rep_info = ["", ""]
-try:
-	rep_info = git_info()
-except:
-	warn("sk: Warning: Failed to parse git info, " +\
-		"'More' tab will not function properly")
-	rep_info = ["", ""]
-
 ###########################################
 # Workflow rules
 ###########################################
@@ -117,9 +108,6 @@ rule siteYAML:
 		main_yml = os.path.join(report_dir, "out_md", "_site.yml"),
 		inner_ymls = inner_ymls
 	message: "Creating site layout from scikick.yml"
-	params:
-		git_repository = rep_info[0],
-		git_branch = rep_info[1]
 	script: os.path.join(script_dir, 'yamlgen.py')
 
 # md => HTML via rmarkdown::render

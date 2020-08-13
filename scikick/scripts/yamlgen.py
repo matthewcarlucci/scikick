@@ -5,6 +5,7 @@ from os.path import basename, dirname, join, relpath, sep
 from ruamel.yaml import YAML
 from scikick.config import get_tabs
 from scikick.yaml import yaml_in
+from scikick.utils import git_repo_url
 
 sk_yaml = snakemake.input[0]
 site_yaml = snakemake.output[0]
@@ -29,8 +30,10 @@ nav_left = [{"text": text, "href": "%s.html" % tabs[text][0]} \
     [{"text": basename(hr), "href": "%s.html" % hr} for hr in tabs[text]] \
     } for text in tabs.keys()]
 
+# get git repo url
+
 nav_more = {"text": "More", \
-    "menu": list()}
+    "menu": [{"text" : "Git Repository", "href" : git_repo_url()}]}
 
 # put the 'sites' dictionary into the 'More' tab
 if "site" in config.keys():
