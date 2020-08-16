@@ -103,8 +103,13 @@ def sk_move_extras(mv_dict):
     analysis = yaml_dict["analysis"]
     reportdir = yaml_dict["reportdir"]
     for src, dest in mv_dict.items():
-        # check if the file is a key in scikick.yml
+        # if not in analysis.keys -> regular file
+        # in this case, rename and continue
         if src not in analysis.keys():
+            if 1 == rename(src, dest):
+                warn("sk: %s renamed to %s in ./scikick.yml" % (src, dest))
+            else:
+                warn("sk: Warning: %s not found in ./scikick.yml" % src)
             continue
         md_rootdir = os.path.join(reportdir, "out_md")
         md_destdir = os.path.join(md_rootdir, os.path.dirname(dest))

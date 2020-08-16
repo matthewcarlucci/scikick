@@ -50,6 +50,7 @@ def test_mv_dir2exdir():
     # check the yaml
     assert "code/subdir/subdf/pagesd.Rmd" in yaml_in()["analysis"].keys()
 
+# also check for the non-rmd dep
 @with_setup(setup, teardown)
 def test_mv_dir2nonexdir():
     assert os.system("sk run") == 0
@@ -59,6 +60,7 @@ def test_mv_dir2nonexdir():
     assert os.path.isfile("report/out_md/code/subdf2/pagesd.md")
     # check the yaml
     assert "code/subdf2/pagesd.Rmd" in yaml_in()["analysis"].keys()
+    assert "code/subdf2/non_rmd_dep.txt" in yaml_in()["analysis"]["code/subdf2/pagesd.Rmd"]
 
 @with_setup(setup, teardown)
 def test_mv_mul2dir():

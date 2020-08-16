@@ -84,12 +84,11 @@ def mv(args):
     (new_src, new_dest) = sk_move_prepare_src_dest(src, dest)
     new_src = list(map(os.path.normpath, new_src))
     new_dest = list(map(os.path.normpath, new_dest))
-    # clear repetitions and rateint the order in scikick.yml
+    # leave only unique pairs of (src, dest) files
     mv_dict = ordereddict()
-    for k in config["analysis"]:
-        if k in new_src:
-            i = new_src.index(k)
-            mv_dict[new_src[i]] = new_dest[i]
+    for k in new_src:
+        i = new_src.index(k)
+        mv_dict[new_src[i]] = new_dest[i]
     # perform the move operation (using the initial args)
     for s in src:
         if args.git:
