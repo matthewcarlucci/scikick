@@ -142,7 +142,7 @@ def add_check(fname, ymli, force):
                     "sk: Warning: Neither of the added index files will be used as a homepage")
     return True
 
-def add(files, deps, force):
+def add(files, deps, force, copy_deps):
     """ Add files and dependencies to them
     files -- page file list
     deps -- dependency file list
@@ -153,6 +153,16 @@ def add(files, deps, force):
     ymli = yaml_in()
     if ymli['analysis'] is None:
         ymli['analysis'] = ordereddict()
+    if copy_deps is not None:
+        copy_deps = copy_deps[0]
+        if copy_deps not in ymli["analysis"]:
+            reterr(f"sk: Error: file {copy_deps} is not included")
+        deps2copy = ymli["analysis"][copy_deps]
+        if not ((deps2copy is None) or (len(deps2copy) == 0)):
+            deps = list(set(deps + deps2copy))
+            warn(f"sk: Copying {copy_deps} dependencies")
+        else:
+            warn(f"sk: Warning: {copy_deps} has no dependencies")
     # add files
     for fname in files:
         if fname in ymli['analysis'].keys() and len(deps) == 0:

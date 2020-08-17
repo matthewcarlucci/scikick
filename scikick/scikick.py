@@ -60,7 +60,7 @@ def init_loc(args):
 
 def add(args):
     """Add Rmds to scikick.yml"""
-    scikick.yaml.add(args.rmd, args.deps, args.force)
+    scikick.yaml.add(args.rmd, args.deps, args.force, args.copy_deps)
 
 
 def delete(args):
@@ -191,6 +191,9 @@ parser_add.add_argument("rmd", nargs="+", \
 parser_add.add_argument("-d", "--deps", \
                         nargs="+", \
                         help="Dependencies to be added to the script(s)")
+parser_add.add_argument("--copy-deps", \
+                        nargs=1, \
+                        help="File from which to copy the dependency list")
 parser_add.add_argument("--force", action="store_true", \
                          help="Force addition of a script(s)")
 parser_add.set_defaults(func=add)

@@ -97,7 +97,9 @@ def file_markers(scripts, config, intupds, extupds, index_file):
                 if is_script and ext_upd != _file_md:
                     markers[_file][1] = "e"
             # script's internal dependencies have been updated
-            if len(intupds[_file]) > 0 + (_file in intupds[_file]):
+            if len(intupds[_file]) > 0 + (_file in intupds[_file]) + \
+                (_file_md in intupds[_file]) + \
+                ("_site.yml" in map(os.path.basename, intupds[_file])):
                 markers[_file][2] = "i"
         else:
             # if not a script and modified mark "s--"
