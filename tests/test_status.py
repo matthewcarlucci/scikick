@@ -55,3 +55,9 @@ def test_status_touch_rm():
     os.system("touch code/page1.Rmd")
     os.system("rm code/page2.Rmd")
     output_check("output4.txt", True)
+
+@with_setup(setup, teardown)
+def test_status_basic():
+    os.system("sk run")
+    os.system("touch scikick.yml")
+    output_check("output5.txt")

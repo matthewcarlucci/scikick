@@ -117,7 +117,7 @@ rule pageRender:
 		md = "{report_dir}/out_md/{report_step}.md"
 	output:
 		"{report_dir}/out_html/{report_step}.html"
-	message: "Generating {wildcards.report_step} html page"
+	message: "Generating {report_dir}/out_html/{wildcards.report_step} html page"
 	params:
 		template_dir = template_dir,
 		index_html = lambda w: os.path.join(os.path.relpath(

@@ -158,7 +158,7 @@ def job_to_script(job, scripts):
     scripts -- list of scripts that are executed (listed in scikick.yml)
     """
     exe_pattern = f"^Job.*: Executing R chunks in (.*), outputting to (.*)$"
-    htmlgen_pattern = f"^Job.*: Generating (.*) html page$"
+    htmlgen_pattern = f"^Job.*: Generating .*/out_html/(.*) html page$"
     noext_scripts = list(map(lambda x: os.path.splitext(x)[0], scripts))
     # Get both matches
     exe_match = re.match(exe_pattern, job)
