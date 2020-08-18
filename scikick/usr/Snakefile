@@ -4,7 +4,6 @@
 
 from scikick.config import read_deps, ScikickConfig, read_snakefile_arg
 from scikick.utils import warn, get_sk_exe_dir
-import yaml
 import tempfile
 
 # trying to eventually remove this

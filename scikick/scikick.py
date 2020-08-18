@@ -17,17 +17,25 @@ from scikick.config import new_tab_order, get_tabs
 from scikick.config import read_snakefile_arg, write_snakefile_arg
 from scikick.config import rearrange_tabs, rearrange_submenus
 from scikick.init import init
-from scikick.yaml import yaml_in
+from scikick.yaml import yaml_in, yaml_dump
 from scikick.move import sk_move_check, sk_move_extras
 from scikick.move import sk_move_prepare_src_dest
 
 def run(args):
     """Run the workflow"""
     # check for empty analysis:
-    analysis = yaml_in()['analysis']
-    if analysis is None or len(analysis) == 0:
+    ymli = yaml_in()
+    analysis = ymli["analysis"]
+    if (analysis is None) or (len(analysis) == 0):
         reterr("sk: Error: no pages have been added to scikick.yml, " + \
-               "this can be done with\nsk: sk add my.rmd")
+            "this can be done with\nsk: sk add my.rmd")
+
+    reportdir = ymli["reportdir"]
+    if (reportdir is None) or (reportdir == ""):
+        warn("sk: Warning: Report directory has not been set "+ \
+            "in scikick.yml, defaulting to report/")
+        ymli["reportdir"] = "report"
+        yaml_dump(ymli)
 
     if args.snakeargs is not None:
         run_snakeargs = " ".join(args.snakeargs)

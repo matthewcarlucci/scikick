@@ -44,6 +44,13 @@ def yaml_in(ymlpath='scikick.yml'):
 
     ymli = yaml.YAML()
     ymli = ymli.load(open(ymlpath, "r"))
+    if ymli is None:
+        ymli = dict()
+    # make sure that mandatory fields are present
+    if "analysis" not in ymli.keys():
+        ymli["analysis"] = dict()
+    if "reportdir" not in ymli.keys():
+        ymli["reportdir"] = ""
     return ymli
 
 def rename(name_a, name_b):
