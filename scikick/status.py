@@ -5,7 +5,7 @@ import subprocess
 from scikick.yaml import yaml_in
 from scikick.utils import warn, get_sk_exe_dir
 
-def snake_status(snakefile, workdir, verbose):
+def snake_status(snakefile, workdir, verbose, rmd):
     """Print workflow status
     snakefile -- string (path to the main snakefile)
     workdir -- string
@@ -43,7 +43,22 @@ def snake_status(snakefile, workdir, verbose):
     # Get internal upadtes for each script
     intupds = internal_updates(scripts, reasons, jobs)
     markers = file_markers(scripts, yaml, intupds, extupds, index_file)
-    print_status(yaml["analysis"], markers, verbose)
+    if rmd is not None:
+        # print only the status of rmd and dependent files
+        reduced_analysis = {k: yaml["analysis"][k] for k in \
+            filter(lambda k: k in yaml["analysis"].keys(), \
+                flatten_dependency_tree(rmd, yaml["analysis"]))}
+        print_status(reduced_analysis, markers, verbose)
+    else:
+        print_status(yaml["analysis"], markers, verbose)
+
+def flatten_dependency_tree(rmd, analysis):
+    """Returns a list of rmd and its recursive deps"""
+    file_list = [rmd]
+    if rmd in analysis.keys() and analysis[rmd] is not None:
+        for dep in analysis[rmd]:
+            file_list += flatten_dependency_tree(dep, analysis)
+    return file_list
 
 def file_markers(scripts, config, intupds, extupds, index_file):
     """Get markers for each file in scikick.yml
