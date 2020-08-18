@@ -91,13 +91,17 @@ def mv(args):
         mv_dict[new_src[i]] = new_dest[i]
     # perform the move operation (using the initial args)
     for s in src:
+        git_retcode = 0
         if args.git:
             print(f"sk: git mv {s} {dest[0]}")
             git_res = subprocess.run(f"git mv {s} {dest[0]}", shell=True, \
                 stderr=subprocess.PIPE)
-            if git_res.returncode != 0:
-                reterr(f"sk: Git error: {git_res.stderr.decode().strip()}")
-        else:
+            git_retcode = git_res.returncode
+            if git_retcode != 0:
+                warn("sk: Warning: Git returned an error:")
+                warn(git_res.stderr.decode().strip())
+                warn("sk: Warning: Falling back to mv")
+        if (git_retcode != 0) or (not args.git):
             print(f"sk: mv {s} {dest[0]}")
             shutil.move(s, dest[0])
     sk_move_extras(mv_dict)
