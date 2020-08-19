@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 from scikick.utils import warn, get_sk_snakefile, get_sk_exe_dir
-from scikick.yaml import yaml_in
+from scikick.yaml import yaml_in, get_indexes
 
 
 def match_print(line):
@@ -43,7 +43,7 @@ def match_print(line):
         warn("sk: Error: Missing files. Run 'sk status' to see which")
 
 def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
-    verbose=False, dryrun=False, run_snakeargs=None):
+    verbose=False, dryrun=False, run_snakeargs=None, rmds=None):
     """Run snakemake with specified arguments
     snakefile -- string (path to the main snakefile)
     workdir -- string
@@ -60,6 +60,21 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     snakemake_args += f" --snakefile {snakefile}"
     snakemake_args += f" --directory {workdir}"
     snakemake_args += " --cores 1"
+    # add rmds listed
+    target_arg = ""
+    index_rmds = get_indexes(yml)
+    if len(rmds) > 0:
+        for rmd in rmds:
+            if rmd in yml["analysis"].keys():
+                # if the rmd is the index
+                if (len(index_rmds) == 1) and (index_rmds[0] == rmd):
+                    target_arg += " " + os.path.join(yml["reportdir"], \
+                        "out_html", "index.html")
+                else:
+                    target_arg += " " + os.path.join(yml["reportdir"], \
+                        "out_html", os.path.splitext(rmd)[0] + ".html")
+            else:
+                warn(f"sk: Warning: {rmd} is not to be executed in scikick.yml")
     # config
     if dryrun:
         snakemake_args += " --dry-run"
@@ -68,7 +83,8 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
         snakemake_args += f" {run_snakeargs}"
     elif 'snakemake_args' in yml.keys() and yml['snakemake_args'] is not None:
         snakemake_args += f" {' '.join(yml['snakemake_args'])}"
-
+    # add the targets
+    snakemake_args += f" {target_arg}"
     if verbose:
         sys.exit(subprocess.call(f"{env_vars} snakemake {snakemake_args}",
             shell=True))

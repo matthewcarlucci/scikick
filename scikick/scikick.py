@@ -46,7 +46,8 @@ def run(args):
                   workdir=os.getcwd(), \
                   dryrun=args.dryrun, \
                   run_snakeargs=run_snakeargs, \
-                  verbose=args.verbose)
+                  verbose=args.verbose, \
+                  rmds=args.rmds)
 
 
 def init_loc(args):
@@ -173,6 +174,8 @@ subparsers = parser.add_subparsers(help="")
 
 parser_run = subparsers.add_parser("run", help="Run pending tasks using snakemake",
                                    description="Run snakemake to execute the workflow specified in scikick.yml")
+parser_run.add_argument("rmds", type=str, nargs="*", \
+                        help="Generate htmls only for the listed rmds (optional)")
 parser_run.add_argument("-v", "--verbose", action="store_true")
 parser_run.add_argument("-d", "--dryrun", action="store_true", \
                         help="Show snakemake's planned execution (wrapper for snakemake -n)")

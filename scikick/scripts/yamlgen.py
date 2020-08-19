@@ -35,12 +35,6 @@ nav_left = [{"text": text, "href": "%s.html" % tabs[text][0]} \
 nav_more = {"text": "More", \
     "menu": [{"text" : "Git Repository", "href" : git_repo_url()}]}
 
-# put the 'sites' dictionary into the 'More' tab
-if "site" in config.keys():
-    site = config["site"]
-    for k in site.keys():
-        nav_more["menu"].append({"text": k, "href": site[k]})
-
 output_yaml = {"output_dir": "../out_html", \
     "navbar": {"title": basename(getcwd()), \
         "left": nav_left, "right": [nav_more]}}
