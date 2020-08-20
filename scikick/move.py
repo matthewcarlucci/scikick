@@ -1,5 +1,6 @@
 """functions for 'sk mv' subcommand"""
 import os
+import time
 import shutil
 from re import sub, IGNORECASE
 from scikick.utils import reterr, warn
@@ -142,6 +143,8 @@ def sk_move_extras(mv_dict):
             print(f"sk: mv {md_srcfigdir} {md_destfigdir}")
             shutil.move(md_srcfigdir, md_destfigdir)
             # rename the output/ directory name in the dest md
+            ## get the initial timestamp
+            initial_timestamp = os.path.getmtime(md_dest)
             md_file = open(md_dest, 'r+')
             md_lines = [sub(string=line,
                 pattern=f'src="output/{tabname_src}',
@@ -151,6 +154,8 @@ def sk_move_extras(mv_dict):
             for l in md_lines:
                 md_file.write(l)
             md_file.close()
+            # set the initial timestamp back to avoid reexecution
+            os.utime(md_dest, (initial_timestamp, initial_timestamp))
         # rename all entries in scikick.yml from from to f_dest
         if 1 == rename(src, dest):
             warn("sk: %s renamed to %s in ./scikick.yml" % (src, dest))
