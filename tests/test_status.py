@@ -61,3 +61,9 @@ def test_status_basic():
     os.system("sk run")
     os.system("touch scikick.yml")
     output_check("output5.txt")
+
+@with_setup(setup, teardown)
+def test_status_():
+    os.system("sk run")
+    os.system("rm report/out_html/code/*.html")
+    output_check("output6.txt")

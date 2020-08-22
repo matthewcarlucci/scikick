@@ -88,17 +88,20 @@ def file_markers(scripts, config, intupds, extupds, index_file):
         if _file in scripts:
             _file_md = os.path.join(os.path.join(reportdir, "out_md"), \
                 os.path.splitext(_file)[0] + ".md")
+            _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
+                os.path.splitext(_file)[0] + ".html")
+            if _file == index_file:
+                _file_md = os.path.join(os.path.join(reportdir, "out_md"), \
+                    "index.md")
+                _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
+                    "index.html")
             # script's md does not exist
             if not os.path.isfile(_file_md):
-                if _file != index_file:
-                    markers[_file] = ["m", "-", "-"]
-                    continue
-                elif not os.path.isfile(os.path.join(\
-                    reportdir, "out_md", "index.md")):
-                    markers[_file] = ["m", "-", "-"]
-                    continue
+                markers[_file] = ["m", "-", "-"]
+                continue
             # html is to be generated
-            if "_site.yml" in map(os.path.basename, extupds[_file]):
+            if ("_site.yml" in map(os.path.basename, extupds[_file])) or \
+                (not os.path.isfile(_file_html)):
                 markers[_file][0] = "-"
             # script itself was modified
             #if _file_md in extupds[_file] and _file in intupds[_file]:
