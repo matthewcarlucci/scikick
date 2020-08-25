@@ -1,0 +1,4 @@
+ --- 	code/page1.Rmd
+ --- 	code/page2.Rmd
+Scripts to execute: 0
+HTMLs to compile ('---'): 2
