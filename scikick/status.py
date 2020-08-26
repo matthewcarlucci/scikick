@@ -86,6 +86,7 @@ def file_markers(scripts, config, intupds, extupds, index_file):
             markers[_file] = ["?", "?", "?"]
             continue
         if _file in scripts:
+            # define corresponding html and md files for the rmd
             _file_md = os.path.join(os.path.join(reportdir, "out_md"), \
                 os.path.splitext(_file)[0] + ".md")
             _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
@@ -104,7 +105,6 @@ def file_markers(scripts, config, intupds, extupds, index_file):
                 (not os.path.isfile(_file_html)):
                 markers[_file][0] = "-"
             # script itself was modified
-            #if _file_md in extupds[_file] and _file in intupds[_file]:
             if _file in intupds[_file]:
                 markers[_file][0] = "s"
             # script's external dependencies have been updated
@@ -115,9 +115,9 @@ def file_markers(scripts, config, intupds, extupds, index_file):
                 if is_script and ext_upd != _file_md:
                     markers[_file][1] = "e"
             # script's internal dependencies have been updated
-            if len(intupds[_file]) > 0 + (_file in intupds[_file]) + \
-                (_file_md in intupds[_file]) + \
-                ("_site.yml" in map(os.path.basename, intupds[_file])):
+            deps = analysis[_file]
+            deps = deps if (deps is not None) else list()
+            if len(list(filter(lambda d: d in intupds[_file], deps))) > 0:
                 markers[_file][2] = "i"
         else:
             # if not a script and modified mark "s--"
@@ -227,8 +227,8 @@ def internal_updates(scripts, reasons, jobs):
         intupd_dict[script] = list()
     for i, _ in enumerate(reasons):
         # simple solution currently - cant go around the ';' sign with regex
-        intupd_pattern = f"^Reason: Updated input files: (.*).*$"
-        intupd_pattern_sc = f"^Reason: Updated input files: (.*);.*$"
+        intupd_pattern = f"^.*Updated input files: (.*).*$"
+        intupd_pattern_sc = f"^.*Updated input files: (.*);.*$"
         match_sc = re.match(intupd_pattern_sc, reasons[i])
         match = re.match(intupd_pattern, reasons[i])
         if match_sc is not None:
