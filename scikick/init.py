@@ -67,12 +67,12 @@ def init_git(usr_dir):
 def init_readme():
     """Print a message indicating that the project uses scikick"""
     print("### Scikick")
-    print("This project uses a python3 CLI application *scikick* " + \
-        "which executes the workflow described in " + \
-        "its configuration file `scikick.yml`.")
-    print("To download scikick, use:\n\t`pip3 install scikick==%s`" % \
-        scikick.__version__)
-    print("To run the project, use:\n\t`scikick run`")
+    print("This data analysis project uses a python tool called " + \
+	"[*scikick*](https://github.com/matthewcarlucci/scikick) " + \
+        "to execute the workflow defined in " + \
+        "the `scikick.yml` configuration file.")
+    print("scikick executes all scripts by running the command:\n\t`sk run`")
+    print("On completion, there will be a directory with a website of results.")
 
 def init_dirs(project_dir):
     """Create default project directories"""
