@@ -63,7 +63,13 @@ def test_status_basic():
     output_check("output5.txt")
 
 @with_setup(setup, teardown)
-def test_status_():
+def test_status_nohtml():
     os.system("sk run")
     os.system("rm report/out_html/code/*.html")
     output_check("output6.txt")
+
+@with_setup(setup, teardown)
+def test_status_mdtouch():
+    os.system("sk run")
+    os.system("touch report/out_md/code/page1.md")
+    output_check("output7.txt", True)

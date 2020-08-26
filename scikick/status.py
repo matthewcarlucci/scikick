@@ -42,7 +42,7 @@ def snake_status(snakefile, workdir, verbose, rmd):
     extupds = external_updates(scripts, reasons, jobs)
     # Get internal upadtes for each script
     intupds = internal_updates(scripts, reasons, jobs)
-    markers = file_markers(scripts, yaml, intupds, extupds, index_file)
+    markers = file_markers(yaml, intupds, extupds, index_file)
     if rmd is not None:
         # print only the status of rmd and dependent files
         reduced_analysis = {k: yaml["analysis"][k] for k in \
@@ -60,19 +60,18 @@ def flatten_dependency_tree(rmd, analysis):
             file_list += flatten_dependency_tree(dep, analysis)
     return file_list
 
-def file_markers(scripts, config, intupds, extupds, index_file):
+def file_markers(config, intupds, extupds, index_file):
     """Get markers for each file in scikick.yml
-    scripts -- list of keys of the analysis dict
-    analysis -- analysi dict from scikick.yml
-    reportdir -- reportdir from scikick.yml
+    config -- dict of scikick.yml
     intupds -- output from internal_updates()
     extupds -- output from external_updates()
+    index_file -- name of the homepage rmd
     """
     analysis = config["analysis"]
     reportdir = config["reportdir"]
     # Get all files
     all_files = set()
-    for script in scripts:
+    for script in analysis.keys():
         all_files.add(script)
         if analysis[script] is not None:
             for dep in analysis[script]:
@@ -85,7 +84,8 @@ def file_markers(scripts, config, intupds, extupds, index_file):
         if not os.path.isfile(_file):
             markers[_file] = ["?", "?", "?"]
             continue
-        if _file in scripts:
+        if _file in analysis.keys():
+            #### SETUP
             # define corresponding html and md files for the rmd
             _file_md = os.path.join(os.path.join(reportdir, "out_md"), \
                 os.path.splitext(_file)[0] + ".md")
@@ -96,24 +96,28 @@ def file_markers(scripts, config, intupds, extupds, index_file):
                     "index.md")
                 _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
                     "index.html")
+            #### FLAG m--
             # script's md does not exist
             if not os.path.isfile(_file_md):
                 markers[_file] = ["m", "-", "-"]
                 continue
+            #### FLAG -**
             # html is to be generated
             if ("_site.yml" in map(os.path.basename, extupds[_file])) or \
-                (not os.path.isfile(_file_html)):
+                (not os.path.isfile(_file_html)) or \
+                (_file_md in intupds[_file]):
                 markers[_file][0] = "-"
+            #### FLAG s**
             # script itself was modified
             if _file in intupds[_file]:
                 markers[_file][0] = "s"
+            #### FLAG *e*
             # script's external dependencies have been updated
-            for ext_upd in extupds[_file]:
-                is_script = ext_upd in map(lambda x: os.path.join( \
-                    os.path.join(reportdir, "out_md"),
-                    os.path.splitext(x)[0] + ".md"), scripts)
-                if is_script and ext_upd != _file_md:
+            for upd in extupds[_file] + intupds[_file]:
+                md_match = re.match(f"^{reportdir}/out_md/.*.md$", upd)
+                if (md_match is not None) and upd != _file_md:
                     markers[_file][1] = "e"
+            #### FLAG **i
             # script's internal dependencies have been updated
             deps = analysis[_file]
             deps = deps if (deps is not None) else list()

@@ -239,7 +239,7 @@ parser_mv.set_defaults(func=mv)
 
 parser_status = subparsers.add_parser("status", \
                                       help="Show scripts with pending execution", \
-                                      description="Show scripts with pending execution. A 3 character code is used to mark the reason for pending tasks on a script: (s--) indicates the script itself is outdated, (m--) indicates a missing markdown output from the script, (--i) indicates an imported dependency has been updated, (-e-) indicates an upstream step/script must be re-executed, (---) indicates only the html rendering needs updating, (???) indicates the file is not found.")
+                                      description="Show scripts with pending execution. A 3 character code is used to mark the reason for pending tasks on a script: (s--) indicates the script itself is outdated, (m--) indicates a missing markdown output from the script, (--i) indicates an imported dependency has been updated, (-e-) indicates an upstream step/script has been updated and might be re-executed, (---) indicates only the html rendering needs updating, (???) indicates the file is not found.")
 parser_status.add_argument("rmd", type=str, nargs="?", \
                            help="Show status only of the rmd and the ones that depend on it (optional)")
 parser_status.add_argument("-v", "--verbose", action="store_true", \
