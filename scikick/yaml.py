@@ -6,7 +6,7 @@ from ruamel.yaml.compat import ordereddict
 from scikick.utils import reterr, warn, get_sk_exe_dir
 
 supported_extensions = [".R", ".Rmd"]
-supported_yaml_fields = ["reportdir", "analysis", "version_info"]
+supported_yaml_fields = ["reportdir", "analysis", "version_info", "snakefile_args"]
 
 def yaml_check(config):
     """Checks for unsupported fields in scikick.yml

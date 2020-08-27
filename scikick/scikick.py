@@ -144,9 +144,16 @@ def layout(args):
 def snake_config(args):
     possible_args = ["singularity", "conda", "threads", "benchmark"]
     const_vals = ["SING_GET", "CONDA_GET", 999999, "BENCH_GET"]
+    # if none of the args is supplied, print them all
     if len(list(filter(lambda s: getattr(args, s) is not None,
         possible_args))) == 0:
-        parser_snake_config.print_help()
+        for poss_arg in possible_args:
+            set_arg_val = read_snakefile_arg(poss_arg)
+            if set_arg_val is not None:
+                print(f"sk: Argument {poss_arg} is set to {set_arg_val}")
+            else:
+                print(f"sk: Arguemnt {poss_arg} has not been set")
+        return
     none_set = True
     # read first...
     for i in range(len(possible_args)):
