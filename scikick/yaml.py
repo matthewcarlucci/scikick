@@ -212,6 +212,10 @@ def add(files, deps, force, copy_deps):
             else:
                 ymli['analysis'][fname].append(dep)
                 warn(f"sk: Added dependency {dep} to {fname}")
+                if dep in ymli["analysis"].keys():
+                    warn(f"sk:   {dep} is a page, will be executed before {fname}")
+                else:
+                    warn(f"sk:   {dep} is not a page, assumed to be imported by {fname} and will not be executed")
     yaml_dump(ymli)
 
 def rm(files, deps):
