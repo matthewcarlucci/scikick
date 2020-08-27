@@ -17,7 +17,7 @@ from scikick.config import new_tab_order, get_tabs
 from scikick.config import read_snakefile_arg, write_snakefile_arg
 from scikick.config import rearrange_tabs, rearrange_submenus
 from scikick.init import init
-from scikick.yaml import yaml_in, yaml_dump
+from scikick.yaml import yaml_in, yaml_dump, yaml_check
 from scikick.move import sk_move_check, sk_move_extras
 from scikick.move import sk_move_prepare_src_dest
 
@@ -36,6 +36,8 @@ def run(args):
             "in scikick.yml, defaulting to report/")
         ymli["reportdir"] = "report"
         yaml_dump(ymli)
+    # check for unsupported fields
+    yaml_check(ymli)
 
     if args.snakeargs is not None:
         run_snakeargs = " ".join(args.snakeargs)

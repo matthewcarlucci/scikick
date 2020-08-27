@@ -6,6 +6,15 @@ from ruamel.yaml.compat import ordereddict
 from scikick.utils import reterr, warn, get_sk_exe_dir
 
 supported_extensions = [".R", ".Rmd"]
+supported_yaml_fields = ["reportdir", "analysis", "version_info"]
+
+def yaml_check(config):
+    """Checks for unsupported fields in scikick.yml
+    config -- dict of scikick.yml
+    """
+    for k in config.keys():
+        if k not in supported_yaml_fields:
+            warn(f"sk: Warning: Unrecognized scikick.yml field '{k}'")
 
 def get_indexes(config):
     """Returns a list of 'index.R(md)' files in scikick.yml
@@ -16,7 +25,7 @@ def get_indexes(config):
         config["analysis"].keys()))
 
 def rm_commdir(text, commpath):
-    """removes path (prefix) commpath from text
+    """Removes path (prefix) commpath from text
     with a check if the commpath is of length 0
     text - string to be modified
     commpath - the prefix that is removed
