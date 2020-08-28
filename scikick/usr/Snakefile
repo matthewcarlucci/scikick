@@ -123,6 +123,8 @@ rule pageRender:
 			os.path.join(report_dir, "out_md"),
 			os.path.dirname(os.path.join(report_dir,
 				"out_md", "%s.md" % w.report_step))), "index.html")
+	conda: snakefile_args["conda"]
+	singularity: snakefile_args["singularity"]
 	shell: "Rscript %s {input.md} {output} {params.template_dir} {params.index_html}" \
 		% os.path.join(script_dir, "render.R")
 # using 'shell:' instead of 'script:' for compatibility with renv
