@@ -1,3 +1,4 @@
 ```{r}
 print("A")
+DT::datatable(iris)
 ```
