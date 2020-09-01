@@ -36,8 +36,6 @@ def run(args):
             "in scikick.yml, defaulting to report/")
         ymli["reportdir"] = "report"
         yaml_dump(ymli)
-    # check for unsupported fields
-    yaml_check(ymli)
 
     if args.snakeargs is not None:
         run_snakeargs = " ".join(args.snakeargs)
@@ -297,6 +295,10 @@ def main():
     """Parse the arguments and run the according function"""
     args = parser.parse_args()
     try:
+        # check for unsupported fields
+        ymli = yaml_in()
+        yaml_check(ymli)
+
         func = args.func
     except AttributeError:
         parser.print_help()
