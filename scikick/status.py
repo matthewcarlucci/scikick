@@ -42,7 +42,9 @@ def snake_status(snakefile, workdir, verbose, rmd):
     extupds = external_updates(scripts, reasons, jobs)
     # Get internal upadtes for each script
     intupds = internal_updates(scripts, reasons, jobs)
-    markers = file_markers(yaml, intupds, extupds, index_file)
+    # Get missing outputs
+    missing_outs = missing_outputs(reasons)
+    markers = file_markers(yaml, intupds, extupds, missing_outs, index_file)
     if rmd is not None:
         # print only the status of rmd and dependent files
         reduced_analysis = {k: yaml["analysis"][k] for k in \
@@ -60,7 +62,7 @@ def flatten_dependency_tree(rmd, analysis):
             file_list += flatten_dependency_tree(dep, analysis)
     return file_list
 
-def file_markers(config, intupds, extupds, index_file):
+def file_markers(config, intupds, extupds, missing_outs, index_file):
     """Get markers for each file in scikick.yml
     config -- dict of scikick.yml
     intupds -- output from internal_updates()
@@ -96,17 +98,16 @@ def file_markers(config, intupds, extupds, index_file):
                     "index.md")
                 _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
                     "index.html")
-            #### FLAG m--
-            # script's md does not exist
-            if not os.path.isfile(_file_md):
-                markers[_file] = ["m", "-", "-"]
-                continue
             #### FLAG -**
             # html is to be generated
             if ("_site.yml" in map(os.path.basename, extupds[_file])) or \
                 (not os.path.isfile(_file_html)) or \
                 (_file_md in intupds[_file]):
                 markers[_file][0] = "-"
+            #### FLAG m--
+            # script's md does not exist
+            if _file_md in missing_outs:
+                markers[_file][0] = "m"
             #### FLAG s**
             # script itself was modified
             if _file in intupds[_file]:
@@ -231,7 +232,7 @@ def internal_updates(scripts, reasons, jobs):
         intupd_dict[script] = list()
     for i, _ in enumerate(reasons):
         # simple solution currently - cant go around the ';' sign with regex
-        intupd_pattern = f"^.*Updated input files: (.*).*$"
+        intupd_pattern = f"^.*Updated input files: (.*)$"
         intupd_pattern_sc = f"^.*Updated input files: (.*);.*$"
         match_sc = re.match(intupd_pattern_sc, reasons[i])
         match = re.match(intupd_pattern, reasons[i])
@@ -249,3 +250,17 @@ def internal_updates(scripts, reasons, jobs):
                     if len(upd_file) != 0:
                         intupd_dict[script].append(upd_file)
     return intupd_dict
+
+def missing_outputs(reasons):
+    """Returns the list of files listed as 'Missing output files'"""
+    missing_outs = list()
+    miou_pattern = f"^.*Missing output files: (.*)$"
+    miou_pattern_sc = f"^.*Missing output files: (.*);.*$"
+    for reason in reasons:
+        match = re.match(miou_pattern, reason)
+        match_sc = re.match(miou_pattern_sc, reason)
+        if match_sc is not None:
+            match = match_sc
+        if match is not None:
+            missing_outs += match.groups()[0].split(", ")
+    return missing_outs

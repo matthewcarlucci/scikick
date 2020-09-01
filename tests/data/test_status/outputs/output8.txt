@@ -1,0 +1,6 @@
+     	code/page1.Rmd
+     	code/page2.Rmd
+     	  code/page1.Rmd
+Scripts to execute: 0
+HTMLs to compile ('---'): 0
+Up to date ('   '): 2

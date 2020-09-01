@@ -73,3 +73,9 @@ def test_status_mdtouch():
     os.system("sk run")
     os.system("touch report/out_md/code/page1.md")
     output_check("output7.txt", True)
+
+@with_setup(setup, teardown)
+def test_status_rmmd():
+    os.system("sk run")
+    os.system("rm report/out_md/code/page2.md")
+    output_check("output8.txt", True)
