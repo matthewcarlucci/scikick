@@ -16,7 +16,6 @@ def match_print(line):
     html_match = re.match(".*Generating (.*) html page.*", line)
     skwarn_match = re.match("sk:.*", line)
     quit_fromlines_match = re.match("Quitting from lines.*", line)
-    complete_log_match = re.match("Complete log.*", line)
     # Error matches:
     snakemake_lock_match = re.match("Error: Directory cannot be locked.*", line)
     missing_input_match = re.match("Missing input files for rule reportRendering.*", line)
@@ -33,8 +32,6 @@ def match_print(line):
         warn(re.sub("\n$", "", line))
     elif quit_fromlines_match is not None:
         warn("sk: %s" % re.sub('\n$', '', line))
-    elif complete_log_match is not None:
-        warn("sk: %s" % re.sub("\n$", "", line))
     elif snakemake_lock_match is not None:
         warn("sk: Error: Directory cannot be locked")
         warn("sk: Error: A snakemake process might already be running. To unlock, run:")
@@ -53,6 +50,8 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     """
     exe_dir = get_sk_exe_dir()
     yml = yaml_in()
+    # logfile created by snakemake
+    snake_logfile=""
     # what comes before 'snakemake'
     env_vars = f'SINGULARITY_BINDPATH="{exe_dir}"'
     # what comes after 'snakemake'
@@ -99,8 +98,12 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 break
             lines.append(line)
             match_print(line)
+            logfile_name_match = re.match("^SK INTERNAL: logfile (.*)$", line)
+            if logfile_name_match is not None:
+                snake_logfile = logfile_name_match.groups()[0]
         snake_p.wait()
         if snake_p.returncode != 0:
             warn("sk: Warning: Snakemake returned a non-zero return code")
-            warn("sk: Warning: Run 'sk run -v' for a more verbose output")
+        if snake_logfile != "":
+            warn(f"sk: Complete log: {snake_logfile}")
         sys.exit(snake_p.returncode)

@@ -169,9 +169,6 @@ def snake_config(args):
         if (given_val is not None) and (given_val != const_vals[i]):
             write_snakefile_arg(possible_args[i], given_val)
 
-def site(args):
-    scikick.yaml.site(args)
-
 parser = argparse.ArgumentParser(
 		description="See available scikick commands below")
 parser.add_argument("-v", "--version", action="version", \
@@ -188,7 +185,7 @@ parser_run.add_argument("-d", "--dryrun", action="store_true", \
                         help="Show snakemake's planned execution (wrapper for snakemake -n)")
 parser_run.add_argument("-s", "--snakeargs", nargs=argparse.REMAINDER, \
                         help="Pass all trailing arguments to snakemake")
-parser_run.set_defaults(func=run)
+parser_run.set_defaults(func=run, which="run")
 
 
 parser_init = subparsers.add_parser("init", \
@@ -204,7 +201,7 @@ parser_init.add_argument("--readme", action="store_true", \
                          help="Print a message to stdout for a README.md file to clearly indicate scikick is in use for the project")
 parser_init.add_argument("--demo", action="store_true", \
                          help="Create and run a demo project demonstrating scikick usage")
-parser_init.set_defaults(func=init_loc)
+parser_init.set_defaults(func=init_loc, which="init")
 
 parser_add = subparsers.add_parser("add", \
                                    help="Add scripts and their dependencies to the workflow",
@@ -219,7 +216,7 @@ parser_add.add_argument("--copy-deps", \
                         help="File from which to copy the dependency list")
 parser_add.add_argument("--force", action="store_true", \
                          help="Force addition of a script(s)")
-parser_add.set_defaults(func=add)
+parser_add.set_defaults(func=add, which="add")
 
 parser_del = subparsers.add_parser("del", \
                                    help="Remove scripts and their dependencies from the workflow",
@@ -229,7 +226,7 @@ parser_del.add_argument("rmd", nargs="+", \
 parser_del.add_argument("-d", "--deps", \
                         nargs="+", \
                         help="Dependencies to be removed from the script(s)")
-parser_del.set_defaults(func=delete)
+parser_del.set_defaults(func=delete, which="del")
 
 parser_mv = subparsers.add_parser("mv", \
                                   help="Move scripts and change project structure accordingly",
@@ -242,7 +239,7 @@ parser_mv.add_argument("-g", "--git", action="store_true", \
                        help="Use git mv instead of basic mv to track with git")
 parser_mv.add_argument("-v", "--verbose", action="store_true", \
                        help="Show all moves taking place (mainly for debugging)")
-parser_mv.set_defaults(func=mv)
+parser_mv.set_defaults(func=mv, which="mv")
 
 parser_status = subparsers.add_parser("status", \
                                       help="Show scripts with pending execution", \
@@ -251,7 +248,7 @@ parser_status.add_argument("rmd", type=str, nargs="?", \
                            help="Show status only of the rmd and the ones that depend on it (optional)")
 parser_status.add_argument("-v", "--verbose", action="store_true", \
                            help="Show the workflow config for all scripts")
-parser_status.set_defaults(func=status)
+parser_status.set_defaults(func=status, which="status")
 
 parser_layout = subparsers.add_parser("layout", \
                                       help="Manage the website navigation bar layout",
@@ -261,7 +258,7 @@ parser_layout.add_argument("order", nargs="*", type=int, \
 parser_layout.add_argument("-s", "--submenu", \
                            nargs=1, \
                            help="Define the layout within a menu/subdirectory")
-parser_layout.set_defaults(func=layout)
+parser_layout.set_defaults(func=layout, which="layout")
 
 parser_snake_config = subparsers.add_parser("config", \
                                       help="Set or get global snakemake directives for scikick",
@@ -275,32 +272,18 @@ parser_snake_config.add_argument("--threads", nargs="?", type=int, \
                        help="Set number of threads for conversion to md (i.e. for script execution)")
 parser_snake_config.add_argument("--benchmark", nargs="?", type=str, \
                        const="BENCH_GET", help="Set benchmark output prefix")
-parser_snake_config.set_defaults(func=snake_config)
-
-parser_site = subparsers.add_parser("site", \
-                                    help="Set sites in the 'More' tab",
-                                    description="Modify links in the 'More' tab. Both '--name' and '--link' need to be specified in order to add a link. In order to delete a link, both '--delete' and '--name' have to be specified.")
-parser_site.add_argument("--name", nargs=1, type=str, \
-                       help="Set the name for a link")
-parser_site.add_argument("--link", nargs=1, type=str, \
-                       help="Set the link for the text")
-parser_site.add_argument("-d", "--delete", action="store_true",
-                           help="Remove the link for the given '--text' argument")
-parser_site.add_argument("-g", "--get", action="store_true",
-                           help="Get all the links")
-parser_site.set_defaults(func=site)
-
+parser_snake_config.set_defaults(func=snake_config, which="config")
 
 def main():
     """Parse the arguments and run the according function"""
     args = parser.parse_args()
     try:
-        # check for unsupported fields
-        ymli = yaml_in()
-        yaml_check(ymli)
-
         func = args.func
     except AttributeError:
         parser.print_help()
         return
+    if args.which != "init":
+        # check for unsupported fields
+        ymli = yaml_in()
+        yaml_check(ymli)
     func(args)

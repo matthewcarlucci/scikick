@@ -6,6 +6,9 @@ from scikick.config import read_deps, ScikickConfig, read_snakefile_arg
 from scikick.utils import warn, get_sk_exe_dir
 import tempfile
 
+# capture the name of the log file
+warn(f"SK INTERNAL: logfile {logger.logfile}")
+
 # trying to eventually remove this
 # configfile: 'scikick.yml'
 # Instead of snakemake config file,
