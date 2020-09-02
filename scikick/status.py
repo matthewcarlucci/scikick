@@ -79,6 +79,11 @@ def file_markers(config, intupds, extupds, missing_outs, index_file):
             for dep in analysis[script]:
                 all_files.add(dep)
     markers = dict()
+    # all executable files that have been updated, without their extensions
+    all_splitext = list()
+    for f in analysis.keys():
+        all_splitext += extupds[f] + intupds[f]
+    all_splitext = map(lambda x: os.path.splitext(x)[0], all_splitext)
     # assign markers to files
     for _file in all_files:
         markers[_file] = [" ", " ", " "]
@@ -112,12 +117,17 @@ def file_markers(config, intupds, extupds, missing_outs, index_file):
             # script itself was modified
             if _file in intupds[_file]:
                 markers[_file][0] = "s"
-            #### FLAG *e*
-            # script's external dependencies have been updated
+            #### FLAG *u* and FLAG *e*
+            # script's external dependency md was updated (*e*), but not an rmd (*u*)
             for upd in extupds[_file] + intupds[_file]:
                 md_match = re.match(f"^{reportdir}/out_md/.*.md$", upd)
                 if (md_match is not None) and upd != _file_md:
-                    markers[_file][1] = "e"
+                    # if the md doesn't have a corresponding script, *u*, else *e*
+                    if os.path.splitext(re.sub(pattern=f"{reportdir}/out_md/", \
+                        repl="", string=upd))[0] not in all_splitext:
+                        markers[_file][1] = "u"
+                    else:
+                        markers[_file][1] = "e"
             #### FLAG **i
             # script's internal dependencies have been updated
             deps = analysis[_file]

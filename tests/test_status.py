@@ -79,3 +79,11 @@ def test_status_rmmd():
     os.system("sk run")
     os.system("rm report/out_md/code/page2.md")
     output_check("output8.txt", True)
+
+@with_setup(setup, teardown)
+def test_status_skrunfile():
+    os.system("sk run")
+    os.system("rm report/out_md/code/page1.md")
+    os.system("rm report/out_html/code/page1.html")
+    os.system("sk run code/page1.Rmd")
+    output_check("output9.txt", True)
