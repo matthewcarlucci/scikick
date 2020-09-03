@@ -44,7 +44,9 @@ def snake_status(snakefile, workdir, verbose, rmd):
     intupds = internal_updates(scripts, reasons, jobs)
     # Get missing outputs
     missing_outs = missing_outputs(reasons)
-    markers = file_markers(yaml, intupds, extupds, missing_outs, index_file)
+    # Get which scripts will be executed
+    exec_scripts = to_execute(jobs)
+    markers = file_markers(yaml, intupds, extupds, missing_outs, exec_scripts, index_file)
     if rmd is not None:
         # print only the status of rmd and dependent files
         reduced_analysis = {k: yaml["analysis"][k] for k in \
@@ -62,7 +64,7 @@ def flatten_dependency_tree(rmd, analysis):
             file_list += flatten_dependency_tree(dep, analysis)
     return file_list
 
-def file_markers(config, intupds, extupds, missing_outs, index_file):
+def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_file):
     """Get markers for each file in scikick.yml
     config -- dict of scikick.yml
     intupds -- output from internal_updates()
@@ -79,11 +81,6 @@ def file_markers(config, intupds, extupds, missing_outs, index_file):
             for dep in analysis[script]:
                 all_files.add(dep)
     markers = dict()
-    # all executable files that have been updated, without their extensions
-    all_splitext = list()
-    for f in analysis.keys():
-        all_splitext += extupds[f] + intupds[f]
-    all_splitext = map(lambda x: os.path.splitext(x)[0], all_splitext)
     # assign markers to files
     for _file in all_files:
         markers[_file] = [" ", " ", " "]
@@ -124,7 +121,8 @@ def file_markers(config, intupds, extupds, missing_outs, index_file):
                 if (md_match is not None) and upd != _file_md:
                     # if the md doesn't have a corresponding script, *u*, else *e*
                     if os.path.splitext(re.sub(pattern=f"{reportdir}/out_md/", \
-                        repl="", string=upd))[0] not in all_splitext:
+                        repl="", string=upd))[0] not in \
+                        map(lambda x: os.path.splitext(x)[0], exec_scripts):
                         markers[_file][1] = "u"
                     else:
                         markers[_file][1] = "e"
@@ -274,3 +272,13 @@ def missing_outputs(reasons):
         if match is not None:
             missing_outs += match.groups()[0].split(", ")
     return missing_outs
+
+def to_execute(jobs):
+    """Returns a list of files listed as 'Executing R chunks in'"""
+    exec_files = list()
+    exec_pattern = f"^.*Executing R chunks in (.*), outputting to.*$"
+    for job in jobs:
+        match = re.match(exec_pattern, job)
+        if match is not None:
+            exec_files.append(match.groups()[0])
+    return exec_files
