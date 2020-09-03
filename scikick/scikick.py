@@ -150,7 +150,7 @@ def snake_config(args):
             if set_arg_val is not None:
                 print(f"sk: Argument {poss_arg} is set to {set_arg_val}")
             else:
-                print(f"sk: Arguemnt {poss_arg} has not been set")
+                print(f"sk: Argument {poss_arg} has not been set")
         return
     none_set = True
     # read first...
@@ -162,7 +162,7 @@ def snake_config(args):
                 none_set = False
                 print(f"sk: Argument {possible_args[i]} is set to {set_arg_val}")
             else:
-                print(f"sk: Arguemnt {possible_args[i]} has not been set")
+                print(f"sk: Argument {possible_args[i]} has not been set")
     # ...then write
     for i in range(len(possible_args)):
         given_val = getattr(args, possible_args[i])

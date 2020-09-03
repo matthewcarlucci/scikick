@@ -2,7 +2,7 @@
 
 Chronological changes to scikick are summarized below.
 
-## Unreleased - August 25th 2020
+## Unreleased - [release date] 2020
 
 ### New Features
 
@@ -11,12 +11,14 @@ Chronological changes to scikick are summarized below.
 - Add `--copy-deps` to `sk add` for duplicating file dependencies
 - Index page is now defined by user with `sk add <path to index file>` 
 instead of auto-detected
+- Add git SHA to site git logs
 
 ### Changes
 
-- sk status fixes
+- Many sk status adjustments
+- More detailed `sk add -d` output
+- Better outputs for errors and warnings during `sk run`
 - Tested and fixed renv compatibility
-- Better indications of snakemake errors during `sk run`
 - Default index page is appended to any added index page
 - Requirement of git2r version >= 0.27.1
 - Fix git warnings and other outputs
