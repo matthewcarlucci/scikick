@@ -57,32 +57,42 @@ Common tasks for *ad hoc* data analysis are managed through scikick:
 
 Commands are inspired by git for configuring the workflow: `sk init`, `sk add`, `sk status`, `sk del`, `sk mv`.
 
-[Example Output](https://petronislab.camh.ca/pub/scikick_tests/master/)
-
 Scikick currently supports `.R` and `.Rmd` for notebook rendering.
 
-### Getting Started
+[Example Output](https://petronislab.camh.ca/pub/scikick_tests/master/)
+
+### Installation
 
 The following should be installed prior to installing scikick.
 
 |**Requirements**   |**Recommended**|
 |---|---|
-|python3 (>=3.6)   | [git >= 2.0](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) |
+|python3 (>=3.6, [installing with conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-python.html) is recommended)   | [git >= 2.0](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) |
 |R + packages `install.packages(c("rmarkdown", "knitr", "yaml","git2r"))`   | [singularity >= 2.4](http://singularity.lbl.gov/install-linux)  |
 |[pandoc > 2.0](https://pandoc.org/installing.html)   | [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)   |
 
-### Installation
+
+Installation within a virtual environment with [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) is recommended but not required.
+
+Scikick can be installed using pip:
 
 ```
 pip install scikick
 ```
 
-Installation with an environment manager such as [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) is recommended but not required.
+Direct conda installation of scikick is still experimental, but may be attempted with:
 
 ```
-# To install from GitHub, clone and
+conda install -c tadasbar -c bioconda -c conda-forge scikick
+```
+
+To install the latest version of scikick, clone and then:
+
+```
 python3 setup.py install
 ```
+
+## Getting Started
 
 Begin by executing the demo project or reviewing the main commands of scikick below.
 
@@ -404,7 +414,7 @@ sk config --conda env.yml
 sk run -v -s --use-conda
 ```
 
-## Incorporating with other Pipelines
+## Incorporating with Other Pipelines
 
 Additional workflows written in [snakemake](http://snakemake.readthedocs.io/en/stable/) should play nicely with the scikick workflow.
 
