@@ -24,7 +24,10 @@ run_system = function(cmd){
     retcode = system(paste(cmd, "2>", tmpf), intern=FALSE,
         ignore.stdout=TRUE, ignore.stderr=FALSE)
     for(line in readLines(tmpf)){
-        msg = paste("sk:  ", line)
+        msg = line
+        if(retcode != 0){
+            msg = paste("sk:  ", line)
+        }
         write(msg, file=stderr())
         write(msg, file=logfile, append=TRUE)
     }

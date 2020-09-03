@@ -262,7 +262,7 @@ def internal_updates(scripts, reasons, jobs):
     return intupd_dict
 
 def missing_outputs(reasons):
-    """Returns the list of files listed as 'Missing output files'"""
+    """Returns a list of files listed as 'Missing output files'"""
     missing_outs = list()
     miou_pattern = f"^.*Missing output files: (.*)$"
     miou_pattern_sc = f"^.*Missing output files: (.*);.*$"
