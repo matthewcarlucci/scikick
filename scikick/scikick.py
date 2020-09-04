@@ -245,7 +245,7 @@ parser_status = subparsers.add_parser("status", \
                                       help="Show scripts with pending execution", \
                                       description="Show which scripts will be executed and provide a reason for execution with a 3 character code. Codes indicate the following: \n(s--) Script is older than the latest report\n(m--) Script's output report is missing\n(-e-) Upstream script must execute before the script\n(-u-) Upstream script's output is newer than the script's output\n(--i) Imported file is newer than the script's output\n(---) No script execution needed, only the site rendering\n(???) File is not found", formatter_class=argparse.RawTextHelpFormatter)
 parser_status.add_argument("rmd", type=str, nargs="?", \
-                           help="Show status only of the rmd and the ones that depend on it (optional)")
+                           help="Show status of the script and everything it depends on (optional)")
 parser_status.add_argument("-v", "--verbose", action="store_true", \
                            help="Show the workflow config for all scripts")
 parser_status.set_defaults(func=status, which="status")
