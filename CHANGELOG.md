@@ -2,7 +2,7 @@
 
 Chronological changes to scikick are summarized below.
 
-## Unreleased - [release date] 2020
+## 0.1.2 - September 9th 2020
 
 ### New Features
 
