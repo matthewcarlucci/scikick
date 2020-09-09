@@ -282,7 +282,7 @@ def main():
     except AttributeError:
         parser.print_help()
         return
-    if args.which != "init":
+    if args.which in ["run", "config", "status"]:
         # check for unsupported fields
         ymli = yaml_in()
         yaml_check(ymli)
