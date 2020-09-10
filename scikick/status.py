@@ -5,6 +5,24 @@ import subprocess
 from scikick.yaml import yaml_in
 from scikick.utils import warn, get_sk_exe_dir
 
+## How 'sk status' works:
+# `snakemake --dryrun --reason` is executed
+# each job has two description lines:
+#   One matches the pattern "^Job.*"
+#   The other matches the pattern "^Reason.*"
+# The Job line is used to figure out which file (of which script) is being processed
+# The Reason line describes which dependencies (if any) caused the job
+
+# Examples of patterns from which certain information is parsed:
+## "^.*Updated input files: (.*)$"
+### the group captures a comma-separated list of internal updates
+## "^Job.*: Generating .*/out_html/(.*) html page$"
+### the group captures a string indicating which script will have an html generated
+## "^.*Input files updated by another job: (.*)$"
+### the group captures a comma-separated list of md files of external dependencies
+
+# Flags are set according to the lists of files parsed from specific snakemake outputs
+
 def snake_status(snakefile, workdir, verbose, rmd):
     """Print workflow status
     snakefile -- string (path to the main snakefile)
@@ -17,9 +35,8 @@ def snake_status(snakefile, workdir, verbose, rmd):
         warn("sk: Warning: no pages have been added to scikick.yaml, " + \
             "this can be done with\nsk: sk add my.rmd")
         return
-    # useful variables
     scripts = list(yaml["analysis"].keys())
-    # get the index file
+    # get which script will be used to create the main index.html (homepage)
     index_list = list(filter(lambda f: \
         os.path.splitext(os.path.basename(f))[0] == "index", \
         scripts))
@@ -34,18 +51,19 @@ def snake_status(snakefile, workdir, verbose, rmd):
     stdout = status.stdout.decode("utf-8").split("\n")
     stdout = list(filter(lambda l: re.match(r"^Job \d+:.*$", l) is not None or \
                          re.match("^Reason:.*$", l) is not None, stdout))
-    # get "Job..." and "Reason:..."
+    # get "Job..." and "Reason:..." line pairs
     jobs = list(map(lambda i: stdout[i*2], range(0, int(len(stdout)/2))))
     reasons = list(map(lambda i: stdout[i*2+1], range(0, int(len(stdout)/2))))
     ## Parsing info from snakemake outputs
-    # Get external upadtes for each script
+    # get external updates for each script
     extupds = external_updates(scripts, reasons, jobs)
-    # Get internal upadtes for each script
+    # get internal upadtes for each script
     intupds = internal_updates(scripts, reasons, jobs)
-    # Get missing outputs
+    # get missing outputs (which are to be generated)
     missing_outs = missing_outputs(reasons)
-    # Get which scripts will be executed
+    # get which scripts will be executed (processed as rmd => md)
     exec_scripts = to_execute(jobs)
+    # get status markers (codes ---) for each script
     markers = file_markers(yaml, intupds, extupds, missing_outs, exec_scripts, index_file)
     if rmd is not None:
         # print only the status of rmd and dependent files
@@ -73,7 +91,7 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
     """
     analysis = config["analysis"]
     reportdir = config["reportdir"]
-    # Get all files
+    # extract all files from the analysis dict
     all_files = set()
     for script in analysis.keys():
         all_files.add(script)
@@ -82,12 +100,16 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
                 all_files.add(dep)
     markers = dict()
     # assign markers to files
+    # since the assignment of each symbol of the flag is done sequentially,
+    # each symbol can be overwritten by the next check,
+    # so the order of 'if' statements is important
     for _file in all_files:
         markers[_file] = [" ", " ", " "]
-        # file doesn't exist
+        # assign "? ? ?" if the file doesn't exist
         if not os.path.isfile(_file):
             markers[_file] = ["?", "?", "?"]
             continue
+        # if file exists, and is a key in analysis dict
         if _file in analysis.keys():
             #### SETUP
             # define corresponding html and md files for the rmd
@@ -95,49 +117,46 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
                 os.path.splitext(_file)[0] + ".md")
             _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
                 os.path.splitext(_file)[0] + ".html")
+            # in case the script generates the homepage, md and html names are generated differently
             if _file == index_file:
                 _file_md = os.path.join(os.path.join(reportdir, "out_md"), \
                     "index.md")
                 _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
                     "index.html")
-            #### FLAG -**
-            # html is to be generated
+            # set the flag to -** if the html is to be generated
             if ("_site.yml" in map(os.path.basename, extupds[_file])) or \
                 (not os.path.isfile(_file_html)) or \
                 (_file_md in intupds[_file]):
                 markers[_file][0] = "-"
-            #### FLAG m--
-            # script's md does not exist
+            # set the flag to m** if the corresponding output md file doesn't exist
             if _file_md in missing_outs:
                 markers[_file][0] = "m"
-            #### FLAG s**
-            # script itself was modified
+            # set the flag to s** if the script itself was modified
             if _file in intupds[_file]:
                 markers[_file][0] = "s"
-            #### FLAG *u* and FLAG *e*
-            # script's external dependency md was updated (*e*), but not an rmd (*u*)
+            # external dependency (a script) was updated - flag *e*
+            # if the script of the external dependency was not modified, but its md was - flag *u*
             for upd in extupds[_file] + intupds[_file]:
                 md_match = re.match(f"^{reportdir}/out_md/.*.md$", upd)
                 if (md_match is not None) and upd != _file_md:
-                    # if the md doesn't have a corresponding script, *u*, else *e*
+                    # if the md does not have a corresponding script, *u*, else *e*
                     if os.path.splitext(re.sub(pattern=f"{reportdir}/out_md/", \
                         repl="", string=upd))[0] not in \
                         map(lambda x: os.path.splitext(x)[0], exec_scripts):
                         markers[_file][1] = "u"
                     else:
                         markers[_file][1] = "e"
-            #### FLAG **i
-            # script's internal dependencies have been updated
+            # script's internal dependencies have been updated - flag **i
             deps = analysis[_file]
             deps = deps if (deps is not None) else list()
             if len(list(filter(lambda d: d in intupds[_file], deps))) > 0:
                 markers[_file][2] = "i"
         else:
-            # if not a script and modified mark "s--"
+            # if not in analysis dict (is an internal dependency) and modified - flag s--
             for key in intupds.keys():
                 if _file in intupds[key]:
                     markers[_file] = ["s", "-", "-"]
-        # complete the marker
+        # complete the marker by adding "-" in empty places
         if "".join(markers[_file]) != "   ":
             for i in range(3):
                 if markers[_file][i] == " ":
@@ -145,7 +164,7 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
     return markers
 
 def print_status(analysis, markers, verbose):
-    """Print the output for 'sk status'
+    """Print the output for 'sk status [-v]' using the generated file markers
     analysis -- analysis dict from scikick.yml
     markers -- dict of markers to print for each file
     verbose -- bool
@@ -186,7 +205,7 @@ def print_status(analysis, markers, verbose):
         print(f"Missing ('???'): {missing_no}")
 
 def job_to_script(job, scripts):
-    """Get the script that is executed in a job
+    """Parse the name of the script from the "^Job.*" string
     job -- job string from Snakemake output
     scripts -- list of scripts that are executed (listed in scikick.yml)
     """
@@ -207,8 +226,9 @@ def job_to_script(job, scripts):
                                scripts))[0]
 
 def external_updates(scripts, reasons, jobs):
-    """Get the dictionary of external updates for each script
-    External updates - files that are not directly used (e.g. other Rmds)
+    """Get the dictionary of external updates for each script (script: [list of updates])
+    External updates - files that are not directly used (e.g. other Rmds),
+    so the outputs (md files) of those rmds are the dependencies
     scripts -- list of scripts that are executed (listed in scikick.yml)
     reasons -- list of 'Reason' outputs from Snakemake
     jobs -- list of 'Job' outputs from Snakemake
@@ -229,7 +249,7 @@ def external_updates(scripts, reasons, jobs):
     return extupd_dict
 
 def internal_updates(scripts, reasons, jobs):
-    """Get the dictionary of internal updates for each script
+    """Get the dictionary of internal updates for each script (script: [list of updates])
     Internal updates - files that are directly used (e.g. sourced scripts)
     scripts -- list of scripts that are executed (listed in scikick.yml)
     reasons -- list of 'Reason' outputs from Snakemake
@@ -274,7 +294,8 @@ def missing_outputs(reasons):
     return missing_outs
 
 def to_execute(jobs):
-    """Returns a list of files listed as 'Executing R chunks in'"""
+    """Returns a list of files listed as 'Executing R chunks in',
+    the ones that will be executed ond processed into md files"""
     exec_files = list()
     exec_pattern = f"^.*Executing R chunks in (.*), outputting to.*$"
     for job in jobs:
