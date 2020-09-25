@@ -3,6 +3,7 @@ import os
 import subprocess
 import re
 import sys
+from shutil import copyfile
 
 # getting the dir of the 'scikick' executable (i.e. this file)
 def get_sk_exe_dir():
@@ -12,7 +13,18 @@ def get_sk_exe_dir():
 # getting the main snakefile for passing to snakemake
 def get_sk_snakefile():
     """Returns the path to the scikick's Snakefile"""
-    return os.path.join(get_sk_exe_dir(), 'usr', 'Snakefile')
+    return os.path.join(get_sk_exe_dir(), 'scripts', 'Snakefile')
+
+def pop_snakefile():
+    """ Get the scikick snakefile for debugging. 
+    Currently intended for scikick developers only.
+    """
+    destfile = os.getcwd() + '/Snakefile'
+    if os.path.isfile(destfile):
+        warn("sk: Snakefile already exists in the current directory, exitting")
+    else:
+        warn("sk: Copied scikick's main Snakefile to current directory")
+        copyfile(get_sk_snakefile(), destfile)
 
 def check_version_r(package, version):
     """Check check whether supplied R libraries are installed
@@ -28,7 +40,7 @@ def check_version_r(package, version):
         warn(f"sk: Warning: Version of {package} needs to be at least {version}")
 
 def check_package_r(packages):
-    """Check vhether Rscript is available,
+    """Check whether Rscript is available,
     then check whether supplied R libraries are installed
     packages -- list of libraries to be checked if installed
     """
