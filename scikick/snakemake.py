@@ -18,7 +18,7 @@ def match_print(line):
     quit_fromlines_match = re.match("Quitting from lines.*", line)
     # Error matches:
     snakemake_lock_match = re.match("Error: Directory cannot be locked.*", line)
-    missing_input_match = re.match("Missing input files for rule reportRendering.*", line)
+    missing_input_match = re.match("Missing input files for rule execute_code.*", line)
     if done_match is not None:
         warn("sk: Done, homepage is report/out_html/index.html")
     elif layout_match is not None:

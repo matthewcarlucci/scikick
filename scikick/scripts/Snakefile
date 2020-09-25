@@ -3,7 +3,7 @@
 ###########################################
 
 from scikick.config import read_deps, ScikickConfig, read_snakefile_arg
-from scikick.utils import warn, get_sk_exe_dir
+from scikick.utils import warn, get_sk_exe_dir, get_sk_snakefile
 import tempfile
 
 # capture the name of the log file
@@ -38,7 +38,7 @@ report_dir = skconfig.report_dir
 exe_dir=get_sk_exe_dir()
 script_dir = os.path.join(exe_dir, "scripts")
 template_dir = os.path.join(exe_dir, "template")
-snake_src = os.path.join(exe_dir, "usr", "Snakefile")
+snake_src = get_sk_snakefile()
 
 data_parent = "output"
 
@@ -71,16 +71,16 @@ index_rmd = rmd_dict["index"]
 ###########################################
 
 # Rules that should never require cluster execution
-localrules: siteYAML, pageRender, AWdone
+localrules: generate_site_files, generate_html, sk_done
 
-rule AWdone:
+rule sk_done:
 	input:
 		expand('{report_dir}/out_html/{report_step}.html',
 			report_step = list(rmd_dict.keys()), report_dir = report_dir)
 	message: "All rules from {snake_src} are complete"
 
-# TODO: specify this for rmd files only
-rule reportRendering:
+# Currently handles all code execution (Rmd and R to md) 
+rule execute_code:
 	input:
 		deps = lambda wildcards: rmd_deps[wildcards.report_step],
 		rmd = lambda wildcards: rmd_dict[wildcards.report_step]
@@ -97,14 +97,14 @@ rule reportRendering:
 	singularity: snakefile_args["singularity"]
 	threads: int(snakefile_args["threads"])
 	benchmark: snakefile_args["benchmark"] + "{report_step}" if snakefile_args["benchmark"] != "" else ""
+	# 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
 	shell: "Rscript %s {input.rmd} {output.md} {params.template_dir} \
 		{params.data_parent} {params.script_dir} {logger.logfile} \
 		{index_rmd}" \
-		% os.path.join(script_dir, "reportRendering.R")
-# 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
+		% os.path.join(script_dir, "execute_code.R")
 
 # Generate all _site.yml files
-rule siteYAML:
+rule generate_site_files:
 	input: yaml = "scikick.yml"
 	output:
 		main_yml = os.path.join(report_dir, "out_md", "_site.yml"),
@@ -113,7 +113,7 @@ rule siteYAML:
 	script: os.path.join(script_dir, 'yamlgen.py')
 
 # md => HTML via rmarkdown::render
-rule pageRender:
+rule generate_html:
 	input:
 		yaml = "{report_dir}/out_md/_site.yml",
 		md = "{report_dir}/out_md/{report_step}.md"
@@ -128,11 +128,11 @@ rule pageRender:
 				"out_md", "%s.md" % w.report_step))), "index.html")
 	conda: snakefile_args["conda"]
 	singularity: snakefile_args["singularity"]
+	# using 'shell:' instead of 'script:' for compatibility with renv
 	shell: "Rscript %s {input.md} {output} {params.template_dir} {params.index_html}" \
 		% os.path.join(script_dir, "render.R")
-# using 'shell:' instead of 'script:' for compatibility with renv
 
 user_snakefile = os.path.join(os.getcwd(), "Snakefile")
 if os.path.isfile(user_snakefile):
-	warn("sk: Using Snakefile found in working directory")
+	warn("sk: Including Snakefile found in project directory")
 	include: user_snakefile

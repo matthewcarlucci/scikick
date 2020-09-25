@@ -28,6 +28,7 @@ def snake_status(snakefile, workdir, verbose, rmd):
     snakefile -- string (path to the main snakefile)
     workdir -- string
     verbose -- bool
+    rmd -- string
     """
     # read the yaml
     yaml = yaml_in()
