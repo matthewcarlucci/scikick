@@ -40,7 +40,7 @@ def match_print(line):
         warn("sk: Error: Missing files. Run 'sk status' to see which")
 
 def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
-    verbose=False, dryrun=False, run_snakeargs=None, rmds=None):
+    verbose=False, dryrun=False, run_snakeargs=None, rmds=[]):
     """Run snakemake with specified arguments
     snakefile -- string (path to the main snakefile)
     workdir -- string
