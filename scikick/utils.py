@@ -45,7 +45,6 @@ def check_package_r(packages):
     packages -- list of libraries to be checked if installed
     """
     # check for R itself
-    warn("sk: Checking if Rscript is available")
     if subprocess.call("Rscript -e 'cat()'", \
         shell=True, stdout=open(os.devnull, "wb"), \
         stderr=open(os.devnull, "wb")) != 0:
@@ -57,7 +56,6 @@ def check_package_r(packages):
         shell=True, stdout=open(os.devnull, "wb"), \
         stderr=open(os.devnull, "wb"))
     for pkg in packages:
-        warn(f"sk: Checking if R library '{pkg}' is installed")
         if installed_x(pkg) != 0:
             warn(f"sk: Error: required R library '{pkg}' is not installed")
             all_installed = 0
@@ -74,7 +72,6 @@ def check_version_generic(min_ver, program, level="Warning"):
     program -- program to be called
     level -- string to be appended to 'sk: ' when printing warning messages
     """
-    warn(f"sk: Checking {program} version")
     prog_version_p = subprocess.Popen(f"{program} --version", shell=True, \
         stdout=subprocess.PIPE, stderr=open(os.devnull, "wb"))
     prog_version_p.wait()
@@ -98,6 +95,7 @@ def check_version_generic(min_ver, program, level="Warning"):
 
 def check_requirements():
     """Performs a check for necessary and optional applications/packages"""
+    warn("sk: Checking scikick software dependencies")
     # check for required package versions
     pandoc_ver_stat = check_version_generic((2, 0), "pandoc", "Error")
     r_ver_stat = check_package_r(["yaml", "knitr", "rmarkdown", "git2r"])
