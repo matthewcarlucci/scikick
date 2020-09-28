@@ -36,10 +36,11 @@ def init_yaml(usr_dir, project_dir):
     if copy_file(os.path.join(usr_dir, yaml_file), \
         os.path.join(project_dir, yaml_file)):
         warn("sk: Created analysis configuration file scikick.yml")
+        add_version_info()
     else:
         warn("sk: File scikick.yml already exists")
-    if add_version_info():
-        warn("sk: Added scikick version info to scikick.yml")
+        if add_version_info():
+            warn("sk: Added scikick version info to scikick.yml")
 
 def init_git(usr_dir):
     """Add certain entries to .gitignore"""
@@ -76,16 +77,19 @@ def init_readme():
 
 def init_dirs(project_dir):
     """Create default project directories"""
-    anything_created = False
     dirs_to_create = ['report', 'input', 'output', 'code']
+    made_dirs=[]
     for curr_dir in dirs_to_create:
         inproj_dir = os.path.join(project_dir, curr_dir)
         if not os.path.exists(inproj_dir):
             os.mkdir(inproj_dir)
-            warn("sk: Directory %s/ created" % curr_dir)
-            anything_created = True
-    if not anything_created:
+            made_dirs.append(curr_dir)
+    anything_created = len(made_dirs) > 0
+    if anything_created:
+        warn("sk: Created dir(s): %s" % ', '.join(made_dirs))
+    else:
         warn("sk: All default directories already exist")
+    
 
 def init(system_dir, args):
     """Initialize a new scikick project
@@ -149,11 +153,10 @@ def run_demo_stage1():
     print_demo("A demo project will be used to demonstrate some features of scikick.")
     print("")
     print_demo("----------  Starting a New Project  ----------")
-    print_demo("A new scikick project can be initialized by adding")
-    print_demo("the scikick.yml config (-y) and making some")
-    print_demo("useful directories (-d) with sk init.")
-    print_demo("useful directories (-d) with sk init. Some")
-    print_demo("key dependencies will be checked.")
+    print_demo("A new scikick project can be initialized with sk init which will:")
+    print_demo("check some software dependencies,")
+    print_demo("add the scikick.yml config file (-y),")
+    print_demo("and make some useful directories (-d).")
 
     print_exec("sk init -yd")
     # copy the files
@@ -166,8 +169,8 @@ def run_demo_stage1():
 
 def run_demo_stage2():
     print_demo("----------  Adding Some Notebooks  -----------")
-    print_demo("Notebooks can be added to the project with sk add.")
-    print_demo("-d is used to specify which notebooks must run")
+    print_demo("Documents can be added to the project with sk add.")
+    print_demo("-d is used to specify which documents must run")
     print_demo("before or are used by the added notebook. ")
 
     print_exec("sk add code/index.Rmd")
