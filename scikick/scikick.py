@@ -21,7 +21,7 @@ from scikick.yaml import yaml_in, yaml_dump, yaml_check
 from scikick.move import sk_move_check, sk_move_extras
 from scikick.move import sk_move_prepare_src_dest
 
-def run(args):
+def sk_run(args):
     """Run the workflow"""
     # check for empty analysis:
     ymli = yaml_in()
@@ -50,12 +50,12 @@ def run(args):
                   rmds=args.rmds)
 
 
-def init_loc(args):
+def sk_init(args):
     """Initialize scikick project"""
     if not (args.git or args.dirs or args.yaml or args.readme or args.demo):
         args.yaml = True
         warn("sk: No arguments supplied, defaulting to sk init -y")
-        init(get_sk_exe_dir(), args)
+        init(args)
         warn("sk: See the below arguments for other " + \
              "possible sk init components")
         parser_init.print_help()
@@ -64,20 +64,20 @@ def init_loc(args):
         warn("sk: Then, to execute the workflow")
         warn("sk: sk run")
     else:
-        init(get_sk_exe_dir(), args)
+        init(args)
 
 
-def add(args):
+def sk_add(args):
     """Add Rmds to scikick.yml"""
     scikick.yaml.add(args.rmd, args.deps, args.force, args.copy_deps)
 
 
-def delete(args):
+def sk_del(args):
     """Remove Rmds from scikick.yml"""
     scikick.yaml.rm(args.rmd, args.deps)
 
 
-def mv(args):
+def sk_mv(args):
     """Rename an Rmd in scikick.yml and associated files"""
     config = yaml_in()
     if config["analysis"] is None:
@@ -115,7 +115,7 @@ def mv(args):
             shutil.move(s, dest[0])
     sk_move_extras(mv_dict)
 
-def status(args):
+def sk_status(args):
     """Get status of the current workflow"""
     snake_status(snakefile=get_sk_snakefile(), \
                  workdir=os.getcwd(), \
@@ -123,7 +123,7 @@ def status(args):
                  rmd=args.rmd)
 
 
-def layout(args):
+def sk_layout(args):
     """Manipulate the tab order in resulting htmls by changing
     the order of keys of 'analysis' dict in scikick.yml.
     """
@@ -139,7 +139,7 @@ def layout(args):
     else:
         rearrange_tabs(args.order, config, tabs)
 
-def snake_config(args):
+def sk_config(args):
     possible_args = ["singularity", "conda", "threads", "benchmark"]
     const_vals = ["SING_GET", "CONDA_GET", 999999, "BENCH_GET"]
     # if none of the args is supplied, print them all
@@ -176,6 +176,7 @@ parser.add_argument("-v", "--version", action="version", \
 
 subparsers = parser.add_subparsers(help="")
 
+# run
 parser_run = subparsers.add_parser("run", help="Run pending tasks using snakemake",
                                    description="Run snakemake to execute the workflow specified in scikick.yml")
 parser_run.add_argument("rmds", type=str, nargs="*", \
@@ -185,12 +186,12 @@ parser_run.add_argument("-d", "--dryrun", action="store_true", \
                         help="Show snakemake's planned execution (wrapper for snakemake -n)")
 parser_run.add_argument("-s", "--snakeargs", nargs=argparse.REMAINDER, \
                         help="Pass all trailing arguments to snakemake")
-parser_run.set_defaults(func=run, which="run")
+parser_run.set_defaults(func=sk_run, which="run")
 
-
+# init
 parser_init = subparsers.add_parser("init", \
                                     help="Initialize a new scikick project in the current directory",
-                                    description="Initialize a new scikick project in the current directory by creating template files, such as a template workflow configuration file scikick.yml (--yaml), base directories (--dirs), .gitignore with specific directories included (--git), or get a markdown indicator that the current project is using scikick (--readme)")
+                                    description="Initialize a new scikick project in the current directory by importing a minimal scikick.yml file. Optionally, import useful template content or import the demo project with a short walkthrough of the main scikick commands.")
 parser_init.add_argument("--yaml", "-y", action="store_true", \
                          help="Add a minimal scikick.yml config file to the current directory")
 parser_init.add_argument("--dirs", "-d", action="store_true", \
@@ -201,8 +202,9 @@ parser_init.add_argument("--readme", action="store_true", \
                          help="Print a message to stdout for a README.md file to clearly indicate scikick is in use for the project")
 parser_init.add_argument("--demo", action="store_true", \
                          help="Create and run a demo project demonstrating scikick usage")
-parser_init.set_defaults(func=init_loc, which="init")
+parser_init.set_defaults(func=sk_init, which="init")
 
+# add
 parser_add = subparsers.add_parser("add", \
                                    help="Add scripts and their dependencies to the workflow",
                                    description="Add scripts and their dependencies to the current project's configuration file (scikick.yml). Multiple dependencies can be added to the same script and the same dependency list can be added to multiple scripts")
@@ -216,8 +218,9 @@ parser_add.add_argument("--copy-deps", \
                         help="File from which to copy the dependency list")
 parser_add.add_argument("--force", action="store_true", \
                          help="Force addition of a script(s)")
-parser_add.set_defaults(func=add, which="add")
+parser_add.set_defaults(func=sk_add, which="add")
 
+# del
 parser_del = subparsers.add_parser("del", \
                                    help="Remove scripts and their dependencies from the workflow",
                                    description="Remove scripts and their dependencies from the current project's configuration file (scikick.yml). If only scripts are specified, they will be removed with their dependencies. If the '-d' flag is used, only dependencies are removed from the scripts.")
@@ -226,8 +229,9 @@ parser_del.add_argument("rmd", nargs="+", \
 parser_del.add_argument("-d", "--deps", \
                         nargs="+", \
                         help="Dependencies to be removed from the script(s)")
-parser_del.set_defaults(func=delete, which="del")
+parser_del.set_defaults(func=sk_del, which="del")
 
+# mv
 parser_mv = subparsers.add_parser("mv", \
                                   help="Move scripts and change project structure accordingly",
                                   description="Perform a basic mv operation while adjusting scikick.yml paths and moving corresponding files (markdown, knitmeta.RDS and output figures) to avoid re-execution")
@@ -239,8 +243,9 @@ parser_mv.add_argument("-g", "--git", action="store_true", \
                        help="Use git mv instead of basic mv to track with git")
 parser_mv.add_argument("-v", "--verbose", action="store_true", \
                        help="Show all moves taking place (mainly for debugging)")
-parser_mv.set_defaults(func=mv, which="mv")
+parser_mv.set_defaults(func=sk_mv, which="mv")
 
+# status
 parser_status = subparsers.add_parser("status", \
                                       help="Show scripts with pending execution", \
                                       description="Show which scripts will be executed and provide a reason for execution with a 3 character code. Codes indicate the following: \n(s--) Script is older than the latest report\n(m--) Script's output report is missing\n(-e-) Upstream script must execute before the script\n(-u-) Upstream script's output is newer than the script's output\n(--i) Imported file is newer than the script's output\n(---) No script execution needed, only the site rendering\n(???) File is not found", formatter_class=argparse.RawTextHelpFormatter)
@@ -248,8 +253,9 @@ parser_status.add_argument("rmd", type=str, nargs="?", \
                            help="Show status of the script and everything it depends on (optional)")
 parser_status.add_argument("-v", "--verbose", action="store_true", \
                            help="Show the workflow config for all scripts")
-parser_status.set_defaults(func=status, which="status")
+parser_status.set_defaults(func=sk_status, which="status")
 
+# layout
 parser_layout = subparsers.add_parser("layout", \
                                       help="Manage the website navigation bar layout",
                                       description="Modify the order of tabs and items within the tabs in the navigation bar of the generated website")
@@ -258,8 +264,9 @@ parser_layout.add_argument("order", nargs="*", type=int, \
 parser_layout.add_argument("-s", "--submenu", \
                            nargs=1, \
                            help="Define the layout within a menu/subdirectory")
-parser_layout.set_defaults(func=layout, which="layout")
+parser_layout.set_defaults(func=sk_layout, which="layout")
 
+# config
 parser_snake_config = subparsers.add_parser("config", \
                                       help="Set or get global snakemake directives for scikick",
                                       description="Set or get global snakemake directives for scikick")
@@ -272,7 +279,7 @@ parser_snake_config.add_argument("--threads", nargs="?", type=int, \
                        help="Set number of threads for conversion to md (i.e. for script execution)")
 parser_snake_config.add_argument("--benchmark", nargs="?", type=str, \
                        const="BENCH_GET", help="Set benchmark output prefix")
-parser_snake_config.set_defaults(func=snake_config, which="config")
+parser_snake_config.set_defaults(func=sk_config, which="config")
 
 def main():
     """Parse the arguments and run the according function"""

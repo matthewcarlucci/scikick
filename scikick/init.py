@@ -29,8 +29,10 @@ def copy_file(src, dest):
     shutil.copy2(src, dest)
     return 1
 
-def init_yaml(usr_dir, project_dir):
+def init_yaml():
     """Create an initial scikick.yml config file"""
+    usr_dir = os.path.join(get_sk_exe_dir(), 'usr')
+    project_dir = os.getcwd()
     yaml_file = "scikick.yml"
     check_requirements()
     if copy_file(os.path.join(usr_dir, yaml_file), \
@@ -42,8 +44,9 @@ def init_yaml(usr_dir, project_dir):
         if add_version_info():
             warn("sk: Added scikick version info to scikick.yml")
 
-def init_git(usr_dir):
+def init_git():
     """Add certain entries to .gitignore"""
+    usr_dir = os.path.join(get_sk_exe_dir(), 'usr')
     gitignore = ".gitignore"
     anything_appended = False
     if copy_file(os.path.join(usr_dir, gitignore), \
@@ -75,8 +78,9 @@ def init_readme():
     print("scikick executes all scripts by running the command:\n\t`sk run`")
     print("On completion, there will be a directory with a website of results.")
 
-def init_dirs(project_dir):
+def init_dirs():
     """Create default project directories"""
+    project_dir = os.getcwd()
     dirs_to_create = ['report', 'input', 'output', 'code']
     made_dirs=[]
     for curr_dir in dirs_to_create:
@@ -91,22 +95,15 @@ def init_dirs(project_dir):
         warn("sk: All default directories already exist")
     
 
-def init(system_dir, args):
-    """Initialize a new scikick project
-    system_dir -- string (directory of scikick system files)
-    args -- argument list
-    """
-    project_dir = os.getcwd()
-    # system directories
-    usr_dir = os.path.join(system_dir, 'usr')
-    # files to be copied
-    # optional copies
+def init(args):
+    """Initialize a new scikick project"""
+    # optional procedures
     if args.yaml:
-        init_yaml(usr_dir, project_dir)
+        init_yaml()
     if args.dirs:
-        init_dirs(project_dir)
+        init_dirs()
     if args.git:
-        init_git(usr_dir)
+        init_git()
     if args.readme:
         init_readme()
     if args.demo:
