@@ -5,7 +5,7 @@ import subprocess
 import sys
 from scikick.utils import warn, get_sk_snakefile, get_sk_exe_dir
 from scikick.yaml import yaml_in, get_indexes
-
+import scikick.yaml
 
 def match_print(line):
     """Print the line if it matches certain patterns"""
@@ -47,6 +47,7 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     verbose -- bool
     dryrun -- bool
     run_snakeargs -- list (list of additional arguments to snakemake)
+    rmds -- string rmd who's output should be targetted
     """
     exe_dir = get_sk_exe_dir()
     yml = yaml_in()
@@ -61,19 +62,34 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     snakemake_args += " --cores 1"
     # add rmds listed
     target_arg = ""
-    index_rmds = get_indexes(yml)
     if len(rmds) > 0:
         for rmd in rmds:
-            if rmd in yml["analysis"].keys():
-                # if the rmd is the index
-                if (len(index_rmds) == 1) and (index_rmds[0] == rmd):
-                    target_arg += " " + os.path.join(yml["reportdir"], \
-                        "out_html", "index.html")
-                else:
-                    target_arg += " " + os.path.join(yml["reportdir"], \
-                        "out_html", os.path.splitext(rmd)[0] + ".html")
+
+            # Try to add rmd if it is not in scikick.yml
+            if yml['analysis'] is None:
+                rmd_found = False
+            elif rmd not in yml["analysis"].keys():
+                rmd_found = False
             else:
-                warn(f"sk: Warning: {rmd} is not to be executed in scikick.yml")
+                rmd_found = True
+            if not rmd_found:
+                warn(f"sk: Warning: {rmd} was not found in scikick.yml")
+                if os.path.exists(rmd):
+                    scikick.yaml.add([rmd])
+                    yml = yaml_in() # Must reload the yml since it changed
+                else:
+                    warn(f"sk: Warning: Will not try to add non-existing file {rmd}")
+                    return
+
+            # Set target. Index file is treated differently
+            index_rmds = get_indexes(yml)
+            if (len(index_rmds) == 1) and (index_rmds[0] == rmd):
+                target_arg += " " + os.path.join(yml["reportdir"], \
+                    "out_html", "index.html")
+            else:
+                target_arg += " " + os.path.join(yml["reportdir"], \
+                    "out_html", os.path.splitext(rmd)[0] + ".html")
+                
     # config
     if dryrun:
         snakemake_args += " --dry-run"
@@ -85,12 +101,12 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     # add the targets
     snakemake_args += f" {target_arg}"
     if verbose:
+        warn("sk: Starting snakemake")
         sys.exit(subprocess.call(f"{env_vars} snakemake {snakemake_args}",
             shell=True))
     else:
         snake_p = subprocess.Popen(f"snakemake {snakemake_args}", \
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        warn("sk: Starting snakemake")
         lines = list()
         while True:
             line = snake_p.stderr.readline().decode('utf-8')

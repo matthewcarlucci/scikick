@@ -27,8 +27,9 @@ def sk_run(args):
     ymli = yaml_in()
     analysis = ymli["analysis"]
     if (analysis is None) or (len(analysis) == 0):
-        reterr("sk: Error: no pages have been added to scikick.yml, " + \
-            "this can be done with\nsk: sk add my.rmd")
+        if args.rmds is None:
+            reterr("sk: Error: no pages have been added to scikick.yml, " + \
+                "this can be done with\nsk: sk add my.rmd")
 
     reportdir = ymli["reportdir"]
     if (reportdir is None) or (reportdir == ""):
