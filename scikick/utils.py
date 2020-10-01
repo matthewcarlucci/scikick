@@ -12,8 +12,19 @@ def get_sk_exe_dir():
 
 # getting the main snakefile for passing to snakemake
 def get_sk_snakefile():
-    """Returns the path to the scikick's Snakefile"""
+    """Returns the path to scikick's Snakefile"""
     return os.path.join(get_sk_exe_dir(), 'scripts', 'Snakefile')
+
+
+def skdir():
+    """Attempts to find the root directory of a scikick project"""
+    curr_dir = os.getcwd()
+    while os.path.normpath(curr_dir) != "/":
+        if "scikick.yml" in os.listdir(curr_dir):
+            return os.path.normpath(curr_dir)
+        curr_dir = os.path.join(curr_dir, "..")
+    return None
+
 
 def pop_snakefile():
     """ Get the scikick snakefile for debugging. 
@@ -140,11 +151,4 @@ def warn(msg):
     """Print msg to stderr"""
     sys.stderr.write("%s\n" % msg)
 
-def skdir():
-    """Returns the root directory of a scikick project"""
-    curr_dir = os.getcwd()
-    while os.path.normpath(curr_dir) != "/":
-        if "scikick.yml" in os.listdir(curr_dir):
-            return os.path.normpath(curr_dir)
-        curr_dir = os.path.join(curr_dir, "..")
-    return None
+

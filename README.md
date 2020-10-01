@@ -5,7 +5,7 @@
 ![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.6.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
 
-### Preface: simple workflow definitions for complex notebooks
+### Preface: simple workflow definitions for complex notebooks in R or Python
 
 A thorough data analysis in 
 [Rmarkdown](https://rmarkdown.rstudio.com/) or [Jupyter](https://jupyter.org/) 

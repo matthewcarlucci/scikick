@@ -59,8 +59,9 @@ index_list = list(filter(lambda f: os.path.basename(f) == "index", \
 	rmd_dict.keys()))
 #if 'index' not in rmd_dict.keys():
 if len(index_list) != 1:
-	warn("sk: Include an index.Rmd to add content " +\
-		"to the required index.html page")
+	# Verbose mode only?
+	#warn("sk: Include an index.Rmd to add content " +\
+	#	"to the required index.html page")
 	rmd_dict['index'] = rmd_deps['index'] = sys_index
 else:
 	rmd_dict['index'] = rmd_dict.pop(os.path.splitext(index_list[0])[0], None)

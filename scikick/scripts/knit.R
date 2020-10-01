@@ -1,4 +1,7 @@
-# loading snakefile variables
+# Use from commandline for Rmd to md execution
+# Called from scikick's Snakefile using shell
+
+# Loading snakefile variables
 args = commandArgs(trailingOnly=TRUE)
 input = args[1]
 output = args[2]
@@ -11,7 +14,15 @@ reportname = gsub("\\.Rmd$", "", basename(input),ignore.case=TRUE)
 outdatadir = paste0(file.path(dataparent, reportname), "/")
 source(file.path(templatedir, "outputLook.R"))
 source(file.path(templatedir, "functions.R"))
+
+# Setting all default knitr chunk options
 knitr::opts_chunk$set(optionsRender$knitr$opts_chunk)
+
+# to prevent interactive plots from being turned into PNGs
+knitr::opts_chunk$set(screenshot.force = FALSE)
+knitr::opts_chunk$set(fig.path = outdatadir)
+knitr::opts_chunk$set(cache.path = paste0(outdatadir, "/cache/"))
+
 rmd <- readLines(input)
 if(input == index_rmd){
     index <- readLines(file.path(templatedir, "index.Rmd"))
@@ -21,21 +32,21 @@ if(input == index_rmd){
         rmd <- c(rmd, index)
     }
 } else {
+    # Append footer (analysis metadata)
     footer <- readLines(file.path(templatedir, "footer.Rmd"))
     rmd <- c(rmd, footer)
 }
 
 knitr::opts_knit$set(root.dir = "./")
 knitr::opts_knit$set(base.dir = dirname(output))
-# to prevent interactive plots from being turned into PNGs
-knitr::opts_chunk$set(screenshot.force = FALSE)
-knitr::opts_chunk$set(fig.path = outdatadir)
-knitr::opts_chunk$set(cache.path = paste0(outdatadir, "/cache/"))
+
 # used for reporting calculation start time in the report
 .scikick = new.env()
 .scikick$starttime = Sys.time()
+
 # execute the Rmd
 knitr::knit(textConnection(rmd), output, quiet=TRUE)
+
 # save the knitmeta
 knitmeta_obj = knitr::knit_meta(clean = FALSE)
 knitmeta_file = sub(output, pattern = ".md$", replacement = ".knitmeta.RDS")

@@ -158,11 +158,12 @@ def add_check(fname, ymli, force):
                     "sk: Warning: Neither of the added index files will be used as a homepage")
     return True
 
-def add(files, deps, force, copy_deps):
+def add(files, deps=None, force=False, copy_deps=None):
     """ Add files and dependencies to them
     files -- page file list
     deps -- dependency file list
     force -- bool whether to add additional index files
+    copy_deps -- file to copy dependencies from
     """
     if deps is None:
         deps = list()
