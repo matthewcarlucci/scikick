@@ -33,7 +33,6 @@ optionsRender$rmarkdown$pandoc$args =
 	c(optionsRender$rmarkdown$pandoc$args,
 		paste0("--metadata=pagetitle:",
         	sub("\\.md$", "", basename(input))))
-
 # generate the html file
 suppressWarnings(suppressMessages({
 rmarkdown::render(input,
@@ -43,7 +42,6 @@ rmarkdown::render(input,
 		sub(x=basename(input), pattern=".md$", replacement=".html")),
 	quiet = TRUE, knit_meta = knitmeta)
 }))
-
 html_outfile = sub(pattern = ".md$", replacement = ".html",
 	file.path(outdir, basename(input)))
 html_text = readLines(html_outfile)

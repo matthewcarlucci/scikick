@@ -1,7 +1,14 @@
-<div class="container">
-  <button type="button" class="btn btn-default btn-sm btn-block" data-toggle="collapse" data-target="#METAbutton">Analysis Metadata</button>
-  <div id="METAbutton" class="collapse">
 
+
+<!-- Use HTML for horizontal lines instead of markdown (---) so
+that rmarkdown render does not treat the markdown
+as a YAML header -->
+
+<hr></hr>
+
+<details> <summary> Click to see analysis metadata </summary>
+
+<div>
 
 ```{r, include = TRUE, echo = FALSE}
 
@@ -21,14 +28,17 @@ cat(sprintf("Finished in %s %s",
     units(timediff)))
 ```
 
----
+<hr></hr>
+
 
 ### Git Log ###
 
 ```{r, include=TRUE, echo=FALSE}
-gitlog = scikick_get_gitlog(original_input)
-rm("scikick_get_gitlog")
+gitlog = .scikick_get_gitlog(original_input)
 
+no_git_history = identical(gitlog$summary,"no git history")
+
+if(!no_git_history){
 # trim if subject line is too long to fit on screen
 gitlog$summary <- sapply(gitlog$summary, function(s){
     if(nchar(s) > 80){
@@ -36,7 +46,10 @@ gitlog$summary <- sapply(gitlog$summary, function(s){
     return(s)
 })
 knitr::kable(gitlog, "markdown", align = rep("l", 4))
+}
 ```
+
+`r if(no_git_history) "No git history available"`
 
 ---
 
@@ -86,6 +99,5 @@ knitr::kable(systemInfo, "markdown", align = "l")
 
 ---
 
-  </div>
 </div>
-
+</details>

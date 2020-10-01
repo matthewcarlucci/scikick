@@ -1,4 +1,4 @@
-scikick_get_gitlog = function(input=NULL){
+.scikick_get_gitlog = function(input=NULL){
 
     default_gitlog = data.frame(author="user", summary="no git history",
         date=Sys.Date(), sha="00000000", stringsAsFactors=FALSE)

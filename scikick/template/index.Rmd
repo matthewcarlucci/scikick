@@ -2,8 +2,8 @@
 ### Git History ###
 
 ```{r, include=TRUE, echo=FALSE}
-gitlog = scikick_get_gitlog()
-rm("scikick_get_gitlog")
+gitlog = .scikick_get_gitlog()
+rm(".scikick_get_gitlog")
 ```
 
 ### List of Contributors ###  
