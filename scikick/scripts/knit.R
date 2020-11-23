@@ -12,16 +12,44 @@ original_input = args[6]
 reportfile = input
 reportname = gsub("\\.Rmd$", "", basename(input),ignore.case=TRUE)
 outdatadir = paste0(file.path(dataparent, reportname), "/")
-source(file.path(templatedir, "outputLook.R"))
+
+# Helper functions
 source(file.path(templatedir, "functions.R"))
 
-# Setting all default knitr chunk options
-knitr::opts_chunk$set(optionsRender$knitr$opts_chunk)
+# Set scikick's default knitr methods
+knitr::opts_chunk$set(list(
+    #################
+    # Visuals
+    #################
+    dpi = 100,
+    fig.width = 10,
+    fig.height = 10,
+    fig.retina = 2,
+    fig.pos = "center",
+    #################
+    # Code reporting
+    #################
+    echo = TRUE, # Need true to work with render step HTMLlook$code_folding
+    error = FALSE,
+    comment = NULL,
+    message = FALSE,
+    results = TRUE,
+    warning = FALSE,
+    ################
+    # Execution behaviour
+    ###############
+    # prevent interactive plots from being turned into PNGs
+    screenshot.force = FALSE,
+    fig.path = outdatadir,
+    cache.path = paste0(outdatadir, "/cache/")
+))
+options(width=105) # wider display of prints than default
 
-# to prevent interactive plots from being turned into PNGs
-knitr::opts_chunk$set(screenshot.force = FALSE)
-knitr::opts_chunk$set(fig.path = outdatadir)
-knitr::opts_chunk$set(cache.path = paste0(outdatadir, "/cache/"))
+# package options
+knitr::opts_knit$set(list(
+    root.dir = "./",
+    base.dir = dirname(output)
+))
 
 rmd <- readLines(input)
 if(input == index_rmd){
@@ -37,14 +65,12 @@ if(input == index_rmd){
     rmd <- c(rmd, footer)
 }
 
-knitr::opts_knit$set(root.dir = "./")
-knitr::opts_knit$set(base.dir = dirname(output))
-
 # used for reporting calculation start time in the report
 .scikick = new.env()
 .scikick$starttime = Sys.time()
 
 # execute the Rmd
+# needs to be knitr::knit since render does not accept textConnection
 knitr::knit(textConnection(rmd), output, quiet=TRUE)
 
 # save the knitmeta

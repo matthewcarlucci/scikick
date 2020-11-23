@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 # Called from scikick's Snakefile
 # Executes R or Rmd code
+# All stderr is output during snakemake execution
 
 args = commandArgs(trailingOnly=TRUE)
 
@@ -24,9 +25,11 @@ write(message, stderr())
 
 # system call with error reporting 
 run_system = function(cmd){
+    # write stderr to temp file
     tmpf = tempfile()
     retcode = system(paste(cmd, "2>", tmpf), intern=FALSE,
         ignore.stdout=TRUE, ignore.stderr=FALSE)
+    # If there is an error, append
     for(line in readLines(tmpf)){
         msg = line
         if(retcode != 0){

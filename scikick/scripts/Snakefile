@@ -2,7 +2,7 @@
 # Imports
 ###########################################
 
-from scikick.config import read_deps, ScikickConfig, read_snakefile_arg
+from scikick.config import ScikickConfig, read_snakefile_arg
 from scikick.utils import warn, get_sk_exe_dir, get_sk_snakefile
 import tempfile
 
@@ -45,7 +45,8 @@ data_parent = "output"
 inner_ymls = [os.path.join(report_dir, "out_md", dir, "_site.yml")
 	for dir in set([os.path.dirname(a) for a in analysis.keys()])]
 ###########################################
-# Dependencies
+# Converting scikick config to I/O deps
+# for the snakemake rules
 ###########################################
 rmd_dict = {}
 for key in analysis:
@@ -53,11 +54,12 @@ for key in analysis:
 
 rmd_deps = skconfig.inferred_deps
 
-# add index if doesn't exist
+# add a template index to the workflow if index doesn't exist
 sys_index = os.path.join(template_dir, 'index.Rmd')
 index_list = list(filter(lambda f: os.path.basename(f) == "index", \
 	rmd_dict.keys()))
-#if 'index' not in rmd_dict.keys():
+
+# Use the template as homepage if there are multiple or no index files
 if len(index_list) != 1:
 	# Verbose mode only?
 	#warn("sk: Include an index.Rmd to add content " +\
@@ -67,6 +69,7 @@ else:
 	rmd_dict['index'] = rmd_dict.pop(os.path.splitext(index_list[0])[0], None)
 	rmd_deps['index'] = rmd_deps.pop(os.path.splitext(index_list[0])[0], None)
 index_rmd = rmd_dict["index"]
+
 ###########################################
 # Workflow rules
 ###########################################

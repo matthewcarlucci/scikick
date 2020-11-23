@@ -1,4 +1,4 @@
-"""General scikick.yml functions"""
+"""General scikick.yml modifier functions"""
 import os
 import re
 from ruamel.yaml.compat import ordereddict
@@ -14,7 +14,7 @@ class ScikickConfig:
 
     def read(self):
         """Read scikick.yml"""
-        self.config = yaml_in()
+        self.config = yaml_in(self.filename)
 
     def __init__(self, filename=None):
         if filename is None:
@@ -56,28 +56,6 @@ class ScikickConfig:
                     else:
                         deps[rmd_name].append(dep)
         return deps
-
-
-def read_deps(analysis, report_dir):
-    """Return dictionary of {Rmd -> [dependencies], ...}
-    analysis -- 'analysis' dictionary from scikick.yml
-    report_dir -- 'reportdir' field in scikick.yml
-    """
-    deps = {}
-    for rmd in analysis.keys():
-        rmd_name = os.path.splitext(rmd)[0]
-        deps[rmd_name] = []
-        deps[rmd_name].append(rmd)
-        if isinstance(analysis[rmd], list):
-            for dep in analysis[rmd]:
-                if os.path.splitext(dep)[-1].lower() == ".rmd":
-                    out_md_file = os.path.join(report_dir, "out_md", \
-                                               re.sub('.rmd$', ".md", dep, \
-                                                      flags=re.IGNORECASE))
-                    deps[rmd_name].append(out_md_file)
-                else:
-                    deps[rmd_name].append(dep)
-    return deps
 
 def get_tabs(config):
     """Return a list of tab names determined from scikick.yml

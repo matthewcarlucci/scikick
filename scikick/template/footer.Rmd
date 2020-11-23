@@ -6,7 +6,7 @@ as a YAML header -->
 
 <hr></hr>
 
-<details> <summary> Click to see analysis metadata </summary>
+<details> <summary> Click to see page metadata </summary>
 
 <div>
 

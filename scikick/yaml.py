@@ -36,7 +36,7 @@ def rm_commdir(text, commpath):
     return text
 
 def yaml_dump(ymli):
-    """Write a dictionary to scikick.yml.
+    """(Over)write a dictionary to scikick.yml.
     ymli -- dict
     """
     ymlo = yaml.YAML()
@@ -54,9 +54,11 @@ def yaml_in(ymlpath='scikick.yml'):
     ymli = yaml.YAML()
     ymli = ymli.load(open(ymlpath, "r"))
     if ymli is None:
+        warn("sk: Warning: scikick.yml is empty")
         ymli = dict()
     # make sure that mandatory fields are present
     if "analysis" not in ymli.keys():
+        warn("sk: Warning: config is missing analysis") 
         ymli["analysis"] = dict()
     if "reportdir" not in ymli.keys():
         ymli["reportdir"] = ""
@@ -228,7 +230,7 @@ def rm(files, deps):
         deps = list()
     ymli = yaml_in()
     if ymli['analysis'] is None:
-        warn("sk: Warning: Nothing to remove")
+        warn("sk: Warning: There are no files in the scikick config")
         return
     for fname in files:
         # check if rmd included
