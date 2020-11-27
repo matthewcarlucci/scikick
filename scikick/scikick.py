@@ -46,7 +46,7 @@ def sk_run(args):
                   dryrun=args.dryrun, \
                   run_snakeargs=run_snakeargs, \
                   verbose=args.verbose, \
-                  rmds=args.rmds)
+                  rmds=args.script)
 
 
 def sk_init(args):
@@ -116,7 +116,7 @@ def sk_status(args):
     snake_status(snakefile=get_sk_snakefile(), \
                  workdir=os.getcwd(), \
                  verbose=args.verbose, \
-                 rmd=args.rmd)
+                 rmd=args.script)
 
 
 def sk_layout(args):
@@ -175,8 +175,8 @@ subparsers = parser.add_subparsers(help="")
 # run
 parser_run = subparsers.add_parser("run", help="Run pending tasks using snakemake",
                                    description="Run snakemake to execute the workflow specified in scikick.yml")
-parser_run.add_argument("rmds", type=str, nargs="*", \
-                        help="Generate htmls only for the listed rmds (optional)")
+parser_run.add_argument("script", type=str, nargs="*", \
+                        help="Generate htmls only for the listed script (optional)")
 parser_run.add_argument("-v", "--verbose", action="store_true")
 parser_run.add_argument("-d", "--dryrun", action="store_true", \
                         help="Show snakemake's planned execution (wrapper for snakemake -n)")
@@ -245,7 +245,7 @@ parser_mv.set_defaults(func=sk_mv, which="mv")
 parser_status = subparsers.add_parser("status", \
                                       help="Show scripts with pending execution", \
                                       description="Show which scripts will be executed and provide a reason for execution with a 3 character code. Codes indicate the following: \n(s--) Script is older than the latest report\n(m--) Script's output report is missing\n(-e-) Upstream script must execute before the script\n(-u-) Upstream script's output is newer than the script's output\n(--i) Imported file is newer than the script's output\n(---) No script execution needed, only the site rendering\n(???) File is not found", formatter_class=argparse.RawTextHelpFormatter)
-parser_status.add_argument("rmd", type=str, nargs="?", \
+parser_status.add_argument("script", type=str, nargs="?", \
                            help="Show status of the script and everything it depends on (optional)")
 parser_status.add_argument("-v", "--verbose", action="store_true", \
                            help="Show the workflow config for all scripts")

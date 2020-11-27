@@ -10,7 +10,7 @@ report
 *RDS
 
 .idea
-
+.vscode
 *.pyc
 *.html
 *.simg
