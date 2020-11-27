@@ -172,7 +172,7 @@ def run_demo_stage2():
 
     print_exec("sk add code/index.Rmd")
     print_exec("sk add code/generate.Rmd")
-    print_exec("sk add code/pca.Rmd -d code/generate.Rmd code/analysis_config.txt")
+    print_exec("sk add code/pca.Rmd -d code/generate.Rmd -d code/analysis_config.txt")
     print_exec("sk add code/pc_score_statistics.Rmd -d code/pca.Rmd")
 
     print_demo("Run sk init --demo again to continue.")
