@@ -73,7 +73,7 @@ def sk_add(args):
 
 def sk_del(args):
     """Remove Rmds from scikick.yml"""
-    scikick.yaml.rm(args.rmd, args.deps)
+    scikick.yaml.rm(args.script, args.dependency)
 
 
 def sk_mv(args):
@@ -218,13 +218,13 @@ parser_add.set_defaults(func=sk_add, which="add")
 
 # del
 parser_del = subparsers.add_parser("del", \
-                                   help="Remove scripts and their dependencies from the workflow",
-                                   description="Remove scripts and their dependencies from the current project's configuration file (scikick.yml). If only scripts are specified, they will be removed with their dependencies. If the '-d' flag is used, only dependencies are removed from the scripts.")
-parser_del.add_argument("rmd", nargs="+", \
-                        help="Remove scripts and/or their dependencies to the workflow")
-parser_del.add_argument("-d", "--deps", \
-                        nargs="+", \
-                        help="Dependencies to be removed from the script(s)")
+                                   help="Remove scripts and/or their dependencies from the workflow configuration",
+                                   description="Remove scripts and their dependencies from the project configuration file (scikick.yml). If no '-d' is provided, the provided script(s) entry will be removed entirely from the configuration file. If the '-d' flag is used, only these dependencies are removed and only from the provided scripts.")
+parser_del.add_argument("script", nargs="+", \
+                        help="Script(s) entry to modify")
+parser_del.add_argument("-d", "--dependency", \
+                        action='append', \
+                        help="Remove this dependency from the script(s) entry (can be used multiple times)")
 parser_del.set_defaults(func=sk_del, which="del")
 
 # mv

@@ -263,24 +263,27 @@ def rm(files, deps):
         if fname not in ymli['analysis'].keys():
             warn(f"sk: Warning: File {fname} not included")
             continue
-        # del page files if no dependencies spedified
+        # delete script entry if no dependencies specified
         if len(deps) == 0:
-            if fname in ymli['analysis'].keys():
-                del ymli['analysis'][fname]
-                warn(f"sk: {fname} removed")
+            del ymli['analysis'][fname]
+            warn(f"sk: {fname} removed")
+            # Check if fname was a dependency for other scripts
+            for val in ymli['analysis'].values():
+                if val is not None:
+                    if fname in val:
+                        warn(f"sk: Warning: {fname} is still a dependency of other scripts")
+                        warn(f"sk:   Use sk del -d {fname} <script> to change this")  
         # delete only deps if deps specified
         else:
             if ymli['analysis'][fname] is None:
                 warn(f"sk: Warning: File {fname} has no dependencies")
                 continue
             for dep in deps:
-                if ymli['analysis'][fname] is None:
-                    break
                 if dep in ymli['analysis'][fname]:
                     ymli['analysis'][fname].remove(dep)
-                    warn(f"sk: {dep} removed from {fname}")
+                    warn(f"sk: dependency {dep} removed from {fname}")
                 else:
-                    warn(f"sk: {dep} is not in {fname}")
+                    warn(f"sk: no dependency {dep} found for {fname}")
                 if len((ymli['analysis'][fname])) == 0:
                     ymli['analysis'][fname] = None
         if os.path.splitext(os.path.basename(fname))[0] == "index":
