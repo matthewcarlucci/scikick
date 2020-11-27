@@ -24,15 +24,13 @@ from scikick.move import sk_move_prepare_src_dest
 def sk_run(args):
     """Run the workflow"""
     # check for empty analysis:
-    ymli = yaml_in()
-    analysis = ymli["analysis"]
-    if (analysis is None) or (len(analysis) == 0):
-        if args.rmds is None:
-            reterr("sk: Error: no pages have been added to scikick.yml, " + \
-                "this can be done with\nsk: sk add my.rmd")
+    if args.script is None:
+        ymli = yaml_in(need_pages=True)
+    else:
+        ymli = yaml_in()
 
     reportdir = ymli["reportdir"]
-    if (reportdir is None) or (reportdir == ""):
+    if reportdir == "":
         warn("sk: Warning: Report directory has not been set "+ \
             "in scikick.yml, defaulting to report/")
         ymli["reportdir"] = "report"
@@ -80,10 +78,7 @@ def sk_del(args):
 
 def sk_mv(args):
     """Rename an Rmd in scikick.yml and associated files"""
-    config = yaml_in()
-    if config["analysis"] is None:
-        reterr("sk: Error: no pages have been added to scikick.yml")
-
+    config = yaml_in(need_pages=True)
     # multiple args
     src = [os.path.normpath(p) for p in args.src]
     # only a single arg

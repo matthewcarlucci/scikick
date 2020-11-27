@@ -31,11 +31,7 @@ def snake_status(snakefile, workdir, verbose, rmd):
     rmd -- string
     """
     # read the yaml
-    yaml = yaml_in()
-    if yaml['analysis'] is None or len(yaml['analysis']) == 0:
-        warn("sk: Warning: no pages have been added to scikick.yaml, " + \
-            "this can be done with\nsk: sk add my.rmd")
-        return
+    yaml = yaml_in(need_pages=True)
     scripts = list(yaml["analysis"].keys())
     # get which script will be used to create the main index.html (homepage)
     index_list = list(filter(lambda f: \

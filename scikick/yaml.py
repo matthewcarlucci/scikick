@@ -42,9 +42,10 @@ def yaml_dump(ymli):
     ymlo = yaml.YAML()
     ymlo.dump(ymli, open("scikick.yml", "w"))
 
-def yaml_in(ymlpath='scikick.yml'):
+def yaml_in(ymlpath='scikick.yml',need_pages=False):
     """Read scikick.yml.
     Returns an ordereddict.
+    need_pages -- logical, whether to error if analysis is empty
     """
     #Exit with an error message if scikick.yml is not found
     if not os.path.isfile(ymlpath):
@@ -58,9 +59,18 @@ def yaml_in(ymlpath='scikick.yml'):
         ymli = dict()
     # make sure that mandatory fields are present
     if "analysis" not in ymli.keys():
-        warn("sk: Warning: config is missing analysis") 
-        ymli["analysis"] = dict()
+        if need_pages:
+            reterr("sk: Error: no pages have been added to scikick.yml, " + \
+                "this can be done with\nsk: sk add my.rmd")
+        else:
+            warn("sk: Warning: scikick.yml is missing analysis field") 
+            ymli["analysis"] = ordereddict()
+    else:
+        if ymli["analysis"] is None:
+            warn("sk: Warning: analysis should not be None") 
+            ymli["analysis"] = ordereddict()
     if "reportdir" not in ymli.keys():
+        warn("sk: Warning: scikick.yml is missing reportdir field") 
         ymli["reportdir"] = ""
     return ymli
 
@@ -170,8 +180,6 @@ def add(files, deps=None, force=False, copy_deps=None):
     if deps is None:
         deps = list()
     ymli = yaml_in()
-    if ymli['analysis'] is None:
-        ymli['analysis'] = ordereddict()
     if copy_deps is not None:
         copy_deps = copy_deps[0]
         if copy_deps not in ymli["analysis"]:
@@ -228,10 +236,7 @@ def rm(files, deps):
     """
     if deps is None:
         deps = list()
-    ymli = yaml_in()
-    if ymli['analysis'] is None:
-        warn("sk: Warning: There are no files in the scikick config")
-        return
+    ymli = yaml_in(need_pages=True)
     for fname in files:
         # check if rmd included
         if fname not in ymli['analysis'].keys():
