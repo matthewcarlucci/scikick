@@ -118,25 +118,24 @@ def get_arg(arg):
         return ymli[arg]
     return ""
 
-def add_check(fname, ymli, force):
+### Check functions for add()
+wildcard_symbols = ["*", "?", "[", "{", "]", "}", "\\"]
+def add_check(fname, ymli, force, deps):
     """Performs a check if fname can be added to scikick.yml as a key"""
-    # if the filename(s) have wildcard symbols
-    wildcard_symbols = ["*", "?", "[", "{", "]", "}", "\\"]
-    if True in [i in fname for i in wildcard_symbols]:
-        warn(f"sk: Error: Filename cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
+    pages = ymli["analysis"].keys()
+    if fname in pages:
+        warn(f"sk: Found existing entry for {fname}")
         return False
-    # check if the file extension is supported
+    # filenames cannot currently have wildcard symbols
+    if True in [i in fname for i in wildcard_symbols]:
+        warn(f"sk: Error: Filename ({fname}) cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
+        return False
+        # check if the file extension is supported
     if not ((re.match(".*.Rmd$", fname, re.I) is not None) or \
         (re.match(".*.R$", fname, re.I) is not None)):
         extension_list_str = ', '.join(supported_extensions)
         warn("sk: Error: Only %s files can be added as pages (%s)" % \
             (extension_list_str, fname))
-        return False
-    # if an .R/.Rmd with the same basename exists
-    if fname not in ymli["analysis"].keys() and \
-        os.path.splitext(fname)[0] in \
-            map(lambda x: os.path.splitext(x)[0], ymli["analysis"].keys()):
-        warn(f"sk: Error: Page {os.path.splitext(fname)[0]} is already to be compiled.")
         return False
     # error if the directory doesn't exist
     dirname = os.path.dirname(fname)
@@ -148,8 +147,15 @@ def add_check(fname, ymli, force):
         warn(f"sk: Warning: File {fname} doesn't exist")
         warn(f"sk: Creating new file {fname}")
         open(fname, "a").close()
-    # check for "index.Rmd"s
-    if fname not in ymli["analysis"].keys():
+    if fname not in pages:
+        # Check for other files with same basename (and therefore same md output file)
+        fname_base = os.path.splitext(fname)[0]
+        page_basenames = map(lambda x: os.path.splitext(x)[0], pages) 
+        page_basename_exists = fname_base in page_basenames
+        if page_basename_exists:
+            warn(f"sk: Error: Page {fname_base} is already to be compiled from another file.")
+            return False
+        # check for "index.Rmd"s
         index_list = get_indexes(ymli)
         if os.path.splitext(os.path.basename(fname))[0] == "index":
             if len(index_list) == 0:
@@ -170,7 +176,23 @@ def add_check(fname, ymli, force):
                     "sk: Warning: Neither of the added index files will be used as a homepage")
     return True
 
-def add(files, deps=None, force=False, copy_deps=None):
+
+def add_dep_checks(fname, ymli, force, dep):
+    """ Check if dependency can be added to fname """
+    if not os.path.isfile(dep):
+        warn(f"sk: Warning: {dep} does not exist or is not a file")
+    fdeps = ymli['analysis'][fname]
+    if fdeps is not None:
+        if dep in fdeps:
+            warn(f"sk: {dep} is already a dependency of {fname}")
+            return False
+    if True in [i in dep for i in wildcard_symbols]:
+       warn(f"sk: Error: Filename ({dep}) cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
+       return False
+    return True
+
+
+def add(files, deps=list(), force=False, copy_deps=None):
     """ Add files and dependencies to them
     files -- page file list
     deps -- dependency file list
@@ -181,6 +203,7 @@ def add(files, deps=None, force=False, copy_deps=None):
         deps = list()
     ymli = yaml_in()
     if copy_deps is not None:
+        # copy_deps(src,dest)
         copy_deps = copy_deps[0]
         if copy_deps not in ymli["analysis"]:
             reterr(f"sk: Error: file {copy_deps} is not included")
@@ -192,11 +215,11 @@ def add(files, deps=None, force=False, copy_deps=None):
             warn(f"sk: Warning: {copy_deps} has no dependencies")
     # add files
     for fname in files:
-        if fname in ymli['analysis'].keys() and len(deps) == 0:
-            warn(f"sk: {fname} is already included")
-        if not add_check(fname, ymli, force):
-            continue
-        if fname not in ymli['analysis'].keys():
+        # Add script
+        # Should the script be addded?
+        add_fname = add_check(fname, ymli, force, deps) 
+        if add_fname: 
+            # add near scripts in the same directory
             if len(ymli["analysis"].keys()) > 0:
                 commpath = os.path.commonpath(list(ymli["analysis"].keys()))
             else:
@@ -208,19 +231,17 @@ def add(files, deps=None, force=False, copy_deps=None):
             tab_matches = list(filter(lambda i:
                 all_tabs[i] == tab_name, range(len(all_tabs))))
             if (tab_name != "") and (len(tab_matches) != 0):
-                ymli["analysis"].insert(tab_matches[-1] + 1, fname, None)
+                ymli["analysis"].insert(tab_matches[-1] + 1, fname, [])
             else:
                 ymli['analysis'][fname] = None
             warn(f"sk: Added {fname}")
-        # add dependencies
+        # Add dependencies
         for dep in deps:
-            if ymli['analysis'][fname] is None:
-                ymli['analysis'][fname] = []
-            if not os.path.isfile(dep):
-                warn(f"sk: Warning: {dep} does not exist or is not a file")
-            if dep in ymli['analysis'][fname]:
-                warn(f"sk: {dep} is already a dependency of {fname}")
-            else:
+            # Should the dep be added?
+            add_dep = add_dep_checks(fname, ymli, force, dep) 
+            if add_dep:
+                if ymli['analysis'][fname] is None:
+                    ymli['analysis'][fname] = []
                 ymli['analysis'][fname].append(dep)
                 warn(f"sk: Added dependency {dep} to {fname}")
                 if dep in ymli["analysis"].keys():

@@ -68,7 +68,7 @@ def sk_init(args):
 
 def sk_add(args):
     """Add Rmds to scikick.yml"""
-    scikick.yaml.add(args.rmd, args.deps, args.force, args.copy_deps)
+    scikick.yaml.add(args.script, args.dependency, args.force, args.copy_deps)
 
 
 def sk_del(args):
@@ -203,15 +203,15 @@ parser_init.set_defaults(func=sk_init, which="init")
 # add
 parser_add = subparsers.add_parser("add", \
                                    help="Add scripts and their dependencies to the workflow",
-                                   description="Add scripts and their dependencies to the current project's configuration file (scikick.yml). Multiple dependencies can be added to the same script and the same dependency list can be added to multiple scripts")
-parser_add.add_argument("rmd", nargs="+", \
+                                   description="Add scripts and their dependencies to the project configuration file (scikick.yml). All provided dependnecies will be applied to all provided scripts. A dependency list can be applied from an existing script with --copy-deps.")
+parser_add.add_argument("script", nargs="+", \
                         help="Script(s) to be added)")
-parser_add.add_argument("-d", "--deps", \
-                        nargs="+", \
-                        help="Dependencies to be added to the script(s)")
+parser_add.add_argument("-d", "--dependency", \
+                        action='append', \
+                        help="Dependency to be added to the script(s) (can be used multiple times)")
 parser_add.add_argument("--copy-deps", \
                         nargs=1, \
-                        help="File from which to copy the dependency list")
+                        help="Copy the dependency list from this file")
 parser_add.add_argument("--force", action="store_true", \
                          help="Force addition of a script(s)")
 parser_add.set_defaults(func=sk_add, which="add")
