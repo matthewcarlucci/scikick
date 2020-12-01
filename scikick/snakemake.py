@@ -80,7 +80,7 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     # after 'snakemake'
     snakemake_args = ""
     snakemake_args += f" --snakefile {snakefile}"
-    snakemake_args += f" --directory {workdir}"
+    snakemake_args += f" --directory '{workdir}'"
     snakemake_args += " --cores 1"
    
     # Translate Rmd script to HTML target 
@@ -129,8 +129,9 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     ### Execution
     if verbose:
         warn("sk: Starting snakemake")
-        sys.exit(subprocess.call(f"{env_vars} snakemake {snakemake_args}",
-            shell=True))
+        cmd = f"{env_vars} snakemake {snakemake_args}"
+        print(cmd)
+        sys.exit(subprocess.call(cmd, shell=True))
     else:
         snake_p = subprocess.Popen(f"snakemake {snakemake_args}", \
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
