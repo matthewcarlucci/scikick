@@ -7,26 +7,20 @@
 
 ### Preface: simple workflow definitions for complex notebooks in R or Python
 
-A thorough data analysis in 
-[Rmarkdown](https://rmarkdown.rstudio.com/) or [Jupyter](https://jupyter.org/) 
-will involve multiple notebooks which must be executed in a specific order. 
+A thorough data analysis will involve multiple notebooks (e.g. in [Rmarkdown](https://rmarkdown.rstudio.com/) or [Jupyter](https://jupyter.org/)), but methods for maintaining simple connections between notebooks are not straightforward. 
 Consider this two stage data analysis where `QC.Rmd` provides a cleaned dataset 
-for `model.Rmd` to perform modelling:
+for `model.Rmd` to perform modeling:
 
-```
+<pre>
 |-- input/raw_data.csv
 |-- code
-│   |-- QC.Rmd
-│   |-- model.Rmd
+<b>│   |-- QC.Rmd</b>
+<b>│   |-- model.Rmd</b>
 |-- output/QC/QC_data.csv
-|-- report/out_md
-|   |-- _site.yml
-|   |-- QC.md
-|   |-- model.md
 |-- report/out_html
 |   |-- QC.html
 |   |-- model.html
-```
+</pre>
 
 Each of these notebooks may be internally complex, but the essence of this workflow is:
 
@@ -34,63 +28,61 @@ Each of these notebooks may be internally complex, but the essence of this workf
 
 This simple definition can be applied to:
 
-- Reproducibly re-execute the notebook collection.
-- Avoid unecessary execution of `QC.Rmd` when `model.Rmd` changes.
-- Build a shareable report from the rendered notebooks (*e.g.* using `rmarkdown::render_website()`).
+- Re-execute the notebook collection in the correct order.
+- Avoid unnecessary execution of `QC.Rmd` when only `model.Rmd` changes.
+- Build a shareable report from the rendered notebooks.
+- Collect relevant provenance information.
 
-Researchers need to be able to get these benefits from simple workflow definitions 
-to allow for focus to be on the data analysis.
+These features enable use of the notebook format for complex analyses, however, 
+current methods for achieving this require too much configuration.
+Researchers require simple tools to get these benefits and allow for focus to remain on the data analysis. 
 
 ## **scikick** - your sidekick for managing notebook collections
 
-*scikick* is a command-line-tool for integrating data analyses 
-with a few simple commands. The `sk run` command will apply dependency definitions to execute steps in the correct order and build a website of results. 
+*scikick* is a command-line-tool for connecting and executing data analyses 
+with a few simple commands. 
+
+![](docs/source/sk_demo.gif)
 
 Common tasks for *ad hoc* data analysis are managed through scikick:
 
- - Awareness of up-to-date results (via Snakemake)
- - Website rendering and layout automation (by project directory structure)
+ - Awareness of up-to-date results
+ - Website generated according to the project directory structure
  - Collection of page metadata (session info, page runtime, git history)
- - Simple dependency tracking of two types:
-   - notebook1 must execute before notebook2 (external dependency)
-   - notebook1 uses the file functions.R (internal dependency)
- - Automated execution of `.R` as a notebook (with `knitr::spin`) 
+ - Simple ordering of script executions
+ - Defining other script dependencies (e.g. notebook imports `functions.R`)
+ - Automated execution of `.R` as R markdown (with `knitr::spin`) 
 
 Commands are inspired by git for configuring the workflow: `sk init`, `sk add`, `sk status`, `sk del`, `sk mv`.
 
-Scikick currently supports `.R` and `.Rmd` for notebook rendering.
+Scikick currently supports `.R` and `.Rmd` for notebook rendering (`.ipynb` can be supported via `jupytext` [paired notebooks](https://jupytext.readthedocs.io/en/latest/paired-notebooks.html)).
 
-[Example Output](https://petronislab.camh.ca/pub/scikick_tests/master/)
+[Output website for demo project (`sk init --demo`)](https://petronislab.camh.ca/pub/scikick_tests/master/)
 
 ### Installation
 
-The following should be installed prior to installing scikick.
-
 |**Requirements**   |**Recommended**|
 |---|---|
-|python3 (>=3.6, [installing with conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-python.html) is recommended)   | [git >= 2.0](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) |
-|R + packages `install.packages(c("rmarkdown", "knitr", "yaml","git2r"))`   | [singularity >= 2.4](http://singularity.lbl.gov/install-linux)  |
+|python3 (>=3.6)   | [git >= 2.0](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) |
+|R + packages `install.packages(c("rmarkdown", "knitr", "yaml","git2r","bookdown"))`   | [singularity >= 2.4](http://singularity.lbl.gov/install-linux)  |
 |[pandoc > 2.0](https://pandoc.org/installing.html)   | [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)   |
 
-
-Installation within a virtual environment with [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) is recommended but not required.
-
-Scikick can be installed using pip:
+With the requirements above installed, scikick can be installed using pip:
 
 ```
 pip install scikick
 ```
 
-Direct conda installation of scikick is still experimental, but may be attempted with:
+Full installation of requirements within a virtual environment with [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) is still experimental, but may be attempted with:
 
 ```
 conda install -c tadasbar -c bioconda -c conda-forge scikick
 ```
 
-To install the latest version of scikick, clone and then:
+To install or upgrade to the latest version of scikick (master branch) directly from GitHub:
 
 ```
-python3 setup.py install
+pip install --upgrade git+https://github.com/matthewcarlucci/scikick.git#egg=scikick
 ```
 
 ## Getting Started
@@ -142,8 +134,7 @@ sk status
 # HTMLs to compile ('---'): 1
 ```
 
-`sk status` uses a 3 character encoding to show that hw.Rmd requires execution where
-the 'm' marking in the first slot indicates the corresponding output file (`report/out_md/hw.md`) is missing.
+`sk status` shows scripts that must be executed and uses a 3 character encoding to show the reason for execution. The 'm' in the first slot here indicates the output file for `hw.Rmd` (`report/out_md/hw.md`) is missing.
 
 ##### sk run
 
@@ -159,7 +150,6 @@ After execution is finished, the directory structure should look like
 .
 ├── hw.Rmd
 ├── report
-│   ├── donefile
 │   ├── out_html
 │   │   ├── hw.html
 │   │   └── index.html
@@ -278,7 +268,7 @@ If the flag '-d' is used (with a dependency specified), only the dependency is r
 
 Note that this does not delete the hw.Rmd file.
 
-### Using a Project Template
+### Project Templates with `sk init` flags
 
 In order to make our project more tidy, we can create some dedicated directories with
 
@@ -313,10 +303,10 @@ sk layout
 returns the current ordered list of tab indices and their names:
 
 ```
-1:  hw.Rmd
-2:  greets.Rmd
-3:  dummy1.Rmd
-4:  dummy2.Rmd
+1:  hw
+2:  greets
+3:  dummy1
+4:  dummy2
 ```
 
 The order can be changed by specifying the new order of tab indices, e.g.
@@ -332,10 +322,10 @@ sk layout 4 # move tab 4 to the front
 Output after running `sk layout 4`:
 
 ```
-1:  dummy2.Rmd
-2:  hw.Rmd
-3:  greets.Rmd
-4:  dummy1.Rmd
+1:  dummy2
+2:  hw
+3:  greets
+4:  dummy1
 ```
 
 Also, items within menus can be rearranged similarly with
@@ -344,53 +334,65 @@ Also, items within menus can be rearranged similarly with
 sk layout -s <menu name>
 ```
 
-## Homepage Modifications
+## Website Homepage
 
-The `index.html` is required for the homepage of the website. scikick will create
-this content from a template and will also include any content from an `index.Rmd`
-added to the workflow with `sk add code/index.Rmd`. 
+The `index.html` is required for the homepage of the website. Scikick includes
+some default content for this page and will add the content to any project defined 
+`index.*` file (only one `index.*` file allowed per project).
 
-## Rstudio with scikick
+## Rstudio with scikick projects
 
-Rstudio, by default, executes code relative to opened Rmd file's location. This
+If using Rstudio, default code execution will be relative to the Rmd file location. This
 can be changed by going to `Tools > Global Options > Rmarkdown > Evaluate chunks in directory`
 and setting to "Current".
 
-## Other scikick files in `report/`
-- `donefile` - empty file created during the snakemake workflow that is executed by scikick
+Additionally, the "knit" button must also be set to execute from the project
+directory. 
+
+More [details here](https://bookdown.org/yihui/rmarkdown-cookbook/working-directory.html).
+
+## File hierarchy notes
+
+Scikick allows for hierarchical file structure of Rmd. This is highly useful for 
+organization and used by scikick for the website layout.
+This use of hierarchy may not support some `md` conversion features of `bookdown::html_document2`.
+
+## Other files in `report/` generated by scikick
 - `out_md/`
-  - `out_md/*.md` - markdown files that were `knit` from Rmarkdown files
+  - `out_md/*.md` - markdown files that were generated from script execution.
   - `out_md/_site.yml` - YAML file specifying the structure of the to-be-created website
-  - `out_md/knitmeta/` - directory of RDS files containing information about javascript libraries that need to be included when rendering markdown files to HTMLs.
+  - `out_md/knitmeta/` - contains RDS files describing required javascript libraries for the final HTML.
   - `out_html/` - contains the resulting HTML files
 
 ## External vs Internal Dependencies
 
+`sk add -d` is used to add all dependencies even though "dependency" can have two meanings. Typically everything behaves
+as one would expect. Internally dependency type is represented as:
+
 **Internal dependencies** - code or files the Rmd uses directly during execution  
 **External dependencies** - code that must be executed prior to the page
 
-scikick assumes that any depedency that is not added as a page (i.e. `sk add <page>`) is an internal dependency. 
-
-Currently, only `Rmd` and `R` files are supported as pages. In the future, executables and other file types may be
-supported by scikick to allow easy usage of arbitrary scripts as pages.
+Scikick assumes that a script dependency that has also been configured to execute (i.e. `sk add <dependent page>`) is an external dependency and must be executed before the script. Otherwise it is assumed the script must execute after changes to the dependency.
 
 ## Snakemake Backend
 
 Data pipelines benefit from improved workflow execution tools 
-(Snakemake, Bpipe, Nextflow), however, *ad hoc* data analysis is often left out of 
-this workflow definition. Using scikick, projects can quickly configure reports
-to take advantage of the snakemake backend with:
+(Snakemake, Bpipe, Nextflow), however, *ad hoc* data analysis projects often do
+not apply these tools. 
+Users can quickly configure reports
+to take advantage of the snakemake backend and use snakemake arguments with `sk run -v -s <snakemake arguments>`. 
+Snakemake is responsible for:
 
-- Basic depedency management (i.e. GNU Make)  
-- Distribution of tasks on compute clusters (thanks to snakemake's `--cluster` argument)    
-- Software virtualization (Singularity, Docker, Conda)  
-- Other snakemake functionality
-
-Users familiar with snakemake can add trailing snakemake arguments during execution with `sk run -v -s`.
+- Basic dependency management (i.e. Make-like execution)  
+- Parallelization: `sk run -s -j <number of cores>` where scikick assumes each page
+uses just a single core.
+- Distribution of tasks on compute clusters (Using snakemake's `--cluster` or `--profile` arguments)    
+- Software virtualization with: Singularity, Docker, Conda  
+- Other snakemake functionality (via passed arguments)
 
 ### Singularity
 
-In order to run all Rmds in a singularity image, we have to do two things: specify the singularity image and use the snakemake flag that singularity, as a feature, should be used.
+In order to run all Rmds in a singularity image, specify the singularity image and use the singularity snakemake flag.
 
 ```
 # specify a singularity image
@@ -399,12 +401,14 @@ sk config --singularity docker://rocker/tidyverse
 # by passing '--use-singularity' argument to Snakemake
 sk run -v -s --use-singularity
 ```
-Only the Rmarkdown files are run in the singularity container, the scikick dependencies are
-still required outside of the container with this usage.
+Scripts will be run inside the singularity container. The container must
+have at least the R dependencies installed (most R-based containers have these 
+packages installed).
 
 ### Conda
 
-The same steps are necessary to use conda, except the needed file is a conda environment YAML file.
+Similar steps are used to execute projects in a conda environment. 
+In this case, the config should point to a conda environment YAML file.
 
 ```
 # create an env.yml file from the current conda environment
@@ -415,11 +419,11 @@ sk config --conda env.yml
 sk run -v -s --use-conda
 ```
 
-## Incorporating with Other Pipelines
+### Incorporating with Other Pipelines
 
-Additional workflows written in [snakemake](http://snakemake.readthedocs.io/en/stable/) should play nicely with the scikick workflow.
+Additional workflows written in [snakemake](http://snakemake.readthedocs.io/en/stable/) should play nicely with the scikick workflow. By default, a `Snakefile` at the project root will be included in the `sk run` execution (Using the snakemake `include:` directive).
 
-These jobs can be added to the begining, middle, or end of scikick related tasks:
+These jobs can be added to the beginning, middle, or end of scikick related tasks:
 
 - Beginning 
   - `sk add first_step.rmd -d pipeline_donefile` (where pipeline_donefile is the last file generated by the Snakefile)
