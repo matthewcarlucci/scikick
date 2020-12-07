@@ -2,6 +2,19 @@
 
 Chronological changes to scikick are summarized below.
 
+## 0.1.3 - TBD
+
+### New Features
+
+- Dump full logs after snakemake error
+
+### Changes
+
+- New sk init template
+- Fix issue #2 for sk add -d usage
+- Renamed underlying snakemake rules
+- Reduce outputs in sk init and other
+
 ## 0.1.2 - September 9th 2020
 
 ### New Features

@@ -4,6 +4,7 @@ scikick.egg-info/
 .eggs/
 __pycache__/
 .snakemake
+.DS_Store
 
 # files from tests
 report

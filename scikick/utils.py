@@ -28,7 +28,7 @@ def skdir():
 
 def pop_snakefile():
     """ Get the scikick snakefile for debugging. 
-    Currently intended for scikick developers only.
+    Currently intended for scikick development only.
     """
     destfile = os.getcwd() + '/Snakefile'
     if os.path.isfile(destfile):

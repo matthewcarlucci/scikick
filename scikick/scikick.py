@@ -41,12 +41,13 @@ def sk_run(args):
         warn(f"sk: Snakemake arguments received: {run_snakeargs}")
     else:
         run_snakeargs = None
-    run_snakemake(snakefile=get_sk_snakefile(), \
+    retcode = run_snakemake(snakefile=get_sk_snakefile(), \
                   workdir=os.getcwd(), \
                   dryrun=args.dryrun, \
                   run_snakeargs=run_snakeargs, \
                   verbose=args.verbose, \
                   rmds=args.script)
+    sys.exit(retcode)
 
 
 def sk_init(args):

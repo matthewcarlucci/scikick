@@ -15,11 +15,11 @@ from scikick.utils import warn, get_sk_exe_dir
 
 # Examples of patterns from which certain information is parsed:
 ## "^.*Updated input files: (.*)$"
-### the group captures a comma-separated list of internal updates
+### captures a comma-separated list of internal updates
 ## "^Job.*: Generating .*/out_html/(.*) html page$"
-### the group captures a string indicating which script will have an html generated
+### message from snakefile used to determine which script will have an html generated
 ## "^.*Input files updated by another job: (.*)$"
-### the group captures a comma-separated list of md files of external dependencies
+### captures a comma-separated list of md files of external dependencies
 
 # Flags are set according to the lists of files parsed from specific snakemake outputs
 
@@ -39,12 +39,12 @@ def snake_status(snakefile, workdir, verbose, rmd):
         scripts))
     index_file = None if len(index_list) != 1 else index_list[0]
 
+    # get snakemake dryrun output with '--reason'
     status = subprocess.run(
         ["snakemake", "--snakefile", snakefile, \
             "--directory", workdir, \
             "--dryrun", "--reason"], \
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-    # get snakemake dryrun output with '--reason'
     stdout = status.stdout.decode("utf-8").split("\n")
     stdout = list(filter(lambda l: re.match(r"^Job \d+:.*$", l) is not None or \
                          re.match("^Reason:.*$", l) is not None, stdout))
@@ -54,7 +54,7 @@ def snake_status(snakefile, workdir, verbose, rmd):
     ## Parsing info from snakemake outputs
     # get external updates for each script
     extupds = external_updates(scripts, reasons, jobs)
-    # get internal upadtes for each script
+    # get internal updates for each script
     intupds = internal_updates(scripts, reasons, jobs)
     # get missing outputs (which are to be generated)
     missing_outs = missing_outputs(reasons)

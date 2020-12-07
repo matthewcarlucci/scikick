@@ -9,10 +9,10 @@ import scikick.yaml
 
 # Functions for parsing snakemake output during run_snakemake
 def detect_page_error(line):
-    # Detect messages from other scripts
+    # Detect 'sk:' messages from other scripts
     skwarn_match = re.match("sk:.*", line)
     if skwarn_match:
-        warn(re.sub("\n$", "", line))
+        sys.stderr.write(line)
     return skwarn_match
 
 def detect_snakemake_progress(line):
@@ -167,4 +167,4 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 sys.exit(snake_p.returncode)
         if snake_logfile != "":
             warn(f"sk: Complete log: {snake_logfile}")
-        sys.exit(snake_p.returncode)
+        return snake_p.returncode

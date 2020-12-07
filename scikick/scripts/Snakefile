@@ -1,3 +1,6 @@
+# This Snakefile must be run from the same directory as 
+# the project's scikick.yml. 
+
 ###########################################
 # Imports
 ###########################################
@@ -34,7 +37,7 @@ analysis = skconfig.analysis
 
 # directories
 report_dir = skconfig.report_dir
-# bin files
+# scikick system files
 exe_dir=get_sk_exe_dir()
 script_dir = os.path.join(exe_dir, "scripts")
 template_dir = os.path.join(exe_dir, "template")
@@ -72,6 +75,7 @@ index_rmd = rmd_dict["index"]
 
 ###########################################
 # Workflow rules
+# - messages are used by status.py
 ###########################################
 
 # Rules that should never require cluster execution
@@ -136,6 +140,7 @@ rule generate_html:
 	shell: "Rscript %s {input.md} {output} {params.template_dir} {params.index_html}" \
 		% os.path.join(script_dir, "render.R")
 
+# Include the project's Snakefile if it exists
 user_snakefile = os.path.join(os.getcwd(), "Snakefile")
 if os.path.isfile(user_snakefile):
 	warn("sk: Including Snakefile found in project directory")
