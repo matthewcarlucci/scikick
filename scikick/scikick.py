@@ -6,15 +6,16 @@ import argparse
 import shutil
 import subprocess
 from re import sub, match, IGNORECASE
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, dump, RoundTripDumper
 from ruamel.yaml.compat import ordereddict
 import scikick
 import scikick.yaml
 from scikick.utils import reterr, warn, get_sk_snakefile, get_sk_exe_dir
 from scikick.snakemake import run_snakemake
 from scikick.status import snake_status
+from scikick.config import ScikickConfig
 from scikick.config import new_tab_order, get_tabs
-from scikick.config import read_snakefile_arg, write_snakefile_arg
+from scikick.config import write_snakefile_arg
 from scikick.config import rearrange_tabs, rearrange_submenus
 from scikick.init import init
 from scikick.yaml import yaml_in, yaml_dump, yaml_check
@@ -23,18 +24,11 @@ from scikick.move import sk_move_prepare_src_dest
 
 def sk_run(args):
     """Run the workflow"""
-    # check for empty analysis:
-    if args.script is None:
-        ymli = yaml_in(need_pages=True)
-    else:
-        ymli = yaml_in()
-
-    reportdir = ymli["reportdir"]
-    if reportdir == "":
-        warn("sk: Warning: Report directory has not been set "+ \
-            "in scikick.yml, defaulting to report/")
-        ymli["reportdir"] = "report"
-        yaml_dump(ymli)
+    
+    # check for empty analysis unless a script will be added
+    need_pages = args.script is None
+    skconfig = ScikickConfig(need_pages=need_pages) 
+    reportdir = skconfig.report_dir
 
     if args.snakeargs is not None:
         run_snakeargs = " ".join(args.snakeargs)
@@ -125,9 +119,7 @@ def sk_layout(args):
     the order of keys of 'analysis' dict in scikick.yml.
     """
     # TODO: optimize this code, too much redundancy
-    config = yaml_in()
-    if config["analysis"] is None:
-        reterr("sk: Error: no pages have been added to scikick.yml")
+    config = yaml_in(need_pages=True)
     tabs = get_tabs(config)
 
     # modify the layout of a submenu

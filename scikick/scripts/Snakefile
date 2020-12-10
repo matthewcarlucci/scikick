@@ -5,54 +5,43 @@
 # Imports
 ###########################################
 
-from scikick.config import ScikickConfig, read_snakefile_arg
+from scikick.config import ScikickConfig 
 from scikick.utils import warn, get_sk_exe_dir, get_sk_snakefile
 import tempfile
 
 # capture the name of the log file
 warn(f"SK INTERNAL: logfile {logger.logfile}")
 
-# trying to eventually remove this
-# configfile: 'scikick.yml'
-# Instead of snakemake config file,
-# import the scikick.yml config file directly.
-skconfig=ScikickConfig()
-config=skconfig.config
-
 ###########################################
 # Workflow variables
 ###########################################
 
-snakefile_args = dict()
-for arg in ["singularity", "conda", "benchmark", "threads"]:
-    snakefile_args[arg] = read_snakefile_arg(arg)
-    if snakefile_args[arg] is None:
-        if arg != "threads":
-            snakefile_args[arg] = ""
-        else:
-            snakefile_args[arg] = 1
+# trying to eventually remove this
+# configfile: 'scikick.yml'
+# Instead of snakemake config file,
+# import the scikick.yml config file directly.
+skconfig = ScikickConfig()
 
-# Importing report_step basenames
-analysis = skconfig.analysis
+# Getting properties
+report_dir = skconfig.report_dir # directories
+data_parent = "output"
 
-# directories
-report_dir = skconfig.report_dir
 # scikick system files
-exe_dir=get_sk_exe_dir()
+exe_dir = get_sk_exe_dir()
 script_dir = os.path.join(exe_dir, "scripts")
 template_dir = os.path.join(exe_dir, "template")
 snake_src = get_sk_snakefile()
 
 data_parent = "output"
 
-inner_ymls = [os.path.join(report_dir, "out_md", dir, "_site.yml")
-	for dir in set([os.path.dirname(a) for a in analysis.keys()])]
+inner_ymls = [os.path.join(skconfig.report_dir, "out_md", dir, "_site.yml")
+	for dir in set([os.path.dirname(a) for a in skconfig.analysis.keys()])]
 ###########################################
 # Converting scikick config to I/O deps
 # for the snakemake rules
 ###########################################
 rmd_dict = {}
-for key in analysis:
+for key in skconfig.analysis:
 	rmd_dict[os.path.splitext(key)[0]] = key
 
 rmd_deps = skconfig.inferred_deps
@@ -84,7 +73,7 @@ localrules: generate_site_files, generate_html, sk_done
 rule sk_done:
 	input:
 		expand('{report_dir}/out_html/{report_step}.html',
-			report_step = list(rmd_dict.keys()), report_dir = report_dir)
+			report_step = list(rmd_dict.keys()), report_dir = skconfig.report_dir)
 	message: "All rules from {snake_src} are complete"
 
 # Currently handles all code execution (Rmd and R to md) 
@@ -93,18 +82,18 @@ rule execute_code:
 		deps = lambda wildcards: rmd_deps[wildcards.report_step],
 		rmd = lambda wildcards: rmd_dict[wildcards.report_step]
 	output:
-		md = os.path.join(report_dir, "out_md", "{report_step}.md")
-	message: "Executing R chunks in {input.rmd}, " + \
+		md = os.path.join(skconfig.report_dir, "out_md", "{report_step}.md")
+	message: "Executing R code in {input.rmd}, " + \
 			"outputting to {output.md}"
 	params:
 		simplified_input = len("{input.rmd}"),
 		data_parent = data_parent,
 		template_dir = template_dir,
 		script_dir = script_dir
-	conda: snakefile_args["conda"]
-	singularity: snakefile_args["singularity"]
-	threads: int(snakefile_args["threads"])
-	benchmark: snakefile_args["benchmark"] + "{report_step}" if snakefile_args["benchmark"] != "" else ""
+	conda: skconfig.snakefile_arg("conda")
+	singularity: skconfig.snakefile_arg("singularity")
+	threads: skconfig.snakefile_arg("threads")
+	benchmark: skconfig.snakefile_arg("benchmark") + "{report_step}" if skconfig.snakefile_arg("benchmark") != "" else ""
 	# 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
 	shell: "Rscript %s {input.rmd} {output.md} {params.template_dir} \
 		{params.data_parent} {params.script_dir} {logger.logfile} \
@@ -115,7 +104,7 @@ rule execute_code:
 rule generate_site_files:
 	input: yaml = "scikick.yml"
 	output:
-		main_yml = os.path.join(report_dir, "out_md", "_site.yml"),
+		main_yml = os.path.join(skconfig.report_dir, "out_md", "_site.yml"),
 		inner_ymls = inner_ymls
 	message: "Creating site layout from scikick.yml"
 	script: os.path.join(script_dir, 'yamlgen.py')
@@ -126,19 +115,19 @@ rule generate_html:
 		yaml = "{report_dir}/out_md/_site.yml",
 		md = "{report_dir}/out_md/{report_step}.md"
 	output:
-		"{report_dir}/out_html/{report_step}.html"
-	message: "Generating {report_dir}/out_html/{wildcards.report_step} html page"
+		html = "{report_dir}/out_html/{report_step}.html"
+	message: "Converting {input.md} to {output.html}"
 	params:
 		template_dir = template_dir,
 		index_html = lambda w: os.path.join(os.path.relpath(
 			os.path.join(report_dir, "out_md"),
 			os.path.dirname(os.path.join(report_dir,
 				"out_md", "%s.md" % w.report_step))), "index.html")
-	conda: snakefile_args["conda"]
-	singularity: snakefile_args["singularity"]
+	conda: skconfig.snakefile_arg("conda")
+	singularity: skconfig.snakefile_arg("singularity")
 	# using 'shell:' instead of 'script:' for compatibility with renv
-	shell: "Rscript %s {input.md} {output} {params.template_dir} {params.index_html}" \
-		% os.path.join(script_dir, "render.R")
+	shell: "Rscript {generate_html_exe} {input.md} {output} {params.template_dir} {params.index_html}" 
+
 
 # Include the project's Snakefile if it exists
 user_snakefile = os.path.join(os.getcwd(), "Snakefile")

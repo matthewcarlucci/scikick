@@ -8,20 +8,19 @@ from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes
 
 class ScikickConfig:
     """
-    A class for reading and manipulating all configuration
-    settings.
+    A class for storing and manipulating the configuration
     """
 
-    def read(self):
-        """Read scikick.yml"""
-        self.config = yaml_in(self.filename)
+    def read(self, need_pages=False):
+        """Read scikick.yml, eventually to replace yaml_in()"""
+        self.config = yaml_in(self.filename, need_pages)
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None,need_pages=False):
         if filename is None:
             self.filename = "scikick.yml"
         else:
             self.filename = filename
-        self.read()
+        self.read(need_pages=need_pages)
 
     @property
     def analysis(self):
@@ -34,10 +33,35 @@ class ScikickConfig:
     @property
     def report_dir(self):
         """Get the value of 'reportdir' from scikick.yml"""
+        if self.config['reportdir'] is None:
+            reterr("sk: Error: Report directory (reportdir) has not been set in scikick.yml")
+            # Eventually it may be safe to set this value dynamically
+            #warn("sk: Warning: Setting reportdir to 'report' and writing to scikick.yml")
+            #self.config['reportdir'] = "report"
+            # yaml_dump may be unsafe if self.config has been changed elsewhere
+            # A direct modification of reportdir would be better
+            # yaml_dump(self.config)    
         return self.config['reportdir']
+    
+    def snakefile_arg(self, arg, set_default=False):
+        """ Get a valid snakefile_arg option """ 
+        if arg not in ["singularity", "conda", "benchmark", "threads"]:
+            value = None
+        else:
+            # Use default values that snakemake will accept
+            if arg is "threads":
+                value = int(1)
+            else:
+                value = "" 
+            # Get the real value if it exists
+            yml = self.config 
+            if "snakefile_args" in yml.keys():
+                if arg in yml["snakefile_args"]:
+                     value = yml["snakefile_args"][arg]
+        return value
+
 
     @property
-    # Duplicate of global function read_deps()
     def inferred_deps(self):
         """Return dictionary of {Rmd -> [dependencies], ...}"""
         deps = {}
@@ -245,15 +269,4 @@ def write_snakefile_arg(arg, val):
     warn(f"sk: Argument {arg} set to {yml['snakefile_args'][arg]}")
     yaml_dump(yml)
 
-def read_snakefile_arg(arg):
-    """Retrieve an arg's value from scikick.yml
-    and fill with placeholders if missing
-    """
-    # update based on yaml
-    yml = yaml_in()
-    if "snakefile_args" not in yml.keys():
-        # no arguments have been set
-        return None
-    if arg in yml["snakefile_args"]:
-        return yml["snakefile_args"][arg]
-    return None
+
