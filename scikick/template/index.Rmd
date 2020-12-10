@@ -1,29 +1,28 @@
 
-### Git History ###
 
-```{r, include=TRUE, echo=FALSE}
+```{r, echo=FALSE}
 gitlog = .scikick_get_gitlog()
 rm(".scikick_get_gitlog")
+has_history = !is.null(gitlog)
 ```
 
-### List of Contributors ###  
+### Project History 
 
-```{r, include=TRUE, echo=FALSE}
-authors = as.data.frame(table(gitlog$author))
-colnames(authors) = c("author", "commits")
+`r if(!has_history) "No git history was found for this project"`
 
-knitr::kable(authors, "markdown", align=rep("l", 2))
+`r if(has_history) "#### List of Contributors"`   
 
+```{r, echo=FALSE}
+if(has_history){
+   authors = as.data.frame(table(gitlog$Author))
+   colnames(authors) = c("Author", "Number of Commits")
+   knitr::kable(authors, "markdown", align=rep("l", 2))
+}
 ```
 
-### List of Changes ###  
+`r if(has_history) "#### Full List of Project Changes"`
 
-```{r, include=TRUE, echo=FALSE}
-
-# trim if summary line is too long to fit on screen
-gitlog$summary = ifelse(nchar(gitlog$summary) > 80, paste0(strtrim(gitlog$summary, 80), "..."), gitlog$summary)
-gitlog$summary = gsub("_", " ", gitlog$summary)
-knitr::kable(gitlog, "markdown", align=rep("l", 4))
-
+```{r, echo=FALSE}
+if(has_history) knitr::kable(gitlog, format = "markdown", align=rep("l", 4))
 ```
 

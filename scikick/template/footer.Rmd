@@ -31,29 +31,21 @@ cat(sprintf("Finished in %s %s",
 <hr></hr>
 
 
-### Git Log ###
+### Git Log 
 
-```{r, include=TRUE, echo=FALSE}
+```{r, echo=FALSE}
 gitlog = .scikick_get_gitlog(original_input)
 
-no_git_history = identical(gitlog$summary,"no git history")
-
-if(!no_git_history){
-# trim if subject line is too long to fit on screen
-gitlog$summary <- sapply(gitlog$summary, function(s){
-    if(nchar(s) > 80){
-        s = paste0(strtrim(s, 80), "...")}
-    return(s)
-})
-knitr::kable(gitlog, "markdown", align = rep("l", 4))
-}
+git_exists = !is.null(gitlog)
+if(git_exists) knitr::kable(gitlog, "markdown", align = rep("l", 4))
 ```
 
-`r if(no_git_history) "No git history available"`
+`r if(!git_exists) "No git history available for this page"`
 
 ---
 
-### Functions ###
+
+### Functions 
 
 ```{r, include=TRUE, echo=FALSE, results="asis"}
 
@@ -71,7 +63,7 @@ for(fun in fnames) {
 
 ```
 
-### Packages ###
+### Packages 
 
 ```{r, echo=FALSE}
 pkgs <- loadedNamespaces()
@@ -86,7 +78,7 @@ knitr::kable(pk, "markdown", align = "l", row.names = FALSE)
 
 ---
 
-### Session Info ###
+### System Information 
 
 ```{r, echo=FALSE}
 si <- sessionInfo()
@@ -97,7 +89,15 @@ systemInfo <- as.data.frame(systemInfo)
 knitr::kable(systemInfo, "markdown", align = "l")
 ```
 
+### Scikick Configuration
+
+```{r engine='bash', comment=''}
+cat scikick.yml
+```
+
 ---
+
+
 
 </div>
 </details>

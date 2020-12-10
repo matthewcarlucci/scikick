@@ -13,8 +13,9 @@ reportfile = input
 reportname = gsub("\\.Rmd$", "", basename(input),ignore.case=TRUE)
 outdatadir = paste0(file.path(dataparent, reportname), "/")
 
+script_dir = file.path(templatedir,"../scripts/")
 # Helper functions
-source(file.path(templatedir, "functions.R"))
+source(file.path(script_dir, "knit_helpers.R"))
 
 # Set scikick's default knitr methods
 knitr::opts_chunk$set(list(
