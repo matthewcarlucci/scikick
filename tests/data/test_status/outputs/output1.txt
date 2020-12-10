@@ -1,4 +1,4 @@
  m-- 	code/page1.Rmd
- m-- 	code/page2.Rmd
+ me- 	code/page2.Rmd
 Scripts to execute: 2
 HTMLs to compile ('---'): 2

@@ -4,7 +4,8 @@ import subprocess
 import tempfile
 import shutil
 import functools
-from nose import with_setup
+from nose import with_setup 
+from nose.tools import assert_equal
 
 exe_dir = os.path.dirname(os.path.realpath(__file__))
 test_datadir = os.path.join(exe_dir, "data", "test_status")
@@ -26,7 +27,8 @@ def output_check(out_fname, verbose=False):
     status = subprocess.Popen(skstat_cmd, shell=True, stdout=subprocess.PIPE)
     current_output = status.stdout.read().decode()
     with open(os.path.join(output_dir, out_fname)) as out_file:
-        assert current_output == out_file.read()
+        expected_output = out_file.read()
+        assert_equal(current_output,expected_output)
 
 @with_setup(setup, teardown)
 def test_status_basic():
@@ -57,7 +59,7 @@ def test_status_touch_rm():
     output_check("output4.txt", True)
 
 @with_setup(setup, teardown)
-def test_status_basic():
+def test_status_touch_config():
     os.system("sk run")
     os.system("touch scikick.yml")
     output_check("output5.txt")
@@ -69,13 +71,13 @@ def test_status_nohtml():
     output_check("output6.txt")
 
 @with_setup(setup, teardown)
-def test_status_mdtouch():
+def test_status_touch_md():
     os.system("sk run")
     os.system("touch report/out_md/code/page1.md")
     output_check("output7.txt", True)
 
 @with_setup(setup, teardown)
-def test_status_rmmd():
+def test_status_rm_md():
     os.system("sk run")
     os.system("rm report/out_md/code/page2.md")
     output_check("output8.txt", True)

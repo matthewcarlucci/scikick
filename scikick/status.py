@@ -23,7 +23,7 @@ from scikick.utils import warn, get_sk_exe_dir
 
 # Flags are set according to the lists of files parsed from specific snakemake outputs
 
-def snake_status(snakefile, workdir, verbose, rmd):
+def snake_status(snakefile, workdir, verbose=False, rmd=None):
     """Print workflow status
     snakefile -- string (path to the main snakefile)
     workdir -- string
@@ -88,7 +88,7 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
     """
     analysis = config["analysis"]
     reportdir = config["reportdir"]
-    # extract all files from the analysis dict
+    # extract all files from the analysis dict (files that will need markers)
     all_files = set()
     for script in analysis.keys():
         all_files.add(script)
@@ -99,14 +99,15 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
     # assign markers to files
     # since the assignment of each symbol of the flag is done sequentially,
     # each symbol can be overwritten by the next check,
-    # so the order of 'if' statements is important
+    # so the order of 'if' statements is important. Priorities are:
+    #     ?>m>s>e>u>->' '
     for _file in all_files:
         markers[_file] = [" ", " ", " "]
         # assign "? ? ?" if the file doesn't exist
         if not os.path.isfile(_file):
             markers[_file] = ["?", "?", "?"]
             continue
-        # if file exists, and is a key in analysis dict
+        # if the file is a script 
         if _file in analysis.keys():
             #### SETUP
             # define corresponding html and md files for the rmd
@@ -120,19 +121,23 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
                     "index.md")
                 _file_html = os.path.join(os.path.join(reportdir, "out_html"), \
                     "index.html")
-            # set the flag to -** if the html is to be generated
-            if ("_site.yml" in map(os.path.basename, extupds[_file])) or \
-                (not os.path.isfile(_file_html)) or \
-                (_file_md in intupds[_file]):
+            ### (*--) Main flag 
+            # - if the html must be generated
+            site_file_update = "_site.yml" in map(os.path.basename, extupds[_file])
+            _file_html_missing = not os.path.isfile(_file_html)
+            _file_html_update = _file_md in intupds[_file]
+            if site_file_update or _file_html_missing or _file_html_update:
                 markers[_file][0] = "-"
-            # set the flag to m** if the corresponding output md file doesn't exist
+            # m if the file's md file doesn't exist
             if _file_md in missing_outs:
                 markers[_file][0] = "m"
-            # set the flag to s** if the script itself was modified
+            # s if the file was modified (newer relative to md file)
             if _file in intupds[_file]:
                 markers[_file][0] = "s"
-            # external dependency (a script) was updated - flag *e*
-            # if the script of the external dependency was not modified, but its md was - flag *u*
+            ### (_*_) External dependency flag
+            # e if an external dependency must execute
+            # u if an external dependency md was -
+            # e>u
             for upd in extupds[_file] + intupds[_file]:
                 md_match = re.match(f"^{reportdir}/out_md/.*.md$", upd)
                 if (md_match is not None) and upd != _file_md:
@@ -143,13 +148,15 @@ def file_markers(config, intupds, extupds, missing_outs, exec_scripts, index_fil
                         markers[_file][1] = "u"
                     else:
                         markers[_file][1] = "e"
-            # script's internal dependencies have been updated - flag **i
+            ### (__*) Internal dependency flag 
+            # i if any internal dependencies have been updated
             deps = analysis[_file]
             deps = deps if (deps is not None) else list()
-            if len(list(filter(lambda d: d in intupds[_file], deps))) > 0:
+            any_intdep_modified = len(list(filter(lambda d: d in intupds[_file], deps))) > 0
+            if any_intdep_modified:
                 markers[_file][2] = "i"
         else:
-            # if not in analysis dict (is an internal dependency) and modified - flag s--
+            # if is an internal dependency and modified, mark as s--
             for key in intupds.keys():
                 if _file in intupds[key]:
                     markers[_file] = ["s", "-", "-"]
@@ -202,12 +209,12 @@ def print_status(analysis, markers, verbose):
         print(f"Missing ('???'): {missing_no}")
 
 def job_to_script(job, scripts):
-    """Parse the name of the script from the "^Job.*" string
+    """Get the script that the "^Job.*" string refers to
     job -- job string from Snakemake output
-    scripts -- list of scripts that are executed (listed in scikick.yml)
+    scripts -- list of possible scripts (scikick.yml analysis keys)
     """
-    exe_pattern = f"^Job.*: Executing R chunks in (.*), outputting to (.*)$"
-    htmlgen_pattern = f"^Job.*: Generating .*/out_html/(.*) html page$"
+    exe_pattern = f"^Job.*: Executing R code in (.*), outputting to (.*)$"
+    htmlgen_pattern = f"^Job.*: Converting .* to .*/out_html/(.*)\.html$"
     noext_scripts = list(map(lambda x: os.path.splitext(x)[0], scripts))
     # Get both matches
     exe_match = re.match(exe_pattern, job)
@@ -291,10 +298,10 @@ def missing_outputs(reasons):
     return missing_outs
 
 def to_execute(jobs):
-    """Returns a list of files listed as 'Executing R chunks in',
+    """Returns a list of files listed as 'Executing R code in',
     the ones that will be executed ond processed into md files"""
     exec_files = list()
-    exec_pattern = f"^.*Executing R chunks in (.*), outputting to.*$"
+    exec_pattern = f"^.*Executing R code in (.*), outputting to.*$"
     for job in jobs:
         match = re.match(exec_pattern, job)
         if match is not None:
