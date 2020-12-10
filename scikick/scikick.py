@@ -128,35 +128,44 @@ def sk_layout(args):
     else:
         rearrange_tabs(args.order, config, tabs)
 
+# Three usage modes
+# 1. sk config 			        Show the full config          (get)
+# 2. sk config --<arg> 		    Show the setting for this arg (get) 
+# 3. sk config --<arg> <value> 	Assign value to arg           (set)
 def sk_config(args):
-    possible_args = ["singularity", "conda", "threads", "benchmark"]
+    skconfig=ScikickConfig()
+    config_exists = 'snakefile_args' in skconfig.config.keys()
+    
+    # values that will be present if only arg was provided (e.g. sk config --conda)
     const_vals = ["SING_GET", "CONDA_GET", 999999, "BENCH_GET"]
-    # if none of the args is supplied, print them all
-    if len(list(filter(lambda s: getattr(args, s) is not None,
-        possible_args))) == 0:
-        for poss_arg in possible_args:
-            set_arg_val = read_snakefile_arg(poss_arg)
-            if set_arg_val is not None:
-                print(f"sk: Argument {poss_arg} is set to {set_arg_val}")
-            else:
-                print(f"sk: Argument {poss_arg} has not been set")
-        return
-    none_set = True
-    # read first...
-    for i in range(len(possible_args)):
-        given_val = getattr(args, possible_args[i])
-        if given_val == const_vals[i]:
-            set_arg_val = read_snakefile_arg(possible_args[i])
-            if set_arg_val is not None:
-                none_set = False
-                print(f"sk: Argument {possible_args[i]} is set to {set_arg_val}")
-            else:
-                print(f"sk: Argument {possible_args[i]} has not been set")
-    # ...then write
-    for i in range(len(possible_args)):
-        given_val = getattr(args, possible_args[i])
-        if (given_val is not None) and (given_val != const_vals[i]):
-            write_snakefile_arg(possible_args[i], given_val)
+    possible_args = ["singularity", "conda", "threads", "benchmark"]
+    
+    # Mode 1 - get all values
+    provided_args = list(filter(lambda s: getattr(args, s) is not None, possible_args))
+    if len(provided_args) == 0:
+        if config_exists:
+            dump(skconfig.config['snakefile_args'], sys.stdout, Dumper=RoundTripDumper)
+        else:
+            print("sk: No config options have been set (see sk config --help for options)")
+    else:
+        for i in range(len(possible_args)):
+            this_arg = possible_args[i]
+            given_val = getattr(args, this_arg)
+            arg_was_provided = given_val is not None
+            val_was_empty = given_val == const_vals[i]  
+            # Mode 2 - get one value
+            if arg_was_provided and val_was_empty:
+                # intent is to view current config for arg
+                if config_exists:
+                    val_exists = this_arg in skconfig.config['snakefile_args'].keys()
+                    if val_exists:
+                        set_arg_val = skconfig.config['snakefile_args'][this_arg]
+                        print(f"sk: Argument {this_arg} is set to {set_arg_val}")
+                    else:
+                        print(f"sk: Argument {this_arg} has not been set")
+            # Mode 3 - set value
+            elif arg_was_provided and not val_was_empty:
+                write_snakefile_arg(this_arg, given_val)
 
 parser = argparse.ArgumentParser(
 		description="See available scikick commands below")
@@ -256,17 +265,17 @@ parser_layout.add_argument("-s", "--submenu", \
 parser_layout.set_defaults(func=sk_layout, which="layout")
 
 # config
-parser_snake_config = subparsers.add_parser("config", \
-                                      help="Set or get global snakemake directives for scikick",
-                                      description="Set or get global snakemake directives for scikick")
-parser_snake_config.add_argument("--singularity", nargs="?", type=str, \
+parser_config = subparsers.add_parser("config", \
+                                      help="Set or get global configurations for scikick script execution",
+                                      description="Set or get global configurations for scikick script execution")
+parser_config.add_argument("--singularity", nargs="?", type=str, \
                        const="SING_GET", help="Set singularity image")
-parser_snake_config.add_argument("--conda", nargs="?", type=str, \
+parser_config.add_argument("--conda", nargs="?", type=str, \
                        const="CONDA_GET", help="Set conda environment file")
-parser_snake_config.add_argument("--threads", nargs="?", type=int, \
+parser_config.add_argument("--threads", nargs="?", type=int, \
                        const=999999,
-                       help="Set number of threads for conversion to md (i.e. for script execution)")
-parser_snake_config.add_argument("--benchmark", nargs="?", type=str, \
+                       help="Set number of threads for script execution")
+parser_config.add_argument("--benchmark", nargs="?", type=str, \
                        const="BENCH_GET", help="Set benchmark output prefix")
 parser_snake_config.set_defaults(func=sk_config, which="config")
 
