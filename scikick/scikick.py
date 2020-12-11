@@ -277,7 +277,20 @@ parser_config.add_argument("--threads", nargs="?", type=int, \
                        help="Set number of threads for script execution")
 parser_config.add_argument("--benchmark", nargs="?", type=str, \
                        const="BENCH_GET", help="Set benchmark output prefix")
-parser_snake_config.set_defaults(func=sk_config, which="config")
+parser_config.set_defaults(func=sk_config, which="config")
+
+# clean
+def sk_clean(args):
+  print("Not yet implemented")
+
+parser_config = subparsers.add_parser("clean", \
+                                      help="Clean up unwanted files",
+                                      description="By default will simply remove files determined to be old")
+parser_config.add_argument("--report", help="Remove all report files (reportdir)")
+parser_config.add_argument("--output", help="Remove all output files (data_parent)")
+parser_config.add_argument("--reset-notebooks", help="Remove all outputs from notebooks (for better git commits)")
+parser_config.set_defaults(func=sk_clean, which="clean")
+
 
 def main():
     """Parse the arguments and run the according function"""

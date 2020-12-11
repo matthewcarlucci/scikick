@@ -9,8 +9,10 @@ from scikick.config import ScikickConfig
 from scikick.utils import warn, get_sk_exe_dir, get_sk_snakefile
 import tempfile
 
-# capture the name of the log file
-warn(f"SK INTERNAL: logfile {logger.logfile}")
+# For debugging outside snakemake context
+import os
+import sys
+from snakemake import *
 
 ###########################################
 # Workflow variables
@@ -31,8 +33,7 @@ exe_dir = get_sk_exe_dir()
 script_dir = os.path.join(exe_dir, "scripts")
 template_dir = os.path.join(exe_dir, "template")
 snake_src = get_sk_snakefile()
-
-data_parent = "output"
+generate_html_exe = os.path.join(script_dir, "render.R")
 
 inner_ymls = [os.path.join(skconfig.report_dir, "out_md", dir, "_site.yml")
 	for dir in set([os.path.dirname(a) for a in skconfig.analysis.keys()])]
@@ -61,6 +62,9 @@ else:
 	rmd_dict['index'] = rmd_dict.pop(os.path.splitext(index_list[0])[0], None)
 	rmd_deps['index'] = rmd_deps.pop(os.path.splitext(index_list[0])[0], None)
 index_rmd = rmd_dict["index"]
+
+# capture the name of the log file
+warn(f"SK INTERNAL: logfile {logger.logfile}")
 
 ###########################################
 # Workflow rules

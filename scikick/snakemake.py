@@ -16,20 +16,14 @@ def detect_page_error(line):
     return skwarn_match
 
 def detect_snakemake_progress(line):
-    done_match = re.match(".*All rules from .* are complete.*", line)
     ntbd_match = re.match(".*Nothing to be done..*", line)
     layout_match = re.match(".*Creating site layout from scikick.*", \
         line)
-    html_match = re.match(".*Generating (.*) html page.*", line)
     # No longer used 
     #quit_fromlines_match = re.match("Quitting from lines.*", line)
-    if done_match:
-        warn("sk: Done, homepage is report/out_html/index.html")
-    elif layout_match:
+    if layout_match:
         warn("sk: Creating site layouts from scikick.yml,"+ \
             " outputting to _site.yml files")
-    elif html_match:
-        warn("sk: Generating %s.html" % html_match.groups()[0])
     elif ntbd_match:
         warn("sk: Nothing to be done")
     # No longer used
@@ -103,7 +97,7 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                     yml = yaml_in() # Must reload the yml since it changed
                 else:
                     warn(f"sk: Warning: Will not try to add non-existing file {rmd}")
-                    return
+                    return 0
 
             # Set target. Index file is treated differently
             index_rmds = get_indexes(yml)
@@ -164,7 +158,8 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 warn("sk: Warning: scikick was unable to find snakemake error in logs, dumping stderr...")
                 for line in logs:
                     sys.stderr.write(line)
-                sys.exit(snake_p.returncode)
+        else:
+            warn(f"sk: Done, homepage is {yml['reportdir']}/out_html/index.html")
         if snake_logfile != "":
             warn(f"sk: Complete log: {snake_logfile}")
         return snake_p.returncode
