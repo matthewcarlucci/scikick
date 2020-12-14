@@ -20,4 +20,5 @@ Exporting data for downstream use as `output/iris.csv`.
 write.csv(iris, file="output/iris.csv")
 ```
 
+At the bottom of each page, scikick includes session info and other page details.
 

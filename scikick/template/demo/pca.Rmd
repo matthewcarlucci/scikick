@@ -1,3 +1,5 @@
+Note that a table of contents is available for each page on the left side.
+
 # Setup
 
 ## Data Import

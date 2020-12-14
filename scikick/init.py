@@ -68,15 +68,16 @@ def init_git():
         if not anything_appended:
             warn("sk: .gitignore already has all the required entries")
 
-def init_readme():
-    """Print a message indicating that the project uses scikick"""
-    print("### Scikick")
-    print("This data analysis project uses a python tool called " + \
-	"[*scikick*](https://github.com/matthewcarlucci/scikick) " + \
-        "to execute the workflow defined in " + \
-        "the `scikick.yml` configuration file.")
-    print("scikick executes all scripts by running the command:\n\t`sk run`")
-    print("On completion, there will be a directory with a website of results.")
+readme_template = r"""
+### Scikick
+This data analysis project is executed using a python tool called 
+[*scikick*](https://github.com/matthewcarlucci/scikick).
+The workflow is defined in the `scikick.yml` configuration file.
+Scripts are executed with the command: `sk run`.
+Files in the results directory (the `reportdir: directory` 
+in `scikick.yml`) are computer generated and should not be
+editted by hand.
+"""
 
 def init_dirs():
     """Create default project directories"""
@@ -105,7 +106,7 @@ def init(args):
     if args.git:
         init_git()
     if args.readme:
-        init_readme()
+        print(readme_template)
     if args.demo:
         init_demo()
 
