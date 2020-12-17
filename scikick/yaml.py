@@ -4,9 +4,11 @@ import re
 import ruamel.yaml as yaml
 from ruamel.yaml.compat import ordereddict
 from scikick.utils import reterr, warn, get_sk_exe_dir
+import scikick
 
-supported_extensions = [".R", ".Rmd"]
-supported_yaml_fields = ["reportdir", "analysis", "version_info", "snakefile_args"]
+# supported extensions will be executed to generate a md file
+supported_extensions = [".R", ".Rmd", ".md",".ipynb"]
+supported_yaml_fields = ["reportdir", "analysis", "version_info", "snakefile_args","yaml_header"]
 
 def yaml_check(config):
     """Checks for unsupported fields in scikick.yml
@@ -131,8 +133,9 @@ def add_check(fname, ymli, force, deps):
         warn(f"sk: Error: Filename ({fname}) cannot have wildcard symbols ({' '.join(wildcard_symbols)})")
         return False
         # check if the file extension is supported
-    if not ((re.match(".*.Rmd$", fname, re.I) is not None) or \
-        (re.match(".*.R$", fname, re.I) is not None)):
+    fext = os.path.splitext(fname)[-1]
+    f_exe_support = fext.lower() in [x.lower() for x in supported_extensions]
+    if not f_exe_support:
         extension_list_str = ', '.join(supported_extensions)
         warn("sk: Error: Only %s files can be added as pages (%s)" % \
             (extension_list_str, fname))

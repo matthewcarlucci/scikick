@@ -9,27 +9,21 @@ import scikick.yaml
 
 # Functions for parsing snakemake output during run_snakemake
 def detect_page_error(line):
-    # Detect 'sk:' messages from other scripts
+    # Detect 'sk:' messages from scripts
     skwarn_match = re.match("sk:.*", line)
     if skwarn_match:
         sys.stderr.write(line)
-    return skwarn_match
+    return 0
 
 def detect_snakemake_progress(line):
     ntbd_match = re.match(".*Nothing to be done..*", line)
     layout_match = re.match(".*Creating site layout from scikick.*", \
         line)
-    # No longer used 
-    #quit_fromlines_match = re.match("Quitting from lines.*", line)
     if layout_match:
         warn("sk: Creating site layouts from scikick.yml,"+ \
             " outputting to _site.yml files")
     elif ntbd_match:
         warn("sk: Nothing to be done")
-    # No longer used
-    #elif quit_fromlines_match:
-    #    msg = re.sub('\n$', '', line)
-    #    warn(f"sk: {msg}")
 
 def detect_snakemake_error(line):
     """
@@ -54,13 +48,13 @@ def detect_snakemake_error(line):
     return ret
 
 def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
-    verbose=False, dryrun=False, run_snakeargs=None, rmds=[]):
+    verbose=False, dryrun=False, snakeargs=None, rmds=[]):
     """Run snakemake with specified arguments
     snakefile -- string (path to the main snakefile)
     workdir -- string
     verbose -- bool
     dryrun -- bool
-    run_snakeargs -- list (list of additional arguments to snakemake)
+    snakeargs -- list (list of additional arguments to snakemake)
     rmds -- string rmd who's output should be targetted
     """
     exe_dir = get_sk_exe_dir()
@@ -112,9 +106,9 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     if dryrun:
         snakemake_args += " --dry-run"
     # Add user defined snakemake arguments
-    if run_snakeargs is not None:
-        snakemake_args += f" {run_snakeargs}"
-    elif 'snakemake_args' in yml.keys() and yml['snakemake_args'] is not None:
+    if snakeargs is not None:
+        snakemake_args += f" {snakeargs}"
+    if 'snakemake_args' in yml.keys() and yml['snakemake_args'] is not None:
         warn("sk: Warning: snakemake_args is deprecated")
         snakemake_args += f" {' '.join(yml['snakemake_args'])}"
     # add the implied targets (html of Rmd)
@@ -131,7 +125,7 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         logs=[]
         sm_err = 0
-        page_err = None
+        page_err = 0
         while True:
             line = snake_p.stderr.readline().decode('utf-8')
             if not line:

@@ -3,7 +3,7 @@ import os
 import re
 from ruamel.yaml.compat import ordereddict
 from scikick.utils import reterr, warn
-from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes
+from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes, supported_extensions
 
 
 class ScikickConfig:
@@ -62,25 +62,47 @@ class ScikickConfig:
 
 
     @property
-    def inferred_deps(self):
-        """Return dictionary of {Rmd -> [dependencies], ...}"""
+    def inferred_inputs(self):
+        """Return dictionary of {exe -> [dependencies], ...}
+        For use while defining snakemake rules I/O
+        Assumptions: 
+        1. All analysis keys have a rule for exe.* => exe.md
+        2. deps that are also exe files actually depend on exe.md
+        3. deps that are not exe depend on the file itself
+        """
         deps = {}
-        for rmd in self.analysis.keys():
-            rmd_name = os.path.splitext(rmd)[0]
-            deps[rmd_name] = []
-            deps[rmd_name].append(rmd)
-            if isinstance(self.analysis[rmd], list):
-                for dep in self.analysis[rmd]:
-                    if os.path.splitext(dep)[-1].lower() == ".rmd" and \
-                        dep in self.analysis.keys():
+        for exe in self.analysis.keys():
+            exe_name = os.path.splitext(exe)[0]
+            deps[exe_name] = [exe] # script itself is an input file
+            if isinstance(self.analysis[exe], list):
+                for dep in self.analysis[exe]:
+                    depext = os.path.splitext(dep)[-1]
+                    depisexeable = depext.lower() in [x.lower() for x in supported_extensions]
+                    depisexe = dep in self.analysis.keys()
+                    if depisexeable and depisexe:
                         out_md_file = os.path.join(self.report_dir, "out_md", \
-                                                   re.sub('.rmd$', ".md", dep, \
+                                                   re.sub(f'{depext}$', ".md", dep, \
+
                                                           flags=re.IGNORECASE))
-                        deps[rmd_name].append(out_md_file)
+                        deps[exe_name].append(out_md_file)
+                    elif not depisexeable and depisexe:
+                        warn("sk: Unsupported executable found in scikick.yml")
                     else:
-                        deps[rmd_name].append(dep)
+                        deps[exe_name].append(dep)
         return deps
 
+
+    def get_site_yaml_files(self):     
+        ret=[os.path.join(self.report_dir, "out_md", dir, "_site.yml")
+        for dir in set([os.path.dirname(a) for a in self.analysis.keys()])]
+        index_site_yaml = os.path.join(self.report_dir, "out_md", "_site.yml")
+        if index_site_yaml not in ret:
+            ret.append(index_site_yaml)
+
+        return ret
+
+
+# to allow hierarchy #232 this and everything it dependends on will need changes
 def get_tabs(config):
     """Return a list of tab names determined from scikick.yml
     'analysis:' dict

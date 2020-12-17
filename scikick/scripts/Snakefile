@@ -1,69 +1,7 @@
-# This Snakefile must be run from the same directory as 
-# the project's scikick.yml. 
 
-###########################################
-# Imports
-###########################################
+# Runs code and sets variables
+from scikick.presnakemake import *
 
-from scikick.config import ScikickConfig 
-from scikick.utils import warn, get_sk_exe_dir, get_sk_snakefile
-import tempfile
-
-# For debugging outside snakemake context
-import os
-import sys
-from snakemake import *
-
-###########################################
-# Workflow variables
-###########################################
-
-# trying to eventually remove this
-# configfile: 'scikick.yml'
-# Instead of snakemake config file,
-# import the scikick.yml config file directly.
-skconfig = ScikickConfig()
-
-# Getting properties
-report_dir = skconfig.report_dir # directories
-data_parent = "output"
-
-# scikick system files
-exe_dir = get_sk_exe_dir()
-script_dir = os.path.join(exe_dir, "scripts")
-template_dir = os.path.join(exe_dir, "template")
-snake_src = get_sk_snakefile()
-generate_html_exe = os.path.join(script_dir, "render.R")
-
-inner_ymls = [os.path.join(skconfig.report_dir, "out_md", dir, "_site.yml")
-	for dir in set([os.path.dirname(a) for a in skconfig.analysis.keys()])]
-###########################################
-# Converting scikick config to I/O deps
-# for the snakemake rules
-###########################################
-rmd_dict = {}
-for key in skconfig.analysis:
-	rmd_dict[os.path.splitext(key)[0]] = key
-
-rmd_deps = skconfig.inferred_deps
-
-# add a template index to the workflow if index doesn't exist
-sys_index = os.path.join(template_dir, 'index.Rmd')
-index_list = list(filter(lambda f: os.path.basename(f) == "index", \
-	rmd_dict.keys()))
-
-# Use the template as homepage if there are multiple or no index files
-if len(index_list) != 1:
-	# Verbose mode only?
-	#warn("sk: Include an index.Rmd to add content " +\
-	#	"to the required index.html page")
-	rmd_dict['index'] = rmd_deps['index'] = sys_index
-else:
-	rmd_dict['index'] = rmd_dict.pop(os.path.splitext(index_list[0])[0], None)
-	rmd_deps['index'] = rmd_deps.pop(os.path.splitext(index_list[0])[0], None)
-index_rmd = rmd_dict["index"]
-
-# capture the name of the log file
 warn(f"SK INTERNAL: logfile {logger.logfile}")
 
 ###########################################
@@ -106,16 +44,17 @@ rule execute_code:
 
 # Generate all _site.yml files
 rule generate_site_files:
-	input: yaml = "scikick.yml"
-	output:
-		main_yml = os.path.join(skconfig.report_dir, "out_md", "_site.yml"),
-		inner_ymls = inner_ymls
-	message: "Creating site layout from scikick.yml"
-	script: os.path.join(script_dir, 'yamlgen.py')
+    input: 
+        "scikick.yml",
+        yaml_gen_script
+    output: site_yaml_files
+    message: "Creating site layout from scikick.yml"
+    script: yaml_gen_script
 
 # md => HTML via rmarkdown::render
 rule generate_html:
 	input:
+        # Should be the _site.yml in the same directory
 		yaml = "{report_dir}/out_md/_site.yml",
 		md = "{report_dir}/out_md/{report_step}.md"
 	output:

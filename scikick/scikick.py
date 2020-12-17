@@ -31,14 +31,14 @@ def sk_run(args):
     reportdir = skconfig.report_dir
 
     if args.snakeargs is not None:
-        run_snakeargs = " ".join(args.snakeargs)
-        warn(f"sk: Snakemake arguments received: {run_snakeargs}")
+        snakeargs = " ".join(args.snakeargs)
+        warn(f"sk: Snakemake arguments received: {snakeargs}")
     else:
-        run_snakeargs = None
+        snakeargs = None
     retcode = run_snakemake(snakefile=get_sk_snakefile(), \
                   workdir=os.getcwd(), \
                   dryrun=args.dryrun, \
-                  run_snakeargs=run_snakeargs, \
+                  snakeargs=snakeargs, \
                   verbose=args.verbose, \
                   rmds=args.script)
     sys.exit(retcode)
