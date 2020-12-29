@@ -1,0 +1,11 @@
+output:
+  rmarkdown::html_document:
+    code_folding: "hide"
+    highlight: "zenburn"
+    theme: "journal"
+    template: "default"
+    toc: TRUE
+    toc_float: TRUE
+    number_sections: FALSE
+    toc_depth: 5
+    self_contained: TRUE
