@@ -1,5 +1,4 @@
-
-# Runs code and sets variables
+# Read in scikick.yml and set variables
 from scikick.presnakemake import *
 
 warn(f"SK INTERNAL: logfile {logger.logfile}")
@@ -8,6 +7,20 @@ warn(f"SK INTERNAL: logfile {logger.logfile}")
 # Workflow rules
 # - messages are used by status.py
 ###########################################
+
+# Include the project's Snakefile if it exists
+user_snakefile = os.path.join(os.getcwd(), "Snakefile")
+if os.path.isfile(user_snakefile):
+	warn("sk: Including Snakefile found in project directory")
+	include: user_snakefile
+
+# scikick rule files
+include: "render_site.smk"
+include: "execute_code.smk"
+
+# Non-default rules
+for snake_include in snake_includes:
+    include: snake_include
 
 # Rules that should never require cluster execution
 localrules: generate_site_files, generate_html, sk_done
@@ -18,62 +31,3 @@ rule sk_done:
 			report_step = list(rmd_dict.keys()), report_dir = skconfig.report_dir)
 	message: "All rules from {snake_src} are complete"
 
-# Currently handles all code execution (Rmd and R to md) 
-rule execute_code:
-	input:
-		deps = lambda wildcards: rmd_deps[wildcards.report_step],
-		rmd = lambda wildcards: rmd_dict[wildcards.report_step]
-	output:
-		md = os.path.join(skconfig.report_dir, "out_md", "{report_step}.md")
-	message: "Executing R code in {input.rmd}, " + \
-			"outputting to {output.md}"
-	params:
-		simplified_input = len("{input.rmd}"),
-		data_parent = data_parent,
-		template_dir = template_dir,
-		script_dir = script_dir
-	conda: skconfig.snakefile_arg("conda")
-	singularity: skconfig.snakefile_arg("singularity")
-	threads: skconfig.snakefile_arg("threads")
-	benchmark: skconfig.snakefile_arg("benchmark") + "{report_step}" if skconfig.snakefile_arg("benchmark") != "" else ""
-	# 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
-	shell: "Rscript %s {input.rmd} {output.md} {params.template_dir} \
-		{params.data_parent} {params.script_dir} {logger.logfile} \
-		{index_rmd}" \
-		% os.path.join(script_dir, "execute_code.R")
-
-# Generate all _site.yml files
-rule generate_site_files:
-    input: 
-        "scikick.yml",
-        yaml_gen_script
-    output: site_yaml_files
-    message: "Creating site layout from scikick.yml"
-    script: yaml_gen_script
-
-# md => HTML via rmarkdown::render
-rule generate_html:
-	input:
-        # Should be the _site.yml in the same directory
-		yaml = "{report_dir}/out_md/_site.yml",
-		md = "{report_dir}/out_md/{report_step}.md"
-	output:
-		html = "{report_dir}/out_html/{report_step}.html"
-	message: "Converting {input.md} to {output.html}"
-	params:
-		template_dir = template_dir,
-		index_html = lambda w: os.path.join(os.path.relpath(
-			os.path.join(report_dir, "out_md"),
-			os.path.dirname(os.path.join(report_dir,
-				"out_md", "%s.md" % w.report_step))), "index.html")
-	conda: skconfig.snakefile_arg("conda")
-	singularity: skconfig.snakefile_arg("singularity")
-	# using 'shell:' instead of 'script:' for compatibility with renv
-	shell: "Rscript {generate_html_exe} {input.md} {output} {params.template_dir} {params.index_html}" 
-
-
-# Include the project's Snakefile if it exists
-user_snakefile = os.path.join(os.getcwd(), "Snakefile")
-if os.path.isfile(user_snakefile):
-	warn("sk: Including Snakefile found in project directory")
-	include: user_snakefile

@@ -19,7 +19,7 @@ if(dirname(input) == template_dir){
     simplified_input = paste("system file", basename(input))
 }
 
-message = sprintf("sk: Executing R chunks in %s, outputting to %s",
+message = sprintf("sk: Executing R code in %s, outputting to %s",
     simplified_input, out_md)
 write(message, stderr())
 

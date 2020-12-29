@@ -152,8 +152,10 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 warn("sk: Warning: scikick was unable to find snakemake error in logs, dumping stderr...")
                 for line in logs:
                     sys.stderr.write(line)
+                return snake_p.returncode
         else:
             warn(f"sk: Done, homepage is {yml['reportdir']}/out_html/index.html")
         if snake_logfile != "":
-            warn(f"sk: Complete log: {snake_logfile}")
+            rellog=os.path.relpath(snake_logfile,start=os.getcwd())
+            warn(f"sk: Complete log: {rellog}")
         return snake_p.returncode

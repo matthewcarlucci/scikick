@@ -4,11 +4,18 @@ from os import getcwd
 from os.path import basename, dirname, join, relpath, sep
 from ruamel.yaml import YAML
 from scikick.config import get_tabs, ScikickConfig
-from scikick.yaml import yaml_in
 from scikick.utils import git_repo_url, get_sk_template_file
 
+#https://stackoverflow.com/questions/29916065/how-to-do-camelcase-split-in-python
+def camel_case_split(identifier):
+    matches = finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', identifier)
+    return [m.group(0) for m in matches]
+
 def clean_name(name):
-    ret = name.replace("_"," ").capitalize()
+    words = name.replace("_"," ").replace("-"," ").split(" ")
+    capitalized_words = [word[0].upper() + word[1:] for word in words]
+    ret = ' '.join(capitalized_words)
+    # TODO - camel case splitting
     return ret
 
 def main():
@@ -42,7 +49,7 @@ def main():
                     sub_item = {"text": basename(item), "href": "%s.html" % path_from_site_to_html}
                     this_item['menu'].append(sub_item)
             nav_left.append(this_item) 
-            
+
         site_yaml= { "navbar": {"title": basename(getcwd()), \
                 "left": nav_left, "right": [nav_more]}}
 

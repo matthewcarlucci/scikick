@@ -15,6 +15,9 @@ def get_sk_snakefile():
     """Returns the path to scikick's Snakefile"""
     return os.path.join(get_sk_exe_dir(), 'scripts', 'Snakefile')
 
+def get_sk_template_file(template_file):
+    """Return the path of a file in templates/""" 
+    return os.path.join(get_sk_exe_dir(), 'template', template_file)
 
 def skdir():
     """Attempts to find the root directory of a scikick project"""
@@ -25,17 +28,36 @@ def skdir():
         curr_dir = os.path.join(curr_dir, "..")
     return None
 
-
-def pop_snakefile():
-    """ Get the scikick snakefile for debugging. 
+### Debugging and template copying functions
+def pop_script(source):
+    """ Get scikick scripts for debugging. 
     Currently intended for scikick development only.
     """
-    destfile = os.getcwd() + '/Snakefile'
-    if os.path.isfile(destfile):
-        warn("sk: Snakefile already exists in the current directory, exitting")
+    sourcepath = os.path.join(get_sk_exe_dir(),"scripts",source)
+    destpath = os.path.join(os.getcwd(),source)
+    if os.path.isfile(destpath):
+        warn(f"sk: {source} already exists in the current directory, exitting")
     else:
-        warn("sk: Copied scikick's main Snakefile to current directory")
-        copyfile(get_sk_snakefile(), destfile)
+        warn(f"sk: Copied scikick's {source} file to current directory")
+        copyfile(sourcepath, destpath)
+
+def unfold():
+    """ Unpack all scikick workflows to the current directory
+    for debugging and for understanding what is done
+    (i.e. for reducing 'magic') 
+    """
+    pop_script()
+    # knit script
+    # render script
+    # template content
+
+def refold():
+    """ For undoing the unfold() to tidy up
+    """
+
+def number_files():
+    """ sk_mv files with new name: <order>_<file>
+    """
 
 def check_version_r(package, version):
     """Check check whether supplied R libraries are installed
