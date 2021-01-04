@@ -1,4 +1,4 @@
-# scikick/setup.py
+# scikick/init.py
 """Functions used by `sk init`"""
 import os
 import shutil
@@ -6,21 +6,17 @@ import snakemake
 import ruamel.yaml
 import scikick
 from scikick.utils import warn, check_requirements, get_sk_exe_dir
-from scikick.yaml import yaml_dump
-from scikick.yaml import yaml_in
 
-def add_version_info():
+def add_version_info(ymli):
     """Add python package version info to scikick.yml"""
-    yml_read = yaml_in()
-    if 'version_info' not in yml_read.keys():
-        yml_read['version_info'] = { \
+    if 'version_info' not in ymli.keys():
+        ymli['version_info'] = { \
             "snakemake" : snakemake.__version__, \
             "ruamel.yaml" : ruamel.yaml.__version__, \
             "scikick" : scikick.__version__ \
         }
-        yaml_dump(yml_read)
-        return True
-    return False
+        return ymli
+    return ymli
 
 def copy_file(src, dest):
     """copy files without overwriting them"""
@@ -31,18 +27,20 @@ def copy_file(src, dest):
 
 def init_yaml():
     """Create an initial scikick.yml config file"""
-    usr_dir = os.path.join(get_sk_exe_dir(), 'usr')
+    template_yaml_path = os.path.join(get_sk_exe_dir(), 'usr/scikick.yml')
     project_dir = os.getcwd()
-    yaml_file = "scikick.yml"
+    proj_yaml_path = os.path.join(project_dir, "scikick.yml")
+    yml_loader = ruamel.yaml.YAML()
     check_requirements()
-    if copy_file(os.path.join(usr_dir, yaml_file), \
-        os.path.join(project_dir, yaml_file)):
-        warn("sk: Created analysis configuration file scikick.yml")
-        add_version_info()
-    else:
+    if os.path.exists(proj_yaml_path): 
         warn("sk: File scikick.yml already exists")
-        if add_version_info():
-            warn("sk: Added scikick version info to scikick.yml")
+        yml_out = yml_loader.load(open(proj_yaml_path, "r"))
+    else:
+        warn("sk: Importing template analysis configuration file")
+        yml_out = yml_loader.load(open(template_yaml_path, "r"))
+    yml_out = add_version_info(yml_out)
+    warn("sk: Writing to scikick.yml") 
+    yml_loader.dump(yml_out, open(proj_yaml_path,"w"))
 
 def init_git():
     """Add certain entries to .gitignore"""
