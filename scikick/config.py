@@ -2,10 +2,10 @@
 import os
 import re
 from ruamel.yaml.compat import ordereddict
-from scikick.utils import reterr, warn
+from scikick.utils import reterr, warn, get_sk_exe_dir
 from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes, supported_extensions
 
-
+# This should be simplified or split
 class ScikickConfig:
     """
     A class for storing and manipulating the configuration
@@ -15,11 +15,8 @@ class ScikickConfig:
         """Read scikick.yml, eventually to replace yaml_in()"""
         self.config = yaml_in(self.filename, need_pages)
 
-    def __init__(self, filename=None,need_pages=False):
-        if filename is None:
-            self.filename = "scikick.yml"
-        else:
-            self.filename = filename
+    def __init__(self, filename="scikick.yml",need_pages=False):
+        self.filename = filename
         self.read(need_pages=need_pages)
 
     @property
@@ -40,11 +37,20 @@ class ScikickConfig:
             #self.config['reportdir'] = "report"
             # yaml_dump may be unsafe if self.config has been changed elsewhere
             # A direct modification of reportdir would be better
-            # yaml_dump(self.config)    
-        return self.config['reportdir']
-    
+            # yaml_dump(self.config)
+        return os.path.normpath(self.config['reportdir'])
+
+    ### Snakemake wildcard patterns
+    @property
+    def html_pattern(self):
+        return os.path.normpath(os.path.join(self.report_dir,'out_html','{out_base}.html'))
+    @property
+    def md_pattern(self):
+        return os.path.normpath(os.path.join(self.report_dir,'out_md','{out_base}.md'))
+
+
     def snakefile_arg(self, arg, set_default=False):
-        """ Get a valid snakefile_arg option """ 
+        """ Get a valid snakefile_arg option """
         if arg not in ["singularity", "conda", "benchmark", "threads"]:
             value = None
         else:
@@ -52,14 +58,33 @@ class ScikickConfig:
             if arg is "threads":
                 value = int(1)
             else:
-                value = "" 
+                value = ""
             # Get the real value if it exists
-            yml = self.config 
+            yml = self.config
             if "snakefile_args" in yml.keys():
                 if arg in yml["snakefile_args"]:
                      value = yml["snakefile_args"][arg]
         return value
 
+    @property
+    def exes(self):
+        return list(self.analysis.keys())
+
+    @property
+    def index_exes(self):
+        """ Get all user defined index exes
+        """
+        ret = get_indexes(self.config)
+        return ret
+
+    @property
+    def index_exe(self):
+        """ Which source file to use for index page
+        """
+        if len(self.index_exes) == 1:
+            return self.index_exes[0]
+        else:
+            return os.path.join(get_sk_exe_dir(),"template", 'index.Rmd')
 
     @property
     def inferred_inputs(self):
@@ -71,35 +96,79 @@ class ScikickConfig:
         3. deps that are not exe depend on the file itself
         """
         deps = {}
-        for exe in self.analysis.keys():
-            exe_name = os.path.splitext(exe)[0]
-            deps[exe_name] = [exe] # script itself is an input file
+        for exe in self.exes:
+            out_base = self.get_info(exe,"out_base")
+            deps[out_base] = [exe] # script itself is an input file
             if isinstance(self.analysis[exe], list):
                 for dep in self.analysis[exe]:
                     depext = os.path.splitext(dep)[-1]
                     depisexeable = depext.lower() in [x.lower() for x in supported_extensions]
-                    depisexe = dep in self.analysis.keys()
+                    depisexe = dep in self.exes
                     if depisexeable and depisexe:
-                        out_md_file = os.path.join(self.report_dir, "out_md", \
-                                                   re.sub(f'{depext}$', ".md", dep, \
-
-                                                          flags=re.IGNORECASE))
-                        deps[exe_name].append(out_md_file)
+                        deps[out_base].append(self.get_info(dep,"md"))
                     elif not depisexeable and depisexe:
                         warn("sk: Unsupported executable found in scikick.yml")
                     else:
-                        deps[exe_name].append(dep)
+                        deps[out_base].append(dep)
         return deps
 
-
-    def get_site_yaml_files(self):     
-        ret=[os.path.join(self.report_dir, "out_md", dir, "_site.yml")
-        for dir in set([os.path.dirname(a) for a in self.analysis.keys()])]
-        index_site_yaml = os.path.join(self.report_dir, "out_md", "_site.yml")
+    def get_site_yaml_files(self):
+        ret=[os.path.normpath(os.path.join(self.report_dir, "out_md", dir,
+            "_site.yml"))
+        for dir in set([os.path.dirname(a) for a in self.exes])]
+        index_site_yaml = os.path.normpath(os.path.join(self.report_dir,
+            "out_md", "_site.yml"))
         if index_site_yaml not in ret:
             ret.append(index_site_yaml)
-
         return ret
+
+    # Creating universal translation between exe=>md=>html
+    @property
+    def exe_core_outputs(self):
+        """
+        For each exe, return a list of exe, md, html, base, out_base, ext
+        This function is meant to contain all of the logic of expected I/O
+        Every string in the result should be unique
+        """
+        ret = []
+        for key in self.exes:
+            base = os.path.splitext(key)[0]
+            ext = os.path.splitext(key)[-1]
+            exe = key
+            if len(self.index_exes) == 1 and key in self.index_exes:
+                md = os.path.normpath(f"{self.report_dir}/out_md/index.md")
+                html = os.path.normpath(f"{self.report_dir}/out_html/index.html")
+                out_base = 'index'
+            else:
+                md = os.path.normpath(f"{self.report_dir}/out_md/{base}.md")
+                html = os.path.normpath(f"{self.report_dir}/out_html/{base}.html")
+                out_base = base
+            ret.append([exe,md,html,base,out_base,ext])
+        return ret
+
+    # Accessing various workflow properties
+    @property
+    def out_bases(self):
+        return [element[4] for element in self.exe_core_outputs]
+    @property
+    def bases(self):
+        return [element[3] for element in self.exe_core_outputs]
+
+    def get_info(self,value,element='all'):
+        """
+        Generic and flexible accesor of paths associated with a file
+        input an exe/md/html/base/out_base and get the matching set
+        value -- a path to lookup
+        element -- which path to return
+        """
+        # labels matching exe_core_output indicies
+        labs = ['exe', 'md', 'html', 'base', 'out_base', 'ext']
+        for blob in self.exe_core_outputs:
+            if os.path.normpath(value) in blob:
+                if element == 'all':
+                    return blob
+                else:
+                    return blob[labs.index(element)]
 
 
 # to allow hierarchy #232 this and everything it dependends on will need changes
@@ -108,6 +177,9 @@ def get_tabs(config):
     'analysis:' dict
     config -- scikick.yml as an ordereddict
     """
+    if len(config["analysis"]) == 0:
+        return {}
+
     # remove index file beforehand
     index_list = get_indexes(config)
     if len(index_list) == 1:

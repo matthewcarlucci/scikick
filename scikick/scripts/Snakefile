@@ -14,20 +14,18 @@ if os.path.isfile(user_snakefile):
 	warn("sk: Including Snakefile found in project directory")
 	include: user_snakefile
 
-# scikick rule files
+# done rule
+localrules: sk_done
+rule sk_done:
+	input:
+		expand(skconfig.html_pattern,out_base = skconfig.out_bases)
+	message: "All rules from {snake_src} are complete"
+
+# scikick main rule files
 include: "render_site.smk"
 include: "execute_code.smk"
 
-# Non-default rules
+# Non-default rule files
 for snake_include in snake_includes:
     include: snake_include
-
-# Rules that should never require cluster execution
-localrules: generate_site_files, generate_html, sk_done
-
-rule sk_done:
-	input:
-		expand('{report_dir}/out_html/{report_step}.html',
-			report_step = list(rmd_dict.keys()), report_dir = skconfig.report_dir)
-	message: "All rules from {snake_src} are complete"
 
