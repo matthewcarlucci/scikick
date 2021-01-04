@@ -3,7 +3,8 @@ import re
 from os import getcwd
 from os.path import basename, dirname, join, relpath, sep
 from ruamel.yaml import YAML
-from scikick.config import get_tabs, ScikickConfig
+from scikick.config import ScikickConfig
+from scikick.layout import get_tabs
 from scikick.utils import git_repo_url, get_sk_template_file
 
 #https://stackoverflow.com/questions/29916065/how-to-do-camelcase-split-in-python

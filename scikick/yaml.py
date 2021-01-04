@@ -1,14 +1,26 @@
-"""basic functions used to modify and read scikick.yml"""
+"""basic functions used to read, modify, obtain config properties, and write scikick.yml"""
 import os
 import re
 import ruamel.yaml as yaml
 from ruamel.yaml.compat import ordereddict
 from scikick.utils import reterr, warn, get_sk_exe_dir
+from scikick.init import add_version_info
 import scikick
+
+# yaml_in note: in this module functions are written which internally:
+# 1. read in the scikick.yml using yaml_in
+# 2. write to the scikick.yml using yaml_dump
+#
+# Elsewhere functions are written to accept ScikickConfig as input
+# and ScikickConfig as output. This can allow for better separation
+# of config modification from read/write to reduce reads/writes and
+# have better control over when this occurs.
+# This comes at the cost of slightly more complexity.
 
 # supported extensions will be executed to generate a md file
 supported_extensions = [".R", ".Rmd", ".md",".ipynb"]
-supported_yaml_fields = ["reportdir", "analysis", "version_info", "snakefile_args","yaml_header"]
+supported_yaml_fields = ["reportdir", "analysis", "version_info",
+        "snakefile_args","yaml_header","output"]
 
 def yaml_check(config):
     """Checks for unsupported fields in scikick.yml
@@ -18,8 +30,9 @@ def yaml_check(config):
         if k not in supported_yaml_fields:
             warn(f"sk: Warning: Unrecognized scikick.yml field '{k}'")
 
+# Add to ScikickConfig
 def get_indexes(config):
-    """Returns a list of 'index.R(md)' files in scikick.yml
+    """Returns a list of 'index.*' files in scikick.yml
     config -- dict of scikick.yml
     """
     return list(filter(lambda f: \
@@ -37,12 +50,12 @@ def rm_commdir(text, commpath):
         return ntxt if ntxt != "" else "./"
     return text
 
-def yaml_dump(ymli):
+def yaml_dump(ymli,skconf_path="scikick.yml"):
     """(Over)write a dictionary to scikick.yml.
     ymli -- dict
     """
     ymlo = yaml.YAML()
-    ymlo.dump(ymli, open("scikick.yml", "w"))
+    ymlo.dump(ymli, open(skconf_path, "w"))
 
 def yaml_in(ymlpath='scikick.yml',need_pages=False):
     """Read scikick.yml.
@@ -56,9 +69,26 @@ def yaml_in(ymlpath='scikick.yml',need_pages=False):
 
     ymli = yaml.YAML()
     ymli = ymli.load(open(ymlpath, "r"))
+
     if ymli is None:
         warn("sk: Warning: scikick.yml is empty")
         ymli = dict()
+
+    ## Checks that will be fixed and written back to scikick.yml if needed
+    write_fixes = False
+    if "version_info" not in ymli.keys():
+        warn("sk: Warning: unknown project scikick version, setting to current")
+        ymli = add_version_info(ymli)
+        write_fixes = True
+    else:
+        if not ymli["version_info"]["scikick"] == scikick.__version__:
+            warn("sk: Warning: This project was not built on this version of scikick")
+
+    if write_fixes:
+        warn("sk: Writing fixes to scikick.yml")
+        yaml_dump(ymli)
+
+    ## Checks that will be modified for this read-in only
     # make sure that mandatory fields are present
     if "analysis" not in ymli.keys():
         if need_pages:
@@ -68,12 +98,18 @@ def yaml_in(ymlpath='scikick.yml',need_pages=False):
             warn("sk: Warning: scikick.yml is missing analysis field") 
             ymli["analysis"] = ordereddict()
     else:
-        if ymli["analysis"] is None:
-            warn("sk: Warning: analysis should not be None") 
-            ymli["analysis"] = ordereddict()
+        if len(ymli["analysis"]) == 0:
+            if need_pages:
+                reterr("sk: Error: no pages have been added to scikick.yml, " + \
+                    "this can be done with\nsk: sk add my.rmd")
+            else:
+                warn("sk: Warning: analysis is empty") 
+                ymli["analysis"] = ordereddict()
+
     if "reportdir" not in ymli.keys():
         warn("sk: Warning: scikick.yml is missing reportdir field") 
         ymli["reportdir"] = ""
+
     return ymli
 
 def rename(name_a, name_b):
@@ -82,7 +118,7 @@ def rename(name_a, name_b):
     b -- string (filename)
     """
     found = 0
-    ymli = yaml_in()
+    ymli = yaml_in(need_pages=True)
     ## rename keys (ana)
     if name_a in ymli["analysis"].keys():
         index_a = list(ymli["analysis"].keys()).index(name_a)
@@ -98,27 +134,6 @@ def rename(name_a, name_b):
                 found = 1
     yaml_dump(ymli)
     return found
-
-def set_arg(arg, val):
-    """Set value of 'arg' in scikick.yml to 'val'.
-    Result: scikick.yml:
-    arg -- string
-    val -- string
-    """
-    ymli = yaml_in()
-    ymli[arg] = val
-    warn("sk: Argument \'%s\' set to \'%s\'" % (arg, val))
-    yaml_dump(ymli)
-
-def get_arg(arg):
-    """Read value of field 'arg' in scikick.yml.
-    Returns a string
-    arg -- string
-    """
-    ymli = yaml_in()
-    if arg in ymli.keys():
-        return ymli[arg]
-    return ""
 
 ### Check functions for add()
 wildcard_symbols = ["*", "?", "[", "{", "]", "}", "\\"]
@@ -219,7 +234,7 @@ def add(files, deps=list(), force=False, copy_deps=None):
     # add files
     for fname in files:
         # Add script
-        # Should the script be addded?
+        # Should the script be added?
         add_fname = add_check(fname, ymli, force, deps) 
         if add_fname: 
             # add near scripts in the same directory
@@ -298,6 +313,7 @@ def rm(files, deps):
                 os.utime(index_list[0], None)
     yaml_dump(ymli)
 
+# Unused
 def site(args):
     """Adds the custom link to the 'More' tab"""
     ymli = yaml_in()

@@ -4,7 +4,7 @@ import time
 import shutil
 from re import sub, IGNORECASE
 from scikick.utils import reterr, warn
-from scikick.config import rm_commdir
+from scikick.layout import rm_commdir
 from scikick.yaml import yaml_in, rename, supported_extensions
 
 def sk_move_walk(src):

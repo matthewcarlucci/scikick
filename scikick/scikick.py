@@ -13,10 +13,8 @@ import scikick.yaml
 from scikick.utils import reterr, warn, get_sk_snakefile, get_sk_exe_dir
 from scikick.snakemake import run_snakemake
 from scikick.status import snake_status
-from scikick.config import ScikickConfig
-from scikick.config import new_tab_order, get_tabs
-from scikick.config import write_snakefile_arg
-from scikick.config import rearrange_tabs, rearrange_submenus
+from scikick.config import ScikickConfig, write_snakefile_arg
+from scikick.layout import rearrange_tabs, rearrange_submenus, new_tab_order, get_tabs
 from scikick.init import init
 from scikick.yaml import yaml_in, yaml_dump, yaml_check
 from scikick.move import sk_move_check, sk_move_extras
@@ -129,17 +127,17 @@ def sk_layout(args):
         rearrange_tabs(args.order, config, tabs)
 
 # Three usage modes
-# 1. sk config 			        Show the full config          (get)
-# 2. sk config --<arg> 		    Show the setting for this arg (get) 
+# 1. sk config 			Show the full config          (get)
+# 2. sk config --<arg> 		Show the setting for this arg (get)
 # 3. sk config --<arg> <value> 	Assign value to arg           (set)
 def sk_config(args):
     skconfig=ScikickConfig()
     config_exists = 'snakefile_args' in skconfig.config.keys()
-    
+
     # values that will be present if only arg was provided (e.g. sk config --conda)
     const_vals = ["SING_GET", "CONDA_GET", 999999, "BENCH_GET"]
     possible_args = ["singularity", "conda", "threads", "benchmark"]
-    
+
     # Mode 1 - get all values
     provided_args = list(filter(lambda s: getattr(args, s) is not None, possible_args))
     if len(provided_args) == 0:
