@@ -1,11 +1,21 @@
+# Main Snakefile called by sk run
+#
+# Includes two main sets of rules:
+#    execute_code.smk - rules for executing code (exe => md) 
+#    render_site.smk - rules for building the website (md => html)
+#
+# Other project defined rules are included if a project Snakefile is found
+#
+# Supplementary/Experimental rules are included for explicit use
+ 
 # Read in scikick.yml and set variables
-from scikick.presnakemake import *
+from scikick.scripts.presnakemake import *
 
 warn(f"SK INTERNAL: logfile {logger.logfile}")
 
 ###########################################
 # Workflow rules
-# - messages are used by status.py
+# - messages are used by sk status and sk run 
 ###########################################
 
 # Include the project's Snakefile if it exists
@@ -19,7 +29,7 @@ localrules: sk_done
 rule sk_done:
 	input:
 		expand(skconfig.html_pattern,out_base = skconfig.out_bases)
-	message: "All rules from {snake_src} are complete"
+	message: "Done, homepage is {skconfig.homepage}"
 
 # scikick main rule files
 include: "render_site.smk"

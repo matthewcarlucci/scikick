@@ -87,6 +87,8 @@ def snake_status(snakefile=get_sk_snakefile(),
     unknown_jobs, unknown_reasons = subset_jobs(jobs,reasons,"unknown")
 
     exes = skconf.exes
+    if skconf.index_exe not in exes:
+        exes.append(skconf.index_exe)
     ## Parsing job/reason info from snakemake outputs
     # each function matches a snakemake reason string
     # get expected input updates for each script
@@ -133,7 +135,12 @@ def snake_status(snakefile=get_sk_snakefile(),
                 flatten_dependency_tree(rmd, skconf))}
         print_status(reduced_analysis, markers, verbose)
     else:
-        print_status(skconf.analysis, markers, verbose)
+        config = skconf.analysis
+        # Adjustment for system index
+        if skconf.index_exe not in config.keys():
+            config['system index (homepage)'] = list() # has no inputs
+            markers['system index (homepage)'] = markers[skconf.index_exe]
+        print_status(config, markers, verbose)
 
 def flatten_dependency_tree(exe, skconf):
     """Returns a list of rmd and its recursive deps"""
@@ -160,6 +167,8 @@ def file_markers(skconf, inupds, exinupds, missing_outs, exec_scripts):
         if skconf.analysis[script] is not None:
             for dep in analysis[script]:
                 all_files.add(dep)
+    if skconf.index_exe not in all_files:
+        all_files.add(skconf.index_exe)
     # Assign markers to files
     # Start by collecting all possible markers for the file, then
     # choose the one with the highest priority
@@ -271,6 +280,7 @@ def print_status(analysis, markers, verbose):
             if ''.join(markers[key]) != "   ":
                 print(f" {''.join(markers[key])} \t{key}")
 
+    # Counts of each job type
     rehtml_no = len(list(filter(lambda k: \
                                 "".join(markers[k]) != "???" and \
                                 "".join(markers[k]) != "   ", \
@@ -349,20 +359,20 @@ def get_expected_input_updates(scripts, reasons, jobs):
                     extupd_dict[script].append(upd_file)
     return extupd_dict
 
-def get_updated_inputs(scripts, reasons, jobs):
+def get_updated_inputs(exes, reasons, jobs):
     """For each script get the the dictionary of scripts and dependencies that match to 
     snakemakes "Updated input files:" reason. 
     output (<script>: [list of updates]).
     Internal updates - files that are directly used (e.g. sourced scripts)
-    scripts -- list of scripts that are executed (scikick.yml analysis)
+    exes -- list of exes that are executed (scikick.yml analysis)
     reasons -- list of 'Reason' outputs from Snakemake
     jobs -- list of 'Job' outputs from Snakemake
     """
 
     # initialize an empty list for each script
     intupd_dict = dict()
-    for script in scripts:
-        intupd_dict[script] = list()
+    for exe in exes:
+        intupd_dict[exe] = list()
     for i, _ in enumerate(reasons):
         match = re.match(intupd_pattern, reasons[i])
         match_sc = re.match(intupd_pattern_sc, reasons[i])

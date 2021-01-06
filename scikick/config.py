@@ -67,6 +67,8 @@ class ScikickConfig:
 
     @property
     def exes(self):
+        """ Get all user defined exes (i.e. excluding system index)
+        """
         return list(self.analysis.keys())
 
     @property
@@ -84,6 +86,10 @@ class ScikickConfig:
             return self.index_exes[0]
         else:
             return os.path.join(get_sk_exe_dir(),"template", 'index.Rmd')
+
+    @property
+    def homepage(self):
+        return os.path.normpath(os.path.join(self.report_dir,'out_html','index.html'))
 
     @property
     def inferred_inputs(self):
@@ -109,6 +115,8 @@ class ScikickConfig:
                         warn("sk: Unsupported executable found in scikick.yml")
                     else:
                         deps[out_base].append(dep)
+        if self.index_exe not in self.exes:
+            deps['index'] = [self.index_exe]
         return deps
 
     def get_site_yaml_files(self):
@@ -130,11 +138,10 @@ class ScikickConfig:
         Every string in the result should be unique
         """
         ret = []
-        for key in self.exes:
-            base = os.path.splitext(key)[0]
-            ext = os.path.splitext(key)[-1]
-            exe = key
-            if len(self.index_exes) == 1 and key in self.index_exes:
+        for exe in self.exes:
+            base = os.path.splitext(exe)[0]
+            ext = os.path.splitext(exe)[-1]
+            if len(self.index_exes) == 1 and exe in self.index_exes:
                 md = os.path.normpath(f"{self.report_dir}/out_md/index.md")
                 html = os.path.normpath(f"{self.report_dir}/out_html/index.html")
                 out_base = 'index'
@@ -142,6 +149,15 @@ class ScikickConfig:
                 md = os.path.normpath(f"{self.report_dir}/out_md/{base}.md")
                 html = os.path.normpath(f"{self.report_dir}/out_html/{base}.html")
                 out_base = base
+            ret.append([exe,md,html,base,out_base,ext])
+        # If using the system index, add it as well
+        if len(self.index_exes)==0:
+            exe = self.index_exe
+            base = os.path.splitext(exe)[0]
+            ext = os.path.splitext(exe)[-1]
+            md = os.path.normpath(f"{self.report_dir}/out_md/index.md")
+            html = os.path.normpath(f"{self.report_dir}/out_html/index.html")
+            out_base = 'index'
             ret.append([exe,md,html,base,out_base,ext])
         return ret
 

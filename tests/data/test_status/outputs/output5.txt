@@ -1,4 +1,5 @@
  --- 	code/page1.Rmd
  --- 	code/page2.Rmd
+ --- 	system index (homepage)
 Scripts to execute: 0
-HTMLs to compile ('---'): 2
+HTMLs to compile ('---'): 3

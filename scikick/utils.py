@@ -28,6 +28,19 @@ def skdir():
         curr_dir = os.path.join(curr_dir, "..")
     return None
 
+
+def sanitize_sys_file(sysfile):
+    """
+    Check if file in in get_sk_exe_dir
+    And then return just the file name
+    """
+    # Placeholder
+    # is_exe = os.path.normpath(sysfile)
+    is_exe = True
+    assert is_exe
+    return os.path.basename(sysfile)
+
+
 ### Debugging and template copying functions
 def pop_script(source):
     """ Get scikick scripts for debugging. 
@@ -56,8 +69,12 @@ def refold():
     """
 
 def number_files():
-    """ sk_mv files with new name: <order>_<file>
+    """ sk_mv (-g) files with new name: <order>_<file>
     """
+    # Pseudocode
+    ordered_list = linearize_dag()
+    for i in range_files:
+        sk_mv(ordered_list[i], i + '_' + ordered_list[i], args)
 
 def check_version_r(package, version):
     """Check check whether supplied R libraries are installed

@@ -23,12 +23,29 @@ supported_yaml_fields = ["reportdir", "analysis", "version_info",
         "snakefile_args","yaml_header","output"]
 
 def yaml_check(config):
-    """Checks for unsupported fields in scikick.yml
+    """Checks to be run 
+    Check for unsupported fields in scikick.yml
+    Check for project version vs scikick install version
     config -- dict of scikick.yml
     """
     for k in config.keys():
         if k not in supported_yaml_fields:
             warn(f"sk: Warning: Unrecognized scikick.yml field '{k}'")
+
+    ## Checks that will be fixed and written back to scikick.yml if needed
+    write_fixes = False
+    if "version_info" not in config.keys():
+        warn("sk: Warning: unknown project scikick version, setting to current")
+        config = add_version_info(config)
+        write_fixes = True
+    else:
+        if not config["version_info"]["scikick"] == scikick.__version__:
+            warn("sk: Warning: This project was not built on this version of scikick")
+
+    if write_fixes:
+        warn("sk: Writing fixes to scikick.yml")
+        yaml_dump(config)
+
 
 # Add to ScikickConfig
 def get_indexes(config):
@@ -73,20 +90,6 @@ def yaml_in(ymlpath='scikick.yml',need_pages=False):
     if ymli is None:
         warn("sk: Warning: scikick.yml is empty")
         ymli = dict()
-
-    ## Checks that will be fixed and written back to scikick.yml if needed
-    write_fixes = False
-    if "version_info" not in ymli.keys():
-        warn("sk: Warning: unknown project scikick version, setting to current")
-        ymli = add_version_info(ymli)
-        write_fixes = True
-    else:
-        if not ymli["version_info"]["scikick"] == scikick.__version__:
-            warn("sk: Warning: This project was not built on this version of scikick")
-
-    if write_fixes:
-        warn("sk: Writing fixes to scikick.yml")
-        yaml_dump(ymli)
 
     ## Checks that will be modified for this read-in only
     # make sure that mandatory fields are present

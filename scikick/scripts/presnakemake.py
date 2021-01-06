@@ -29,8 +29,8 @@ generate_html_exe = os.path.join(script_dir, "render_minimal.R")
 
 # Add on experimental workflows for explicit usage only
 snake_includes = []
-snake_includes.append(os.path.join(script_dir, "supplemental_rules/custom.smk"))
-snake_includes.append(os.path.join(script_dir, "supplemental_rules/rmarkdown.smk"))
+#snake_includes.append(os.path.join(script_dir, "supplemental_rules/custom.smk"))
+#snake_includes.append(os.path.join(script_dir, "supplemental_rules/rmarkdown.smk"))
 
 ###########################################
 # Converting scikick config to I/O deps

@@ -1,6 +1,7 @@
  s-- 	code/page1.Rmd
  -e- 	code/page2.Rmd
 (s--)	  code/page1.Rmd
+     	system index (homepage)
 Scripts to execute: 2
 HTMLs to compile ('---'): 2
-Up to date ('   '): 0
+Up to date ('   '): 1

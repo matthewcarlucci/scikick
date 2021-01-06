@@ -1,4 +1,5 @@
  m-- 	code/page1.Rmd
  me- 	code/page2.Rmd
-Scripts to execute: 2
-HTMLs to compile ('---'): 2
+ *-- 	system index (homepage)
+Scripts to execute: 3
+HTMLs to compile ('---'): 3
