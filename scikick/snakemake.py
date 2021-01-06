@@ -13,17 +13,27 @@ def detect_page_error(line):
     skwarn_match = re.match("sk:.*", line)
     if skwarn_match:
         sys.stderr.write(line)
+    # Match output from loghandler.py
+    skerr_match = re.match("sk: Error while .*",line)
+    if skerr_match:
+        return 1
     return 0
 
 def detect_snakemake_progress(line):
     ntbd_match = re.match(".*Nothing to be done..*", line)
     layout_match = re.match(".*Creating site layout from scikick.*", \
         line)
+    job_match = re.match("^Job .*: (.*)$",line)
     if layout_match:
         warn("sk: Creating site layouts from scikick.yml,"+ \
             " outputting to _site.yml files")
     elif ntbd_match:
         warn("sk: Nothing to be done")
+    elif job_match:
+        # sanitize system index.Rmd path
+        job_msg = job_match.groups()[0].replace(get_sk_exe_dir(),"system's ")
+        warn("sk: " + job_msg)
+
 
 def detect_snakemake_error(line):
     """
@@ -31,7 +41,7 @@ def detect_snakemake_error(line):
     """
     # Common Snakemake errors:
     snakemake_lock_match = re.match("Error: Directory cannot be locked.*", line)
-    missing_input_match = re.match("Missing input files for rule execute_code.*", line)
+    missing_input_match = re.match("Missing input files for rule .*", line)
     wflow_error_match =  re.match("WorkflowError:.*", line)
     # Snakemake errors (errors not related to analysis code)
     ret=1
@@ -58,10 +68,13 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     rmds -- string rmd who's output should be targetted
     """
     exe_dir = get_sk_exe_dir()
+    loghandler = os.path.join(exe_dir, 'scripts/loghandler.py')
+
     yml = yaml_in()
+
     # logfile created by snakemake
     snake_logfile=""
-    
+
     ### Construct call to snakemake
     # before 'snakemake'
     env_vars = f'SINGULARITY_BINDPATH="{exe_dir}"'
@@ -70,9 +83,12 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     snakemake_args += f" --snakefile {snakefile}"
     snakemake_args += f" --directory '{workdir}'"
     snakemake_args += " --cores 1"
-   
+    snakemake_args += f" --log-handler-script {loghandler}"
+
     # Translate Rmd script to HTML target 
     # TODO - factor out
+    # TODO - move this to sk_run as an additional snake_arg
+    # to reduce skconfig read ins
     target_arg = ""
     if len(rmds) > 0:
         for rmd in rmds:
@@ -101,7 +117,7 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
             else:
                 target_arg += " " + os.path.join(yml["reportdir"], \
                     "out_html", os.path.splitext(rmd)[0] + ".html")
-                
+
     # set more snakemake arguments
     if dryrun:
         snakemake_args += " --dry-run"
@@ -132,11 +148,11 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 break
             # Capture logs
             logs.append(line)
-            
+
             # Report progress
             detect_snakemake_progress(line)
             page_err = detect_page_error(line) or page_err
-            
+
             # In case of snakemake error start writing stderr
             sm_err += detect_snakemake_error(line)
             if sm_err:
@@ -154,7 +170,10 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                     sys.stderr.write(line)
                 return snake_p.returncode
         else:
-            warn(f"sk: Done, homepage is {yml['reportdir']}/out_html/index.html")
+            # TODO replace with skconf.homepage
+            homepage = os.path.join(yml['reportdir'],'out_html','index.html')
+            assert os.path.exists(homepage), f"Expected homepage {homepage} is missing"
+            #warn(f"sk: Done, homepage is {homepage}")
         if snake_logfile != "":
             rellog=os.path.relpath(snake_logfile,start=os.getcwd())
             warn(f"sk: Complete log: {rellog}")
