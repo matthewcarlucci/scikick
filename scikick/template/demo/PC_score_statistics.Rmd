@@ -1,5 +1,5 @@
 
-Loading in the [PCA](pca.html) results `output/iris_pca.csv`.
+Loading in the [PCA](PCA.html) results `output/iris_pca.csv`.
 
 ```{r}
 iris_pca = read.csv("output/iris_pca.csv",header=T)

@@ -6,6 +6,7 @@ import sys
 from scikick.utils import warn, get_sk_snakefile, get_sk_exe_dir
 from scikick.yaml import yaml_in, get_indexes
 import scikick.yaml
+from scikick.config import ScikickConfig
 
 # Functions for parsing snakemake output during run_snakemake
 def detect_page_error(line):
@@ -70,7 +71,8 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     exe_dir = get_sk_exe_dir()
     loghandler = os.path.join(exe_dir, 'scripts/loghandler.py')
 
-    yml = yaml_in()
+    skconf = ScikickConfig()
+    yml = skconf.config
 
     # logfile created by snakemake
     snake_logfile=""
@@ -104,7 +106,9 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 warn(f"sk: Warning: {rmd} was not found in scikick.yml")
                 if os.path.exists(rmd):
                     scikick.yaml.add([rmd])
-                    yml = yaml_in() # Must reload the yml since it changed
+                    # Must reload or modify the yml since it changed
+                    skconf = ScikickConfig()
+                    yml = skconf.config
                 else:
                     warn(f"sk: Warning: Will not try to add non-existing file {rmd}")
                     return 0
@@ -163,17 +167,16 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 snake_logfile = logfile_name_match.groups()[0]
         snake_p.wait()
         if snake_p.returncode != 0:
-            warn("sk: Error: Snakemake returned a non-zero return code")
-            if not page_err and not sm_err:
-                warn("sk: Warning: scikick was unable to find snakemake error in logs, dumping stderr...")
-                for line in logs:
-                    sys.stderr.write(line)
-                return snake_p.returncode
+            if not page_err:
+                warn("sk: Error: Snakemake returned a non-zero return code")
+                if not sm_err:
+                    warn("sk: Warning: scikick was unable to find snakemake error in logs, dumping stderr...")
+                    for line in logs:
+                        sys.stderr.write(line)
+                    return snake_p.returncode
         else:
-            # TODO replace with skconf.homepage
-            homepage = os.path.join(yml['reportdir'],'out_html','index.html')
-            assert os.path.exists(homepage), f"Expected homepage {homepage} is missing"
-            #warn(f"sk: Done, homepage is {homepage}")
+            if not os.path.exists(skconf.homepage):
+                warn(f"sk: Warning: Expected homepage {skconf.homepage} is missing")
         if snake_logfile != "":
             rellog=os.path.relpath(snake_logfile,start=os.getcwd())
             warn(f"sk: Complete log: {rellog}")

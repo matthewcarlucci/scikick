@@ -8,6 +8,7 @@ import tempfile
 # For debugging outside snakemake context
 import os
 import sys
+import glob
 
 ###########################################
 # Workflow variables
@@ -28,9 +29,7 @@ snake_src = get_sk_snakefile()
 generate_html_exe = os.path.join(script_dir, "render_minimal.R")
 
 # Add on experimental workflows for explicit usage only
-snake_includes = []
-#snake_includes.append(os.path.join(script_dir, "supplemental_rules/custom.smk"))
-#snake_includes.append(os.path.join(script_dir, "supplemental_rules/rmarkdown.smk"))
+snake_includes = glob.glob(os.path.join(script_dir,"supplemental_rules") + "/*.smk")
 
 ###########################################
 # Converting scikick config to I/O deps

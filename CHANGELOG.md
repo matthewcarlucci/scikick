@@ -2,18 +2,27 @@
 
 Chronological changes to scikick are summarized below.
 
-## 0.1.3 - TBD
+## 0.2.0 - TBD
 
 ### New Features
 
+- Added experimental support for `.ipynb`
+- Website menus are processed to be more human readable (#1) 
+- Individual page log files stored in report/logs
+- Allow for global rmarkdown/pandoc yaml in scikick.yml
 - Dump full logs after snakemake error
+- Include the default homepage in sk status
 
 ### Changes
 
-- New sk init template
+- Remove custom CSS for rmarkdown::html_document
+- Snakemake requirement bumped to >= 5.9 due to use of custom logger
+- New sk status message (detect unknown execution reasons)
 - Fix issue #2 for sk add -d usage
-- Renamed underlying snakemake rules
+- More checks for scikick.yml state (e.g. sk version in use)
+- Minor changes to footer/homepage content (include scikick.yml)
 - Reduce outputs in sk init and other
+- New sk init template
 
 ## 0.1.2 - September 9th 2020
 

@@ -1,12 +1,33 @@
-# Only edit this file by hand if you know what you are doing 
+### Scikick project workflow configuration file
 
 # Directory where all scikick output will be stored
 reportdir: report
 
-# workflow configuration format
+### Site output configuration
+# markdown rendering options for rmarkdown::render()
+output:
+  rmarkdown::html_document:
+    code_folding: "hide"
+    highlight: "zenburn"
+    theme: "journal"
+    template: "default"
+    toc: TRUE
+    toc_float: TRUE
+    number_sections: FALSE
+    toc_depth: 5
+    self_contained: TRUE
+
+##### Content below here is not intended to be editted by hand 
+#
+### "analysis" - Workflow Configuration Format
+#
 # analysis:
 #  first_script.Rmd:
 #  second_script.Rmd:
 #  - first_script.Rmd 	# script to run before second_script.Rmd
 #  - functions.R 	# file used by second_script.Rmd
+#
+# Each analysis item is expected to generate md and html files, E.g.:
+# 1. <reportdir>/out_md/first_script.md
+# 2. <reportdir>/out_html/first_script.html
 analysis: {}

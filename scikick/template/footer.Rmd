@@ -31,7 +31,7 @@ cat(sprintf("Finished in %s %s",
 <hr></hr>
 
 
-### Git Log 
+**Git Log** 
 
 ```{r, echo=FALSE}
 gitlog = .scikick_get_gitlog(original_input)
@@ -45,7 +45,41 @@ if(git_exists) knitr::kable(gitlog, "markdown", align = rep("l", 4))
 ---
 
 
-### Functions 
+**Packages**
+
+```{r, echo=FALSE}
+pkgs <- loadedNamespaces()
+desc <- Map(packageDescription, pkgs)
+ver  <- sapply(desc, getElement, "Version")
+bld  <- sapply(desc, getElement, "Built")
+bld  <- as.character(bld)
+date <- format(as.Date(sapply(strsplit(bld, "; "), "[", 3)), "%Y-%m-%d")
+pk <- data.frame(package = pkgs, version = ver, date = date)
+knitr::kable(pk, "markdown", align = "l", row.names = FALSE)
+```
+
+---
+
+**System Information**
+
+```{r, echo=FALSE}
+si <- sessionInfo()
+systemInfo <- c(version = si$R.version$version.string,
+    platform = si$platform, locale = Sys.getlocale("LC_COLLATE"),
+    OS = si$running, UI = .Platform$GUI)
+systemInfo <- as.data.frame(systemInfo)
+knitr::kable(systemInfo, "markdown", align = "l")
+```
+
+**Scikick Configuration**
+
+```{r engine='bash', comment=''}
+cat scikick.yml
+```
+
+---
+
+**Functions**
 
 ```{r, include=TRUE, echo=FALSE, results="asis"}
 
@@ -63,41 +97,9 @@ for(fun in fnames) {
 
 ```
 
-### Packages 
-
-```{r, echo=FALSE}
-pkgs <- loadedNamespaces()
-desc <- Map(packageDescription, pkgs)
-ver  <- sapply(desc, getElement, "Version")
-bld  <- sapply(desc, getElement, "Built")
-bld  <- as.character(bld)
-date <- format(as.Date(sapply(strsplit(bld, "; "), "[", 3)), "%Y-%m-%d")
-pk <- data.frame(package = pkgs, version = ver, date = date)
-knitr::kable(pk, "markdown", align = "l", row.names = FALSE)
-```
-
----
-
-### System Information 
-
-```{r, echo=FALSE}
-si <- sessionInfo()
-systemInfo <- c(version = si$R.version$version.string,
-    platform = si$platform, locale = Sys.getlocale("LC_COLLATE"),
-    OS = si$running, UI = .Platform$GUI)
-systemInfo <- as.data.frame(systemInfo)
-knitr::kable(systemInfo, "markdown", align = "l")
-```
-
-### Scikick Configuration
-
-```{r engine='bash', comment=''}
-cat scikick.yml
-```
-
----
-
 
 
 </div>
 </details>
+
+<hr></hr>

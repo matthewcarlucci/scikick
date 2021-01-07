@@ -2,13 +2,16 @@
 # Called from scikick's Snakefile
 # Executes R or Rmd code
 # All stderr is output during snakemake execution
+# using .<function> to hide from notebook environment
 
 # Rmd=>md
-skknit <- function(input, output,
+.skknit <- function(input, output,
                    template_dir = "",  
                    data_parent = "output" # currently for knitr cache only
                    ){
-    out_base = gsub("\\.Rmd$", "", basename(input),ignore.case=TRUE)
+
+    out_base = tools::file_path_sans_ext(input)
+    input_noext = basename(out_base)
     outdatadir = paste0(file.path(data_parent, out_base), "/")
 
     script_dir = file.path(template_dir,"../scripts/")
@@ -40,7 +43,8 @@ skknit <- function(input, output,
         ###############
         # prevent interactive plots from being turned into PNGs
         screenshot.force = FALSE,
-        #fig.path = outdatadir,
+        # Prevent two rmds from clashing figure names in figure/
+        fig.path = paste0("figure/",input_noext,"/"), 
         cache.path = paste0(outdatadir, "/cache/")
     ))
     options(width=105) # wider display of prints than default
@@ -92,7 +96,7 @@ skknit <- function(input, output,
 }
 
 # Execute an R or Rmd as Rmd with knitr
-main <- function(input, out_md, script_dir){
+.main <- function(input, out_md, script_dir){
     file_is_rmd = length(grep(x=input, pattern=".rmd$", ignore.case=TRUE)) > 0
     file_is_r = length(grep(x=input, pattern=".r$", ignore.case=TRUE)) > 0
     if(file_is_rmd){
@@ -111,7 +115,9 @@ main <- function(input, out_md, script_dir){
    
     # Execution 
     template_dir = file.path(script_dir,"../template")
-    skknit(rmd, out_md, template_dir)
+    out <- .skknit(rmd, out_md, template_dir)
+    # Ensure logs are empty if execution is successful
+    return(invisible(NULL))
 } 
 
 # Allows for debugging by loading functions
@@ -123,7 +129,7 @@ if(!interactive()){
     script_dir <- dirname(script_name)
     
     args = commandArgs(trailingOnly = TRUE)
-    main(input = args[1],
+    .main(input = args[1],
         out_md = args[2],
         script_dir = script_dir)
 }

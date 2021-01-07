@@ -3,7 +3,7 @@ import tempfile
 import shutil
 
 exe_dir = os.path.dirname(os.path.realpath(__file__))
-htmls = ["code/pca.html", "code/generate.html","code/pc_score_statistics.html","index.html"]
+htmls = ["code/PCA.html", "code/generate.html","code/PC_score_statistics.html","index.html"]
 project_dir = tempfile.TemporaryDirectory()
 
 def setup():

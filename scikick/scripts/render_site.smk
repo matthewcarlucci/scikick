@@ -23,7 +23,6 @@ rule generate_html:
 		html = skconfig.html_pattern 
 	message: "Converting {input.md} to {output.html}"
 	params:
-		template_dir = template_dir,
 		index_html = lambda w: os.path.join(os.path.relpath(
 			os.path.join(report_dir, "out_md"),
 			os.path.dirname(os.path.join(report_dir,
@@ -32,5 +31,5 @@ rule generate_html:
 	conda: skconfig.snakefile_arg("conda") # 'env/rmarkdown.yml'
 	singularity: skconfig.snakefile_arg("singularity") # 'docker://rocker/tidyverse'
 	# using 'shell:' instead of 'script:' for compatibility with renv
-	shell: "Rscript {generate_html_exe} '{input.md}' '{output}' {params.template_dir} '{params.index_html}'"
+	shell: "Rscript {generate_html_exe} '{input.md}' '{output}' '{params.index_html}'"
 

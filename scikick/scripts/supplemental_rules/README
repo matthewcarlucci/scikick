@@ -1,0 +1,10 @@
+Experimental workflows to be called explicitly as:
+
+sk run -s <experimental workflow>
+
+A convention of <file name> == <first rule name> is currently used.
+
+Note that multiple rule targets can be used as:
+
+sk run -s sk_done min_site
+

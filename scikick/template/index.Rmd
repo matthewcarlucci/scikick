@@ -1,16 +1,16 @@
 
+<hr></hr>
 
 ```{r, echo=FALSE}
 gitlog = .scikick_get_gitlog()
-rm(".scikick_get_gitlog")
 has_history = !is.null(gitlog)
 ```
 
-### Project History 
+**Project History**
 
 `r if(!has_history) "No git history was found for this project"`
 
-`r if(has_history) "#### List of Contributors"`   
+`r if(has_history) "**List of Contributors**"`   
 
 ```{r, echo=FALSE}
 if(has_history){
@@ -20,7 +20,7 @@ if(has_history){
 }
 ```
 
-`r if(has_history) "#### Full List of Project Changes"`
+`r if(has_history) "**Full List of Project Changes**"`
 
 ```{r, echo=FALSE}
 if(has_history) knitr::kable(gitlog, format = "markdown", align=rep("l", 4))

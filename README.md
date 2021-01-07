@@ -3,9 +3,9 @@
 [](https://pypi.python.org/pypi/scikick/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scikick.svg)](https://pypi.python.org/pypi/scikick/)
 ![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
-[![Snakemake](https://img.shields.io/badge/snakemake-≥5.6.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥5.9.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
 
-### Preface: simple workflow definitions for complex notebooks in R or Python
+### Preface: Notebook-Centric Workflows 
 
 A thorough data analysis will involve multiple notebooks (e.g. in [Rmarkdown](https://rmarkdown.rstudio.com/) or [Jupyter](https://jupyter.org/)), but methods for maintaining simple connections between notebooks are not straightforward. 
 Consider this two stage data analysis where `QC.Rmd` provides a cleaned dataset 
@@ -33,29 +33,33 @@ This simple definition can be applied to:
 - Build a shareable report from the rendered notebooks.
 - Collect relevant provenance information.
 
-These features enable use of the notebook format for complex analyses, however, 
-current methods for achieving this require too much configuration.
-Researchers require simple tools to get these benefits and allow for focus to remain on the data analysis. 
+These features are key to the use of notebooks for complex analyses, however, 
+**too much configuration is currently required to accomplish these goals**.
+To remain focused on an investigation, simple tools 
+are needed to streamline the organization of notebook collections.
 
 ## **scikick** - your sidekick for managing notebook collections
 
 *scikick* is a command-line-tool for connecting and executing data analyses 
-with a few simple commands. 
+ with a few simple commands to ensure future reproducibility. 
 
 ![](docs/source/sk_demo.gif)
 
-Common tasks for *ad hoc* data analysis are managed through scikick:
+Common useful features for *ad hoc* data analysis are managed through scikick:
 
  - Awareness of up-to-date results
- - Website generated according to the project directory structure
+ - Website generation with no configuration needed
  - Collection of page metadata (session info, page runtime, git history)
- - Simple ordering of script executions
- - Defining other script dependencies (e.g. notebook imports `functions.R`)
- - Automated execution of `.R` as R markdown (with `knitr::spin`) 
+ - Simple ordering of script executions (via user-defined definition)
+ - Defining other script dependencies (e.g. notebook imports `my_functions.R`)
+ - Preset methods for executing a variety of notebook formats to markdown output 
+ - Reduction of boilerplate code (code not directly related to the investigation)
 
 Commands are inspired by git for configuring the workflow: `sk init`, `sk add`, `sk status`, `sk del`, `sk mv`.
 
-Scikick currently supports `.R` and `.Rmd` for notebook rendering (`.ipynb` can be supported via `jupytext` [paired notebooks](https://jupytext.readthedocs.io/en/latest/paired-notebooks.html)).
+Scikick currently contains methods for executing `.R`, `.Rmd`, `.ipynb`, and `.md` (simple copy) to `.md` output pages.
+
+`.md` files are currently compiled into a website with `rmarkdown::render_site`.
 
 [Output website for demo project (`sk init --demo`)](https://petronislab.camh.ca/pub/scikick_tests/master/)
 
@@ -79,7 +83,7 @@ Full installation of requirements within a virtual environment with [conda](http
 conda install -c tadasbar -c bioconda -c conda-forge scikick
 ```
 
-To install or upgrade to the latest version of scikick (master branch) directly from GitHub:
+To install or upgrade to the latest development version of scikick (master branch) directly from GitHub:
 
 ```
 pip install --upgrade git+https://github.com/matthewcarlucci/scikick.git#egg=scikick
@@ -101,7 +105,8 @@ sk init --demo
 
 ### Main Commands
 
-Below are some brief descriptions of the most useful commands. Run `sk <command> --help` for details and available arguments. Run `sk --help` for the full list of commands.
+Below are some brief descriptions of the most useful commands. Run `sk --help` for the full list of commands. 
+Run `sk <command> --help` for details and available arguments for each command. 
 
 ##### sk init
 
@@ -111,9 +116,9 @@ sk init
 
 Like `git init`, this should be executed at the project root in an existing or an empty project.
 
-It will check for required dependencies and create `scikick.yml` to store the workflow definition which will be configured using other commands. 
+It will check for required dependencies and create a `scikick.yml` file to store the workflow definition. 
 
-`sk init` can also be used to create data analysis directories and add to `.gitignore` for the project.
+`sk init` can also be used to create some useful directory conventions and add appropriate entries to `.gitignore` for the project.
 
 ##### sk add
 
@@ -336,18 +341,30 @@ sk layout -s <menu name>
 
 ## Website Homepage
 
-The `index.html` is required for the homepage of the website. Scikick includes
-some default content for this page and will add the content to any project defined 
-`index.*` file (only one `index.*` file allowed per project).
+The `index.html` is required for the homepage of the website and will be automatically
+generated if not provided. Any project defined 
+`index.*` file will be added to the default content. It is recommended to include *at most* one `index.*` file per project.
+
+## Website output customization
+
+As of scikick 0.2.0, users can include global output options in the project scikick.yml
+as one would in an Rmarkdown document, E.g. in scikick.yml add:
+
+```
+output: 
+  rmarkdown::html_document:
+    theme: "paper"
+```
+
+This has only been tested with html_document outputs. Other formats may require further accomodations.
 
 ## Rstudio with scikick projects
 
-If using Rstudio, default code execution will be relative to the Rmd file location. This
-can be changed by going to `Tools > Global Options > Rmarkdown > Evaluate chunks in directory`
-and setting to "Current".
+If using Rstudio, default interactive code execution will be relative to the Rmd file location (instead of the project root). This
+can be changed to match scikick behaviour by going to `Tools > Global Options > Rmarkdown > Evaluate chunks in directory`
+and setting to "Current". "Current" should be the project root (scikick.yml directory).
 
-Additionally, the "knit" button must also be set to execute from the project
-directory. 
+Additionally, the "knit" button can be used for prototyping if set to execute from the project directory. 
 
 More [details here](https://bookdown.org/yihui/rmarkdown-cookbook/working-directory.html).
 
@@ -419,7 +436,7 @@ sk config --conda env.yml
 sk run -v -s --use-conda
 ```
 
-### Incorporating with Other Pipelines
+### Interoperability with Other Pipelines
 
 Additional workflows written in [snakemake](http://snakemake.readthedocs.io/en/stable/) should play nicely with the scikick workflow. By default, a `Snakefile` at the project root will be included in the `sk run` execution (Using the snakemake `include:` directive).
 
@@ -432,3 +449,4 @@ These jobs can be added to the beginning, middle, or end of scikick related task
   - `sk add second_step.rmd -d pipeline_donefile`
 - End 
   - Add `report/out_md/last_step.md` as the input to the first job of the Snakefile.
+

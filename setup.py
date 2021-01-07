@@ -17,13 +17,13 @@ with open("README.md", "r") as fh:
 setup(
     name='scikick',
     version=main_ns['__version__'],
-    description='report rendering workflow',
+    description='Notebook collection execution tool',
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=['scikick'],
     zip_safe=False,
     install_requires=[
-        'snakemake>=5.6.0',
+        'snakemake>=5.9.0',
         'ruamel.yaml>=0.16.5'
         ],
     include_package_data = True,

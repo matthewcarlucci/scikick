@@ -184,7 +184,8 @@ def file_markers(skconf, inupds, exinupds, missing_outs, exec_scripts):
         if not os.path.isfile(_file):
             markers[_file] = ["?", "?", "?"]
             continue
-        _file_is_exe = _file in skconf.exes
+        _file_is_index = _file == skconf.index_exe
+        _file_is_exe = _file in skconf.exes or _file_is_index
         if _file_is_exe:
             #### SETUP
             # Get corresponding html and md files for the exe
@@ -227,7 +228,7 @@ def file_markers(skconf, inupds, exinupds, missing_outs, exec_scripts):
 
             ### (__*) Internal dependency flag
             # i if any internal dependencies have been updated
-            deps = analysis[_file]
+            deps = analysis[_file] if not _file_is_index else None
             deps = deps if (deps is not None) else list()
             # Note that exes in analysis will not be found in inupds values (their
             # md will be)
