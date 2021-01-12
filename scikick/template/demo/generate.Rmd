@@ -17,6 +17,7 @@ head(iris)
 Exporting data for downstream use as `output/iris.csv`.
 
 ```{r export}
+dir.create("output",showWarnings=FALSE)
 write.csv(iris, file="output/iris.csv")
 ```
 

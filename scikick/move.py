@@ -5,7 +5,11 @@ import shutil
 from re import sub, IGNORECASE
 from scikick.utils import reterr, warn
 from scikick.layout import rm_commdir
-from scikick.yaml import yaml_in, rename, supported_extensions
+from scikick.yaml import yaml_in, rename
+
+# Currently, not all yaml support is supported in sk mv
+#from scikick.yaml import supported_extensions
+supported_extensions = [".R", ".Rmd"]
 
 def sk_move_walk(src):
     """Walks through the directory that is contained inside src
@@ -134,21 +138,22 @@ def sk_move_extras(mv_dict):
             pattern="\.md$", repl="")
         tabname_dest = sub(string=os.path.basename(md_dest),
             pattern="\.md$", repl="")
-        md_srcfigdir = os.path.join(md_srcdir, "output", tabname_src)
-        md_destfigdir = os.path.join(md_destdir, "output", tabname_dest)
+        # "figure" must match execute_code.R fig.path
+        md_srcfigdir = os.path.join(md_srcdir, "figure", tabname_src)
+        md_destfigdir = os.path.join(md_destdir, "figure", tabname_dest)
         if os.path.isdir(md_srcfigdir):
             dest_dirname = os.path.dirname(md_srcfigdir)
             if not os.path.isdir(dest_dirname):
                 os.makedirs(dest_dirname, exist_oke=True)
             print(f"sk: mv {md_srcfigdir} {md_destfigdir}")
             shutil.move(md_srcfigdir, md_destfigdir)
-            # rename the output/ directory name in the dest md
+            # rename the figure/ directory name in the dest md
             ## get the initial timestamp
             initial_timestamp = os.path.getmtime(md_dest)
             md_file = open(md_dest, 'r+')
             md_lines = [sub(string=line,
-                pattern=f'src="output/{tabname_src}',
-                repl=f'src="output/{tabname_dest}')
+                pattern=f'src="figure/{tabname_src}',
+                repl=f'src="figure/{tabname_dest}')
                 for line in md_file]
             md_file.seek(0)
             for l in md_lines:

@@ -17,7 +17,7 @@ rule sk_exe_rmd:
     threads: skconfig.snakefile_arg("threads")
     benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
-    shell: "Rscript %s '{input.exe}' '{output.md}' > {log} 2>&1" \
+    shell: "Rscript %s '{input.exe}' '{output.md}' > '{log}' 2>&1" \
         % os.path.join(script_dir, "execute_code.R")
 
 rule sk_exe_r:
@@ -33,7 +33,7 @@ rule sk_exe_r:
     threads: skconfig.snakefile_arg("threads")
     benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
-    shell: "Rscript %s '{input.exe}' '{output.md}' > {log} 2>&1" \
+    shell: "Rscript %s '{input.exe}' '{output.md}' > '{log}' 2>&1" \
         % os.path.join(script_dir, "execute_code.R")
 
 rule sk_exe_ipynb:
@@ -51,13 +51,23 @@ rule sk_exe_ipynb:
         outdir=lambda wildcards, output: os.path.dirname(output[0])
     log: '%s/logs/{out_base}_logs.txt' % skconfig.report_dir
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
-    shell: "jupyter nbconvert --to markdown --execute --output-dir='{params.outdir}' '{input.exe}' > {log} 2>&1" 
+    shell: "jupyter nbconvert --to markdown --execute --output-dir='{params.outdir}' '{input.exe}' > '{log}' 2>&1" 
 
 # WIP for py script execution as ipynb
-#rule sk_exe_py:
-#    input: "{out_base}.py"
-#    output: temp("{out_base}.ipynb")
-#    shell: "jupyter convert --to notebook {input}"
+# Currently is not compatible with projects also containing ipynb
+# rule sk_exe_py:
+#     input: exe ="{out_base}.ipynb"
+#     output:
+#         md = skconfig.md_pattern
+#     params:
+#         outdir=lambda wildcards, output: os.path.dirname(output[0])
+#     message: "Executing code in {input.exe}, outputting to {output.md}"
+#     log: '%s/logs/{out_base}_logs.txt' % skconfig.report_dir
+#     shell: "jupyter nbconvert --to markdown --execute --output-dir='{params.outdir}' '{input.exe}' > '{log}' 2>&1" 
+# rule sk_exe_py_convert:
+#     input: lambda wildcards: py_inputs[wildcards.out_base]
+#     output: temp("{out_base}.ipynb")
+#     shell: "jupytext --to notebook {input}"
 
 rule sk_exe_md: 
     input: lambda wildcards: md_inputs[wildcards.out_base]
@@ -65,6 +75,6 @@ rule sk_exe_md:
         md = skconfig.md_pattern
     message: "Executing code in {input}, outputting to {output}"
     log: '%s/logs/{out_base}_logs.txt' % skconfig.report_dir
-    shell: "cp {input} {output} > {log} 2>&1"
+    shell: "cp {input} {output} > '{log}' 2>&1"
 
 
