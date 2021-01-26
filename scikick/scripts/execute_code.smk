@@ -70,11 +70,13 @@ rule sk_exe_ipynb:
 #     shell: "jupytext --to notebook {input}"
 
 rule sk_exe_md: 
-    input: lambda wildcards: md_inputs[wildcards.out_base]
+    input: 
+        deps = lambda wildcards: md_inputs[wildcards.out_base],
+        exe = lambda wildcards: skconfig.get_info(wildcards.out_base,"exe")
     output:
         md = skconfig.md_pattern
-    message: "Executing code in {input}, outputting to {output}"
+    message: "Executing code in {input.exe}, outputting to {output}"
     log: '%s/logs/{out_base}_logs.txt' % skconfig.report_dir
-    shell: "cp {input} {output} > '{log}' 2>&1"
+    shell: "cp {input.exe} {output} > '{log}' 2>&1"
 
 
