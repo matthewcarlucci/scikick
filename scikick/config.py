@@ -120,11 +120,13 @@ class ScikickConfig:
         return deps
 
     def get_site_yaml_files(self):
-        ret=[os.path.normpath(os.path.join(self.report_dir, "out_md", dir,
-            "_site.yml"))
-        for dir in set([os.path.dirname(a) for a in self.exes])]
-        index_site_yaml = os.path.normpath(os.path.join(self.report_dir,
-            "out_md", "_site.yml"))
+        """
+        Determine all required _site.yml files for the generate_site
+        workflow.
+        """
+        dirs = set([os.path.dirname(self.get_info(a,"md")) for a in self.exes])
+        ret=[os.path.normpath(os.path.join(dir, "_site.yml")) for dir in dirs]
+        index_site_yaml = os.path.normpath(os.path.join(self.report_dir, "out_md", "_site.yml"))
         if index_site_yaml not in ret:
             ret.append(index_site_yaml)
         return ret
