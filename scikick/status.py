@@ -27,7 +27,7 @@ extupd_pattern = "^.*Input files updated by another job: (.*)$"
 intupd_pattern = f"^.*Updated input files: (.*)$"
 intupd_pattern_sc = f"^.*Updated input files: (.*);.*$"
 # Get the 'out_base' for exe(s) that will have an html generated
-htmlgen_pattern = f"^Job.*: Converting .*out_md/(.*)\.md to .*out_html/(.*)\.html$"
+htmlgen_pattern = f"^Job.*: Converting .*out_md/(.*)_tmp\.md to .*out_html/(.*)\.html$"
 # Determine which exe will be executed
 exe_pattern = f"^Job.*: Executing code in (.*), outputting to .*$"
 # Generic job/reason patterns

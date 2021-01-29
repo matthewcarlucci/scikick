@@ -21,9 +21,9 @@ as a YAML header -->
 ```{r results='asis',echo=F}
 fintime <- Sys.time()
 timediff <- difftime(fintime,.scikick$starttime)
-cat(sprintf("Computation Started: %s", .scikick$starttime))
+cat(sprintf("Computation Started: `%s`", .scikick$starttime))
 cat("\n\n")
-cat(sprintf("Finished in %s %s",
+cat(sprintf("Finished in `%s %s`",
     round(as.numeric(timediff),3),
     units(timediff)))
 ```
@@ -102,4 +102,5 @@ for(fun in fnames) {
 </div>
 </details>
 
-<hr></hr>
+<!-- Project map inserted below after knitting -->
+

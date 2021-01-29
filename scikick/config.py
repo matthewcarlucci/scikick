@@ -135,10 +135,11 @@ class ScikickConfig:
     @property
     def exe_core_outputs(self):
         """
-        For each exe, return a list of exe, md, html, base, out_base, ext
+        For each exe, return a list of exe, md, html, base, out_base, ext, post_md
         This function is meant to contain all of the logic of expected I/O
         Every string in the result should be unique
         """
+
         ret = []
         for exe in self.exes:
             base = os.path.splitext(exe)[0]
@@ -151,7 +152,10 @@ class ScikickConfig:
                 md = os.path.normpath(f"{self.report_dir}/out_md/{base}.md")
                 html = os.path.normpath(f"{self.report_dir}/out_html/{base}.html")
                 out_base = base
-            ret.append([exe,md,html,base,out_base,ext])
+            post_md = md[:-3] + "_tmp.md"
+            # figdir is relative to out_md
+            figdir = os.path.join(os.path.dirname(md),'figure',os.path.basename(base))
+            ret.append([exe,md,html,base,out_base,ext,figdir,post_md])
         # If using the system index, add it as well
         if len(self.index_exes)==0:
             exe = self.index_exe
@@ -160,8 +164,11 @@ class ScikickConfig:
             md = os.path.normpath(f"{self.report_dir}/out_md/index.md")
             html = os.path.normpath(f"{self.report_dir}/out_html/index.html")
             out_base = 'index'
-            ret.append([exe,md,html,base,out_base,ext])
+            post_md = md[:-3] + "_tmp.md"
+            figdir = os.path.join(os.path.dirname(md),'figure',os.path.basename(base))
+            ret.append([exe,md,html,base,out_base,ext,figdir,post_md])
         return ret
+
 
     # Accessing various workflow properties
     @property
@@ -179,7 +186,8 @@ class ScikickConfig:
         element -- which path to return
         """
         # labels matching exe_core_output indicies
-        labs = ['exe', 'md', 'html', 'base', 'out_base', 'ext']
+        labs = ['exe', 'md', 'html', 'base', 'out_base',
+        'ext','next','prev',"figdir","post_md"]
         for blob in self.exe_core_outputs:
             if os.path.normpath(value) in blob:
                 if element == 'all':

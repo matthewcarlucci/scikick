@@ -14,7 +14,8 @@ def camel_case_split(identifier):
 
 def clean_name(name):
     words = name.replace("_"," ").replace("-"," ").split(" ")
-    capitalized_words = [word[0].upper() + word[1:] for word in words]
+    capitalized_words = [word[0].upper() + word[1:] if len(word) != 0 else
+            word for word in words]
     ret = ' '.join(capitalized_words)
     # TODO - camel case splitting
     return ret
@@ -47,11 +48,11 @@ def main():
                 this_item = {"text": human_text, "menu":[]} 
                 for item in items:
                     path_from_site_to_html = join(path_to_root,item)
-                    sub_item = {"text": basename(item), "href": "%s.html" % path_from_site_to_html}
+                    sub_item = {"text": clean_name(basename(item)), "href": "%s.html" % path_from_site_to_html}
                     this_item['menu'].append(sub_item)
             nav_left.append(this_item) 
 
-        site_yaml= { "navbar": {"title": basename(getcwd()), \
+        site_yaml= { "navbar": {"title": clean_name(basename(getcwd())), \
                 "left": nav_left, "right": [nav_more]}}
 
         if 'output' in skconfig.config.keys():

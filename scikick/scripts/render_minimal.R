@@ -33,20 +33,17 @@ render_minimal <- function(input,outfile,index_html){
         knit_meta = knitmeta
         )
 
-    
     # Modify new html directly to point to top level out_html/index.html file
     # Alternative to this would be to include a copy of index.html in each
     # subdirectory
-    html_outfile = sub(pattern = ".md$", replacement = ".html",
-        file.path(outdir, basename(input)))
-    if(file.exists(html_outfile)){
-        html_text = readLines(html_outfile)
+    if(file.exists(outfile)){
+        html_text = readLines(outfile)
         out = gsub(pattern="(navbar-brand.*)index.html",
             replacement=paste0("\\1", index_html),
                 x=html_text)
-        writeLines(text=out, con=html_outfile)
+        writeLines(text=out, con=outfile)
     }else{
-        warning(paste0(html_outfile," does not exist"))   
+        warning(paste0(outfile," does not exist"))   
     }
 }
 

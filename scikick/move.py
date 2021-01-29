@@ -9,7 +9,7 @@ from scikick.yaml import yaml_in, rename
 
 # Currently, not all yaml support is supported in sk mv
 #from scikick.yaml import supported_extensions
-supported_extensions = [".R", ".Rmd"]
+supported_extensions = [".R", ".Rmd",".md"]
 
 def sk_move_walk(src):
     """Walks through the directory that is contained inside src

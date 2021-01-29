@@ -36,8 +36,6 @@ snake_includes = glob.glob(os.path.join(script_dir,"supplemental_rules") + "/*.s
 # for the snakemake rules
 ###########################################
 
-site_yaml_files = skconfig.get_site_yaml_files()
-
 # Depending on upstream exes' resulting 'md'
 exe_inputs = skconfig.inferred_inputs
 
@@ -51,3 +49,4 @@ r_inputs = get_inputs(exe_inputs,'.R')
 md_inputs = get_inputs(exe_inputs,'.md')
 rmd_inputs = get_inputs(exe_inputs,'.Rmd')
 ipynb_inputs = get_inputs(exe_inputs,'.ipynb')
+py_inputs = get_inputs(exe_inputs,'.py')

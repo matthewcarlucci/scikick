@@ -1,6 +1,8 @@
 
 <hr></hr>
 
+<details> <summary> Project History </summary>
+
 ```{r, echo=FALSE}
 gitlog = .scikick_get_gitlog()
 has_history = !is.null(gitlog)
@@ -25,4 +27,4 @@ if(has_history){
 ```{r, echo=FALSE}
 if(has_history) knitr::kable(gitlog, format = "markdown", align=rep("l", 4))
 ```
-
+</details>

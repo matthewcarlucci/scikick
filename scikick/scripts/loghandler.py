@@ -9,4 +9,5 @@ def log_handler(msg):
         for line in f:
             sys.stderr.write('sk:    ' + line)
         f.close()
+        sys.stderr.write("sk: Error while generating " + msg['output'][0] + '\n')
 
