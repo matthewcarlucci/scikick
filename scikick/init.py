@@ -26,14 +26,15 @@ def copy_file(src, dest):
     return 1
 
 def init_yaml():
-    """Create an initial scikick.yml config file"""
+    """Create an initial scikick.yml config file and update the project scikick
+    version"""
     template_yaml_path = os.path.join(get_sk_exe_dir(), 'usr/scikick.yml')
     project_dir = os.getcwd()
     proj_yaml_path = os.path.join(project_dir, "scikick.yml")
     yml_loader = ruamel.yaml.YAML()
     check_requirements()
     if os.path.exists(proj_yaml_path): 
-        warn("sk: File scikick.yml already exists")
+        warn("sk: File scikick.yml already exists, adding current scikick version")
         yml_out = yml_loader.load(open(proj_yaml_path, "r"))
     else:
         warn("sk: Importing template analysis configuration file")

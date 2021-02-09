@@ -21,7 +21,6 @@ warn(f"SK INTERNAL: logfile {logger.logfile}")
 # Include the project's Snakefile if it exists
 user_snakefile = os.path.join(os.getcwd(), "Snakefile")
 if os.path.isfile(user_snakefile):
-	warn("sk: Including Snakefile found in project directory")
 	include: user_snakefile
 
 # done rule

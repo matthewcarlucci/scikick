@@ -27,9 +27,9 @@ extupd_pattern = "^.*Input files updated by another job: (.*)$"
 intupd_pattern = f"^.*Updated input files: (.*)$"
 intupd_pattern_sc = f"^.*Updated input files: (.*);.*$"
 # Get the 'out_base' for exe(s) that will have an html generated
-htmlgen_pattern = f"^Job.*: Converting .*out_md/(.*)_tmp\.md to .*out_html/(.*)\.html$"
+htmlgen_pattern = f"^Job.*:.*Converting .*out_md/(.*)_tmp\.md to .*out_html/(.*)\.html$"
 # Determine which exe will be executed
-exe_pattern = f"^Job.*: Executing code in (.*), outputting to .*$"
+exe_pattern = f"^Job.*:.*Executing code in (.*), outputting to .*$"
 # Generic job/reason patterns
 job_pattern = r"^Job \d+:.*$"
 reason_pattern = "^Reason:.*$"
@@ -70,7 +70,7 @@ def snake_status(snakefile=get_sk_snakefile(),
     verbose -- bool
     rmd -- string (show status for just this file)
     """
-    skconf = ScikickConfig(need_pages=True) # OR status with no pages just indicates whether index.html exists
+    skconf = ScikickConfig() # OR status with no pages just indicates whether index.html exists
     jobs, reasons = run_sk_dryrun(snakefile, workdir)
     # split jobs/reasons into types
     def subset_jobs(jobs,reasons,jtype):

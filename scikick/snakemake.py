@@ -22,13 +22,8 @@ def detect_page_error(line):
 
 def detect_snakemake_progress(line):
     ntbd_match = re.match(".*Nothing to be done..*", line)
-    layout_match = re.match(".*Creating site layout from scikick.*", \
-        line)
     job_match = re.match("^Job .*: (.*)$",line)
-    if layout_match:
-        warn("sk: Creating site layouts from scikick.yml,"+ \
-            " outputting to _site.yml files")
-    elif ntbd_match:
+    if ntbd_match:
         warn("sk: Nothing to be done")
     elif job_match:
         # sanitize system index.Rmd path
@@ -133,7 +128,10 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
         snakemake_args += f" {' '.join(yml['snakemake_args'])}"
     # add the implied targets (html of Rmd)
     snakemake_args += f" {target_arg}"
-
+    # Check for a user defined snakefile (imported by scikick Snakefile)
+    user_snakefile = os.path.join(os.getcwd(), "Snakefile")
+    if os.path.isfile(user_snakefile):
+        warn("sk: Including Snakefile found in project directory")
     ### Execution
     if verbose:
         warn("sk: Starting snakemake")
@@ -164,7 +162,9 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
 
             logfile_name_match = re.match("^SK INTERNAL: logfile (.*)$", line)
             if logfile_name_match is not None:
-                snake_logfile = logfile_name_match.groups()[0]
+                # Use the first found match
+                if snake_logfile == "":
+                    snake_logfile = logfile_name_match.groups()[0]
         snake_p.wait()
         if snake_p.returncode != 0:
             if not page_err:

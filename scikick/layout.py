@@ -2,6 +2,7 @@
 import os
 from ruamel.yaml.compat import ordereddict
 from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes, supported_extensions
+from scikick.utils import reterr
 
 # to allow hierarchy #232 this and everything it dependends on will need changes
 def get_tabs(config):
@@ -28,20 +29,21 @@ def get_tabs(config):
             tabs[tabname].append("./%s" % os.path.splitext(i)[0])
         else:
             tabs[tabname].append(os.path.splitext(i)[0])
-    # get the common dir suffix for all files
-    commpath = os.path.commonpath(tabs.keys())
-    tabs = ordereddict(map(lambda k: (rm_commdir(k, commpath), tabs[k]), \
-                           tabs.keys()))
-    # all files in './' have their own tab
-    if "./" in tabs.keys():
-        wd_idx = list(tabs.keys()).index("./")
-        tabs["./"].reverse()
-        for root_file in tabs["./"]:
-            fname = os.path.basename(root_file)
-            if fname in tabs.keys():
-                fname = f"{fname}.Rmd"
-            tabs.insert(wd_idx, fname, [root_file])
-        del tabs["./"]
+    if tabs != {}:
+        # get the common dir suffix for all files
+        commpath = os.path.commonpath(tabs.keys())
+        tabs = ordereddict(map(lambda k: (rm_commdir(k, commpath), tabs[k]), \
+                               tabs.keys()))
+        # all files in './' have their own tab
+        if "./" in tabs.keys():
+            wd_idx = list(tabs.keys()).index("./")
+            tabs["./"].reverse()
+            for root_file in tabs["./"]:
+                fname = os.path.basename(root_file)
+                if fname in tabs.keys():
+                    fname = f"{fname}.Rmd"
+                tabs.insert(wd_idx, fname, [root_file])
+            del tabs["./"]
     return tabs
 
 
