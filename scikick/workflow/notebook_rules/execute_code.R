@@ -6,7 +6,8 @@
 
 # Rmd=>md
 .skknit <- function(input, output,
-                   template_dir = "",  
+                   script_dir = "",  
+                   wd = "./",
                    data_parent = "output" # currently for knitr cache only
                    ){
 
@@ -14,7 +15,6 @@
     input_noext = basename(out_base)
     outdatadir = paste0(file.path(data_parent, out_base), "/")
 
-    script_dir = file.path(template_dir,"../scripts/")
     # Helper functions in template code
     source(file.path(script_dir, "knit_helpers.R"))
 
@@ -50,17 +50,14 @@
     options(width=105) # wider display of prints than default
 
     # package options
-    knitr::opts_knit$set(list(
-        root.dir = "./",
-        base.dir = dirname(output)
-    ))
+    knitr::opts_knit$set(list(root.dir = wd, base.dir = dirname(output)))
 
     rmd <- readLines(input)
     #is_homepage = input == index_rmd
     is_homepage = grepl("out_md/index",output)
     if(is_homepage){
         # import system index 
-        sysindex <- readLines(file.path(template_dir, "index.Rmd"))
+        sysindex <- readLines(file.path(script_dir, "index.Rmd"))
         # When no project index.Rmd exists, index_rmd/rmd will be the system
         # template and nothing else needs to be done 
         if(!identical(rmd, sysindex)){
@@ -68,7 +65,7 @@
         }
     } else {
         # Append footer (analysis metadata)
-        footer <- readLines(file.path(template_dir, "footer.Rmd"))
+        footer <- readLines(file.path(script_dir, "footer.Rmd"))
         rmd <- c(rmd, footer)
     }
 
@@ -114,8 +111,8 @@
     }
    
     # Execution 
-    template_dir = file.path(script_dir,"../template")
-    out <- .skknit(rmd, out_md, template_dir)
+    self_dir = dirname(input) # Allow for self as working directory for retrofitting
+    out <- .skknit(rmd, out_md, script_dir,wd="./")
     # Ensure logs are empty if execution is successful
     return(invisible(NULL))
 } 

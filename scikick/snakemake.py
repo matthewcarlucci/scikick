@@ -64,7 +64,7 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
     rmds -- string rmd who's output should be targetted
     """
     exe_dir = get_sk_exe_dir()
-    loghandler = os.path.join(exe_dir, 'scripts/loghandler.py')
+    loghandler = os.path.join(exe_dir, 'workflow/loghandler.py')
 
     skconf = ScikickConfig()
     yml = skconf.config

@@ -1,10 +1,10 @@
 from shutil import copyfile
-from scikick.workflow import *
+from scikick.graph import *
 import scikick
 
 # Currently depends on variables from main Snakefile
 
-yaml_gen_script = os.path.join(script_dir, 'render_site_yamlgen.py')
+yaml_gen_script = os.path.join(workflow_dir, 'site_rules/render_site_yamlgen.py')
 
 localrules: generate_html, generate_site_files
 

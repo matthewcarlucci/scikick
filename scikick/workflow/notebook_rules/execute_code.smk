@@ -18,7 +18,7 @@ rule sk_exe_rmd:
     benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
     shell: "Rscript %s '{input.exe}' '{output.md}' > '{log}' 2>&1" \
-        % os.path.join(script_dir, "execute_code.R")
+        % os.path.join(workflow_dir,"notebook_rules", "execute_code.R")
 
 rule sk_exe_r:
     input:
@@ -34,7 +34,7 @@ rule sk_exe_r:
     benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
     shell: "Rscript %s '{input.exe}' '{output.md}' > '{log}' 2>&1" \
-        % os.path.join(script_dir, "execute_code.R")
+        % os.path.join(workflow_dir,"notebook_rules", "execute_code.R")
 
 rule sk_exe_ipynb:
     input:
@@ -51,7 +51,7 @@ rule sk_exe_ipynb:
         outdir=lambda wildcards, output: os.path.dirname(output[0])
     log: '%s/logs/{out_base}_logs.txt' % skconfig.report_dir
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
-    shell: "jupyter nbconvert --to markdown --execute --output-dir='{params.outdir}' '{input.exe}' > '{log}' 2>&1" 
+    shell: "jupyter nbconvert --to markdown --ExecutePreprocessor.timeout -1 --execute --output-dir='{params.outdir}' '{input.exe}' > '{log}' 2>&1" 
 
 # WIP for py script execution as ipynb
 # Currently is not compatible with projects also containing ipynb

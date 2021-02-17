@@ -13,11 +13,8 @@ def get_sk_exe_dir():
 # getting the main snakefile for passing to snakemake
 def get_sk_snakefile():
     """Returns the path to scikick's Snakefile"""
-    return os.path.join(get_sk_exe_dir(), 'scripts', 'Snakefile')
+    return os.path.join(get_sk_exe_dir(), 'workflow', 'Snakefile')
 
-def get_sk_template_file(template_file):
-    """Return the path of a file in templates/""" 
-    return os.path.join(get_sk_exe_dir(), 'template', template_file)
 
 def skdir():
     """Attempts to find the root directory of a scikick project"""
@@ -46,7 +43,7 @@ def pop_script(source):
     """ Get scikick scripts for debugging. 
     Currently intended for scikick development only.
     """
-    sourcepath = os.path.join(get_sk_exe_dir(),"scripts",source)
+    sourcepath = os.path.join(get_sk_exe_dir(),"workflow",source)
     destpath = os.path.join(os.getcwd(),source)
     if os.path.isfile(destpath):
         warn(f"sk: {source} already exists in the current directory, exitting")
@@ -67,14 +64,6 @@ def unfold():
 def refold():
     """ For undoing the unfold() to tidy up
     """
-
-def number_files():
-    """ sk_mv (-g) files with new name: <order>_<file>
-    """
-    # Pseudocode
-    ordered_list = linearize_dag()
-    for i in range_files:
-        sk_mv(ordered_list[i], i + '_' + ordered_list[i], args)
 
 def check_version_r(package, version):
     """Check check whether supplied R libraries are installed

@@ -9,7 +9,7 @@
 # Supplementary/Experimental rules are included for explicit use
  
 # Read in scikick.yml and set variables
-from scikick.scripts.presnakemake import *
+from scikick.workflow.presnakemake import *
 
 warn(f"SK INTERNAL: logfile {logger.logfile}")
 
@@ -31,8 +31,8 @@ rule sk_done:
 	message: "Done, homepage is {skconfig.homepage}"
 
 # scikick main rule files
-include: "render_site.smk"
-include: "execute_code.smk"
+include: "site_rules/render_site.smk"
+include: "notebook_rules/execute_code.smk"
 
 # Non-default rule files
 for snake_include in snake_includes:

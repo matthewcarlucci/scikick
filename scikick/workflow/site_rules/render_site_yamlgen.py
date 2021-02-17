@@ -5,7 +5,7 @@ from os.path import basename, dirname, join, relpath, sep
 from ruamel.yaml import YAML
 from scikick.config import ScikickConfig
 from scikick.layout import get_tabs
-from scikick.utils import git_repo_url, get_sk_template_file
+from scikick.utils import git_repo_url, get_sk_exe_dir
 
 #https://stackoverflow.com/questions/29916065/how-to-do-camelcase-split-in-python
 def camel_case_split(identifier):
@@ -28,9 +28,13 @@ def main():
     tabs = get_tabs(skconfig.config)
     site_yaml_files = skconfig.get_site_yaml_files()
 
-    # get git repo url
-    nav_more = {"text": "More", \
-        "menu": [{"text" : "Git Repository", "href" : git_repo_url()}]}
+    giturl = git_repo_url()
+    if giturl != '.':
+        # get git repo url
+        nav_more = {"text": "More", \
+            "menu": [{"text" : "Git Repository", "href" : giturl}]}
+    else:
+        nav_more = {}
 
     # translating the desired layout (get_tabs) to _site.yml format
     for site_yaml_file in site_yaml_files:
@@ -59,7 +63,7 @@ def main():
             output_yaml = skconfig.config
         else:
             # TODO merge with scikick.yml
-            output_yaml = yaml.load(open(get_sk_template_file("default_output.yml"),"r")) 
+            output_yaml = yaml.load(open(join(get_sk_exe_dir(),"workflow/site_rules/default_output.yml"),"r")) 
         site_yaml.update(output_yaml)
 
         yaml.indent(sequence=4, mapping=4, offset=0)
