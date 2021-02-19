@@ -1,5 +1,5 @@
  m-- 	code/page1.Rmd
  me- 	code/page2.Rmd
- *-- 	system index (homepage)
+ m-- 	system index (homepage)
 Scripts to execute: 3
 HTMLs to compile ('---'): 3

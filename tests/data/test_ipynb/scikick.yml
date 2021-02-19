@@ -1,0 +1,37 @@
+### Scikick project workflow configuration file
+
+# Directory where all scikick output will be stored
+reportdir: report
+
+### Site output configuration
+# markdown rendering options for rmarkdown::render()
+output:
+  rmarkdown::html_document:
+    code_folding: hide
+    highlight: zenburn
+    theme: journal
+    template: default
+    toc: true
+    toc_float: true
+    number_sections: false
+    toc_depth: 5
+    self_contained: true
+
+##### Content below here is not intended to be editted by hand 
+#
+### "analysis" - Workflow Configuration Format
+#
+# analysis:
+#  first_script.Rmd:
+#  second_script.Rmd:
+#  - first_script.Rmd 	# script to run before second_script.Rmd
+#  - functions.R 	# file used by second_script.Rmd
+#
+# Each analysis item is expected to generate md and html files, E.g.:
+# 1. <reportdir>/out_md/first_script.md
+# 2. <reportdir>/out_html/first_script.html
+analysis: {}
+version_info:
+  snakemake: 5.30.1
+  ruamel.yaml: 0.16.5
+  scikick: 0.1.2dev

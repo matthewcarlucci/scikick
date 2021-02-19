@@ -1,3 +1,4 @@
 ```{r}
 print("A")
+plot(1) # ensure plots are moved propperly
 ```

@@ -31,6 +31,17 @@ def test_mv_file2file():
     assert "code/page3.Rmd" in yaml_in()["analysis"].keys()
 
 @with_setup(setup, teardown)
+def test_mv_file2subdirfile_runagain():
+    assert os.system("sk run") == 0
+    assert os.system("sk mv code/page1.Rmd code/subdf/page1.Rmd") == 0
+    # check the files
+    assert os.path.isfile("code/subdf/page1.Rmd")
+    assert os.path.isfile("report/out_md/code/subdf/page1.md")
+    # check the yaml
+    assert "code/subdf/page1.Rmd" in yaml_in()["analysis"].keys()
+    assert os.system("sk run > /dev/null") == 0
+
+@with_setup(setup, teardown)
 def test_mv_file2dir():
     assert os.system("sk run") == 0
     assert os.system("sk mv code/page1.Rmd code/subdir") == 0
