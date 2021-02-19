@@ -4,7 +4,7 @@ import scikick
 
 # Currently depends on variables from main Snakefile
 
-yaml_gen_script = os.path.join(workflow_dir, 'site_rules/render_site_yamlgen.py')
+yaml_gen_script = os.path.join(workflow_dir, 'site_rules','render_site_yamlgen.py')
 
 localrules: generate_html, generate_site_files
 
@@ -34,7 +34,7 @@ rule md_postprocess:
           md_root = os.path.join(skconfig.report_dir,"out_md")
           path_to_root = os.path.relpath(md_root, os.path.join(md_root,outdir))
           dg = make_dag(skconfig,"dot",path_from_root=path_to_root,subject=wildcards.out_base)
-          proj_map = '<details><summary> Next (Project Map) </summary>\n'
+          proj_map = '<br><br><details><summary> Next (Project Map) </summary>\n'
           svg = dg.pipe(format="svg").decode('utf-8')
           # Remove doctype string
           proj_map = proj_map + '\n'.join(svg.split('\n')[3:])

@@ -157,7 +157,7 @@ def run_demo_stage1():
 
     print_exec("sk init -yd")
     # copy the files
-    demo_templatedir = os.path.join(get_sk_exe_dir(), "template", "demo")
+    demo_templatedir = os.path.join(get_sk_exe_dir(), "demo")
     for f in ["generate.Rmd", "PCA.Rmd", "analysis_config.txt", \
         "PC_score_statistics.Rmd", "index.Rmd"]:
         shutil.copy(os.path.join(demo_templatedir, f), os.path.join("code", f))

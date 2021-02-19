@@ -57,7 +57,10 @@ def main():
             nav_left.append(this_item) 
 
         site_yaml= { "navbar": {"title": clean_name(basename(getcwd())), \
-                "left": nav_left, "right": [nav_more]}}
+                "left": nav_left}} 
+
+        if nav_more != {}:
+            site_yaml["navbar"]["right"] = [nav_more]
 
         if 'output' in skconfig.config.keys():
             output_yaml = skconfig.config

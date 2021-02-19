@@ -25,7 +25,7 @@ data_parent = "output"
 exe_dir = get_sk_exe_dir()
 workflow_dir = os.path.join(exe_dir, "workflow")
 snake_src = get_sk_snakefile()
-generate_html_exe = os.path.join(workflow_dir, "render_minimal.R")
+generate_html_exe = os.path.join(workflow_dir,"site_rules", "render_minimal.R")
 
 # Add on experimental workflows for explicit usage only
 snake_includes = glob.glob(os.path.join(workflow_dir,"experimental_rules") + "/*.smk")

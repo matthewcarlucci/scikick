@@ -101,12 +101,13 @@ def yaml_in(ymlpath='scikick.yml',need_pages=False):
             warn("sk: Warning: scikick.yml is missing analysis field") 
             ymli["analysis"] = ordereddict()
     else:
+        if ymli["analysis"] is None:
+            ymli["analysis"] = ordereddict()
         if len(ymli["analysis"]) == 0:
             if need_pages:
                 reterr("sk: Error: no pages have been added to scikick.yml, " + \
                     "this can be done with\nsk: sk add my.rmd")
             else:
-                warn("sk: Warning: analysis is empty") 
                 ymli["analysis"] = ordereddict()
 
     if "reportdir" not in ymli.keys():
@@ -191,7 +192,7 @@ def add_check(fname, ymli, force, deps):
                 else:
                     warn(f"sk: Warning: A redundant index file has been added\n" +
                         "sk: Warning: Neither of the added index files will be used as a homepage")
-                    os.utime(os.path.join(get_sk_exe_dir(), "template", "index.Rmd"), None)
+                    os.utime(os.path.join(get_sk_exe_dir(), "workflow","notebook_rules", "index.Rmd"), None)
             elif len(index_list) > 1:
                 warn(f"sk: Warning: A redundant index file has been added\n" +
                     "sk: Warning: Neither of the added index files will be used as a homepage")

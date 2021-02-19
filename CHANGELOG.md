@@ -6,16 +6,18 @@ Chronological changes to scikick are summarized below.
 
 ### New Features
 
+- Project Maps - embed the scikick workflow into each page as a graph with nodes linking to pages 
 - Added experimental support for `.ipynb`
 - Website menus are processed to be more human readable (#1) 
 - Individual page log files stored in report/logs
 - Allow for global rmarkdown/pandoc yaml in scikick.yml
 - Dump full logs after snakemake error
+- Add `sk run --quiet` argument
 - Include the default homepage in sk status
 
 ### Changes
 
-- Remove custom CSS for rmarkdown::html_document
+- Remove internal custom CSS for rmarkdown::html_document
 - Snakemake requirement bumped to >= 5.9 due to use of custom logger
 - New sk status message (detect unknown execution reasons)
 - Fix issue #2 for sk add -d usage

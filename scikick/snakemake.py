@@ -20,7 +20,7 @@ def detect_page_error(line):
         return 1
     return 0
 
-def detect_snakemake_progress(line):
+def detect_snakemake_progress(line, quiet=False):
     ntbd_match = re.match(".*Nothing to be done..*", line)
     job_match = re.match("^Job .*: (.*)$",line)
     if ntbd_match:
@@ -28,6 +28,8 @@ def detect_snakemake_progress(line):
     elif job_match:
         # sanitize system index.Rmd path
         job_msg = job_match.groups()[0].replace(get_sk_exe_dir(),"system's ")
+        if job_msg[0] ==' ' and quiet:
+            return
         warn("sk: " + job_msg)
 
 
@@ -54,7 +56,7 @@ def detect_snakemake_error(line):
     return ret
 
 def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
-    verbose=False, dryrun=False, snakeargs=None, rmds=[]):
+    verbose=False, dryrun=False, snakeargs=None, rmds=[], quiet=False):
     """Run snakemake with specified arguments
     snakefile -- string (path to the main snakefile)
     workdir -- string
@@ -140,19 +142,19 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
         sys.exit(subprocess.call(cmd, shell=True))
     else:
         snake_p = subprocess.Popen(f"snakemake {snakemake_args}", \
-            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         logs=[]
         sm_err = 0
         page_err = 0
         while True:
-            line = snake_p.stderr.readline().decode('utf-8')
+            line = snake_p.stdout.readline().decode('utf-8')
             if not line:
                 break
             # Capture logs
             logs.append(line)
 
             # Report progress
-            detect_snakemake_progress(line)
+            detect_snakemake_progress(line,quiet)
             page_err = detect_page_error(line) or page_err
 
             # In case of snakemake error start writing stderr
@@ -179,5 +181,6 @@ def run_snakemake(snakefile=get_sk_snakefile(), workdir=os.getcwd(), \
                 warn(f"sk: Warning: Expected homepage {skconf.homepage} is missing")
         if snake_logfile != "":
             rellog=os.path.relpath(snake_logfile,start=os.getcwd())
-            warn(f"sk: Complete log: {rellog}")
+            if snake_p.returncode!=0:
+                warn(f"sk: Complete log: {rellog}")
         return snake_p.returncode

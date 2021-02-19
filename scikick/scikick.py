@@ -38,7 +38,8 @@ def sk_run(args):
                   dryrun=args.dryrun, \
                   snakeargs=snakeargs, \
                   verbose=args.verbose, \
-                  rmds=args.script)
+                  rmds=args.script, \
+                  quiet=args.quiet)
     sys.exit(retcode)
 
 
@@ -61,12 +62,12 @@ def sk_init(args):
 
 def sk_add(args):
     """Add Rmds to scikick.yml"""
-    scikick.yaml.add(args.script, args.dependency, args.force, args.copy_deps)
+    scikick.yaml.add(args.script, args.depends_on, args.force, args.copy_deps)
 
 
 def sk_del(args):
     """Remove Rmds from scikick.yml"""
-    scikick.yaml.rm(args.script, args.dependency)
+    scikick.yaml.rm(args.script, args.depends_on)
 
 
 def sk_mv(args):
@@ -178,6 +179,7 @@ parser_run = subparsers.add_parser("run", help="Run pending tasks using snakemak
 parser_run.add_argument("script", type=str, nargs="*", \
                         help="Generate htmls only for the listed script (optional)")
 parser_run.add_argument("-v", "--verbose", action="store_true")
+parser_run.add_argument("-q", "--quiet", action="store_true")
 parser_run.add_argument("-d", "--dryrun", action="store_true", \
                         help="Show snakemake's planned execution (wrapper for snakemake -n)")
 parser_run.add_argument("-s", "--snakeargs", nargs=argparse.REMAINDER, \
@@ -189,7 +191,7 @@ parser_init = subparsers.add_parser("init", \
                                     help="Initialize a new scikick project in the current directory",
                                     description="Initialize a new scikick project in the current directory by importing a minimal scikick.yml file. Optionally, import useful template content or import the demo project with a short walkthrough of the main scikick commands.")
 parser_init.add_argument("--yaml", "-y", action="store_true", \
-                         help="Add a minimal scikick.yml config file to the current directory")
+                         help="Add a minimal scikick.yml config file to the current directory and add the current Scikick version")
 parser_init.add_argument("--dirs", "-d", action="store_true", \
 		help="Create directories: input (raw data), output (script outputs), code (scripts/code), report (website)")			 
 parser_init.add_argument("--git", "-g", action="store_true", \
@@ -206,9 +208,11 @@ parser_add = subparsers.add_parser("add", \
                                    description="Add scripts and their dependencies to the project configuration file (scikick.yml). All provided dependnecies will be applied to all provided scripts. A dependency list can be applied from an existing script with --copy-deps.")
 parser_add.add_argument("script", nargs="+", \
                         help="Script(s) to be added)")
-parser_add.add_argument("-d", "--dependency", \
+parser_add.add_argument("-d", "--depends-on", \
                         action='append', \
-                        help="Dependency to be added to the script(s) (can be used multiple times)")
+                        help="Dependency to be added to the script(s) (can be
+                        used multiple times as sk add script.Rmd -d dep1.Rmd -d
+                        dep2.Rmd)")
 parser_add.add_argument("--copy-deps", \
                         nargs=1, \
                         help="Copy the dependency list from this file")
@@ -222,7 +226,7 @@ parser_del = subparsers.add_parser("del", \
                                    description="Remove scripts and their dependencies from the project configuration file (scikick.yml). If no '-d' is provided, the provided script(s) entry will be removed entirely from the configuration file. If the '-d' flag is used, only these dependencies are removed and only from the provided scripts.")
 parser_del.add_argument("script", nargs="+", \
                         help="Script(s) entry to modify")
-parser_del.add_argument("-d", "--dependency", \
+parser_del.add_argument("-d", "--depends-on", \
                         action='append', \
                         help="Remove this dependency from the script(s) entry (can be used multiple times)")
 parser_del.set_defaults(func=sk_del, which="del")

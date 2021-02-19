@@ -85,7 +85,7 @@ class ScikickConfig:
         if len(self.index_exes) == 1:
             return self.index_exes[0]
         else:
-            return os.path.join(get_sk_exe_dir(),"template", 'index.Rmd')
+            return os.path.join(get_sk_exe_dir(), "workflow", "notebook_rules", 'index.Rmd')
 
     @property
     def homepage(self):
