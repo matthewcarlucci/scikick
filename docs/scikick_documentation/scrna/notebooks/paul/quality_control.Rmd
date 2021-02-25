@@ -1,0 +1,50 @@
+---
+title: Quality Control
+---
+
+```{r}
+unfiltered <- sce.paul
+```
+
+For some reason, only one mitochondrial transcripts are available, so we will perform quality control using only the library size and number of detected features.
+Ideally, we would simply block on the plate of origin to account for differences in processing, but unfortunately, it seems that many plates have a large proportion (if not outright majority) of cells with poor values for both metrics.
+We identify such plates based on the presence of very low outlier thresholds, for some arbitrary definition of "low"; we then redefine thresholds using information from the other (presumably high-quality) plates.
+
+```{r quality-control}
+library(scater)
+stats <- perCellQCMetrics(sce.paul) 
+qc <- quickPerCellQC(stats, batch=sce.paul$Plate_ID)
+
+# Detecting batches with unusually low threshold values.
+lib.thresholds <- attr(qc$low_lib_size, "thresholds")["lower",]
+nfeat.thresholds <- attr(qc$low_n_features, "thresholds")["lower",]
+ignore <- union(names(lib.thresholds)[lib.thresholds < 100],
+    names(nfeat.thresholds)[nfeat.thresholds < 100])
+
+# Repeating the QC using only the "high-quality" batches.
+qc2 <- quickPerCellQC(stats, batch=sce.paul$Plate_ID,
+    subset=!sce.paul$Plate_ID %in% ignore)
+sce.paul <- sce.paul[,!qc2$discard]
+```
+
+We examine the number of cells discarded for each reason.
+
+```{r}
+colSums(as.matrix(qc2))
+```
+
+We create some diagnostic plots for each metric (Figure \@ref(fig:unref-paul-qc-dist)).
+
+```{r unref-paul-qc-dist, fig.wide=TRUE, fig.cap="Distribution of each QC metric across cells in the Paul HSC dataset. Each point represents a cell and is colored according to whether that cell was discarded."}
+colData(unfiltered) <- cbind(colData(unfiltered), stats)
+unfiltered$discard <- qc2$discard
+unfiltered$Plate_ID <- factor(unfiltered$Plate_ID)
+
+gridExtra::grid.arrange(
+    plotColData(unfiltered, y="sum", x="Plate_ID", colour_by="discard") +
+        scale_y_log10() + ggtitle("Total count"),
+    plotColData(unfiltered, y="detected", x="Plate_ID", colour_by="discard") +
+        scale_y_log10() + ggtitle("Detected features"),
+    ncol=1
+)
+```

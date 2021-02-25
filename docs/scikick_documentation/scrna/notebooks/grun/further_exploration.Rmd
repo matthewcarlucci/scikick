@@ -1,0 +1,69 @@
+
+---
+title: Further Exploration
+---
+
+# Dimensionality reduction
+
+```{r dimensionality-reduction}
+set.seed(101010011)
+sce.grun.hsc <- denoisePCA(sce.grun.hsc, technical=dec.grun.hsc, subset.row=top.grun.hsc)
+sce.grun.hsc <- runTSNE(sce.grun.hsc, dimred="PCA")
+```
+
+We check that the number of retained PCs is sensible.
+
+```{r}
+ncol(reducedDim(sce.grun.hsc, "PCA"))
+```
+
+# Clustering
+
+```{r clustering}
+snn.gr <- buildSNNGraph(sce.grun.hsc, use.dimred="PCA")
+colLabels(sce.grun.hsc) <- factor(igraph::cluster_walktrap(snn.gr)$membership)
+```
+
+```{r}
+table(colLabels(sce.grun.hsc))
+```
+
+```{r unref-hgrun-tsne, fig.asp=0.5, fig.width=10, fig.cap="Obligatory $t$-SNE plot of the Grun HSC dataset, where each point represents a cell and is colored according to the assigned cluster (left) or extraction protocol (right)."}
+short <- ifelse(grepl("micro", sce.grun.hsc$protocol), "micro", "sorted")
+gridExtra:::grid.arrange(
+    plotTSNE(sce.grun.hsc, colour_by="label"),
+    plotTSNE(sce.grun.hsc, colour_by=I(short)),
+    ncol=2
+)
+```
+
+# Marker gene detection
+
+```{r marker-detection}
+markers <- findMarkers(sce.grun.hsc, test.type="wilcox", direction="up",
+    row.data=rowData(sce.grun.hsc)[,"SYMBOL",drop=FALSE])
+```
+
+```{r, echo=FALSE}
+cluster <- "6"
+```
+
+To illustrate the manual annotation process, we examine the marker genes for one of the clusters.
+Upregulation of _Camp_, _Lcn2_, _Ltf_ and lysozyme genes indicates that this cluster contains cells of neuronal origin.
+
+```{r unref-heat-hgrun-markers, fig.asp=1.5, fig.cap=sprintf("Heatmap of the AUCs for the top marker genes in cluster %s compared to all other clusters in the Grun HSC dataset.", cluster)}
+chosen <- markers[['6']]
+best <- chosen[chosen$Top <= 10,]
+aucs <- getMarkerEffects(best, prefix="AUC")
+rownames(aucs) <- best$SYMBOL
+
+library(pheatmap)
+pheatmap(aucs, color=viridis::plasma(100))
+```
+
+```{r, echo=FALSE}
+# Checking my statements:
+stopifnot(identical(chosen, markers[[cluster]]))
+stopifnot(all(c("Camp", "Lcn2", "Ltf", "Lyz1") %in% rownames(aucs)))
+```
+

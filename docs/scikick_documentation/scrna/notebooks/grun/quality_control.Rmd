@@ -1,0 +1,44 @@
+---
+title: Quality Control
+---
+
+```{r}
+unfiltered <- sce.grun.hsc
+```
+
+For some reason, no mitochondrial transcripts are available, and we have no spike-in transcripts, so we only use the number of detected genes and the library size for quality control.
+We block on the protocol used for cell extraction, ignoring the micro-dissected cells when computing this threshold.
+This is based on our judgement that a majority of micro-dissected plates consist of a majority of low-quality cells, compromising the assumptions of outlier detection.
+
+```{r quality-control}
+library(scuttle)
+stats <- perCellQCMetrics(sce.grun.hsc)
+qc <- quickPerCellQC(stats, batch=sce.grun.hsc$protocol,
+    subset=grepl("sorted", sce.grun.hsc$protocol))
+sce.grun.hsc <- sce.grun.hsc[,!qc$discard]
+```
+
+We examine the number of cells discarded for each reason.
+
+```{r}
+colSums(as.matrix(qc))
+```
+
+We create some diagnostic plots for each metric (Figure \@ref(fig:unref-hgrun-qc-dist)).
+The library sizes are unusually low for many plates of micro-dissected cells; this may be attributable to damage induced by the extraction protocol compared to cell sorting.
+
+```{r unref-hgrun-qc-dist, fig.asp=0.8, fig.wide=10, fig.cap="Distribution of each QC metric across cells in the Grun HSC dataset. Each point represents a cell and is colored according to whether that cell was discarded."}
+colData(unfiltered) <- cbind(colData(unfiltered), stats)
+unfiltered$discard <- qc$discard
+
+library(scater)
+gridExtra::grid.arrange(
+    plotColData(unfiltered, y="sum", x="sample", colour_by="discard", 
+        other_fields="protocol") + scale_y_log10() + ggtitle("Total count") +
+        facet_wrap(~protocol),
+    plotColData(unfiltered, y="detected", x="sample", colour_by="discard",
+        other_fields="protocol") + scale_y_log10() + 
+        ggtitle("Detected features") + facet_wrap(~protocol),
+    ncol=1
+)
+```

@@ -1,18 +1,15 @@
-# Merged mouse HSC datasets {#merged-hsc}
+---
+title: Merged HSC
+---
 
-```{r unref-setup, cache=FALSE, echo=FALSE, results="asis"}
-library(rebook)
-chapterPreamble(cache=TRUE)
-```
-
-## Introduction
+# Introduction
 
 The blood is probably the most well-studied tissue in the single-cell field, mostly because everything is already dissociated "for free".
 Of particular interest has been the use of single-cell genomics to study cell fate decisions in haematopoeisis.
 Indeed, it was not long ago that dueling interpretations of haematopoeitic stem cell (HSC) datasets were a mainstay of single-cell conferences.
 Sadly, these times have mostly passed so we will instead entertain ourselves by combining a small number of these datasets into a single analysis.
 
-## Data loading
+# Data loading
 
 ```{r, results='asis', echo=FALSE}
 extractCached("nestorowa-hsc.Rmd", "variance-modelling", c("sce.nest", "dec.nest"))
@@ -53,7 +50,7 @@ set.seed(00010010)
 dec.paul <- modelGeneVarByPoisson(sce.paul) 
 ```
 
-## Setting up the merge
+# Setting up the merge
 
 ```{r common-annotation}
 common <- Reduce(intersect, list(rownames(sce.nest),
@@ -83,7 +80,7 @@ normed.sce <- multiBatchNorm(
 )
 ```
 
-## Merging the datasets
+# Merging the datasets
 
 We turn on `auto.merge=TRUE` to instruct `fastMNN()` to merge the batch that offers the largest number of MNNs.
 This aims to perform the "easiest" merges first, i.e., between the most replicate-like batches,
@@ -189,8 +186,3 @@ stopifnot(igraph::are_adjacent(pseudo.out2$mst, "3", "8"))
 stopifnot(!igraph::are_adjacent(pseudo.out2$mst, "3", "7"))
 ```
 
-## Session Info {-}
-
-```{r sessionInfo, echo=FALSE, results='asis'}
-prettySessionInfo()
-```

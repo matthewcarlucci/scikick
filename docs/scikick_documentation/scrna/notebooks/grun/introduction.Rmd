@@ -1,0 +1,27 @@
+---
+title: Introduction
+---
+
+This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with CEL-seq [@grun2016denovo].
+Despite its name, this dataset actually contains both sorted HSCs and a population of micro-dissected bone marrow cells.
+
+# Data loading
+
+```{r data-loading}
+library(scRNAseq)
+sce.grun.hsc <- GrunHSCData(ensembl=TRUE)
+```
+
+```{r gene-annotation}
+library(AnnotationHub)
+ens.mm.v97 <- AnnotationHub()[["AH73905"]]
+anno <- select(ens.mm.v97, keys=rownames(sce.grun.hsc), 
+    keytype="GENEID", columns=c("SYMBOL", "SEQNAME"))
+rowData(sce.grun.hsc) <- anno[match(rownames(sce.grun.hsc), anno$GENEID),]
+```
+
+After loading and annotation, we inspect the resulting `SingleCellExperiment` object:
+
+```{r}
+sce.grun.hsc
+```
