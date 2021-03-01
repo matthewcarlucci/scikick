@@ -1,7 +1,13 @@
-
 ---
 title: Further Exploration
 ---
+
+```{r}
+source("src/env.R")
+sce.paul <- readRDS("output/paul_normalization_sce.RDS")
+dec.paul <- readRDS("output/paul_normalization_dec.RDS")
+top.paul <- readRDS("output/paul_normalization_top.RDS")
+```
 
 # Dimensionality reduction
 

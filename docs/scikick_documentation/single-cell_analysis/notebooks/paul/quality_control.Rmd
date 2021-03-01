@@ -3,6 +3,10 @@ title: Quality Control
 ---
 
 ```{r}
+sce.paul <- readRDS("output/paul_import_sce.RDS")
+```
+
+```{r}
 unfiltered <- sce.paul
 ```
 
@@ -48,3 +52,8 @@ gridExtra::grid.arrange(
     ncol=1
 )
 ```
+
+```{r export}
+saveRDS(sce.paul,"output/paul_quality_control_sce.RDS")
+```
+

@@ -2,6 +2,11 @@
 title: Normalization and Variance Modelling
 ---
 
+```{r}
+source("src/env.R")
+sce.grun.hsc <- readRDS("output/grun_quality_control_sce.RDS")
+```
+
 # Normalization
 
 ```{r normalization}
@@ -41,4 +46,10 @@ plot(dec.grun.hsc$mean, dec.grun.hsc$total, pch=16, cex=0.5,
     xlab="Mean of log-expression", ylab="Variance of log-expression")
 curfit <- metadata(dec.grun.hsc)
 curve(curfit$trend(x), col='dodgerblue', add=TRUE, lwd=2)
+```
+
+```{r export}
+saveRDS(sce.grun.hsc,"output/grun_normalization_sce.RDS")
+saveRDS(dec.grun.hsc,"output/grun_normalization_dec.RDS")
+saveRDS(top.grun.hsc,"output/grun_normalization_top.RDS")
 ```

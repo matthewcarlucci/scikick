@@ -2,6 +2,11 @@
 title: Normalization and Variance Modelling
 ---
 
+```{r}
+source("src/env.R")
+sce.paul <- readRDS("output/paul_quality_control_sce.RDS")
+```
+
 # Normalization
 
 ```{r normalization}
@@ -39,3 +44,10 @@ plot(dec.paul$mean, dec.paul$total, pch=16, cex=0.5,
     xlab="Mean of log-expression", ylab="Variance of log-expression")
 curve(metadata(dec.paul)$trend(x), col="blue", add=TRUE)
 ```
+
+```{r export}
+saveRDS(sce.paul,"output/paul_normalization_sce.RDS")
+saveRDS(dec.paul,"output/paul_normalization_dec.RDS")
+saveRDS(top.paul,"output/paul_normalization_top.RDS")
+```
+

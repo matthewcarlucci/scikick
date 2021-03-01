@@ -3,6 +3,11 @@ title: Quality Control
 ---
 
 ```{r}
+sce.grun.hsc <- readRDS("output/grun_import_sce.RDS")
+```
+
+
+```{r}
 unfiltered <- sce.grun.hsc
 ```
 
@@ -42,3 +47,8 @@ gridExtra::grid.arrange(
     ncol=1
 )
 ```
+
+```{r}
+saveRDS(sce.grun.hsc,"output/grun_quality_control_sce.RDS")
+```
+

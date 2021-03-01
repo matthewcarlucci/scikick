@@ -2,6 +2,10 @@
 title: Quality Control
 ---
 
+```{r setup}
+sce.nest <- readRDS("output/nestorowa_import_sce.RDS")
+```
+
 ```{r}
 unfiltered <- sce.nest
 ```
@@ -37,3 +41,8 @@ gridExtra::grid.arrange(
     ncol=2
 )
 ```
+
+```{r export}
+saveRDS(sce.nest,"output/nestorowa_quality_control_sce.RDS")
+```
+

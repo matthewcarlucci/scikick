@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: Import
 ---
 
 This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with MARS-seq [@paul2015transcriptional].
@@ -25,3 +25,8 @@ After loading and annotation, we inspect the resulting `SingleCellExperiment` ob
 ```{r}
 sce.paul
 ```
+
+```{r export}
+saveRDS(sce.paul,"output/paul_import_sce.RDS")
+```
+

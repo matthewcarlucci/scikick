@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: Import
 ---
 
 This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with CEL-seq [@grun2016denovo].
@@ -25,3 +25,8 @@ After loading and annotation, we inspect the resulting `SingleCellExperiment` ob
 ```{r}
 sce.grun.hsc
 ```
+
+```{r export}
+saveRDS(sce.grun.hsc,"output/grun_import_sce.RDS")
+```
+

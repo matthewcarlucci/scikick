@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: Import
 ---
 
 This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with Smart-seq2 [@nestorowa2016singlecell].
@@ -24,3 +24,9 @@ After loading and annotation, we inspect the resulting `SingleCellExperiment` ob
 ```{r}
 sce.nest
 ```
+
+```{r export}
+dir.create("output",showWarnings = F)
+saveRDS(sce.nest,"output/nestorowa_import_sce.RDS")
+```
+

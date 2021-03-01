@@ -1,7 +1,11 @@
-
 ---
 title: Normalization and Variance Modelling
 ---
+
+```{r setup}
+source("src/env.R")
+sce.nest <- readRDS("output/nestorowa_quality_control_sce.RDS")
+```
 
 # Normalization
 
@@ -41,3 +45,10 @@ curfit <- metadata(dec.nest)
 curve(curfit$trend(x), col='dodgerblue', add=TRUE, lwd=2)
 points(curfit$mean, curfit$var, col="red")
 ```
+
+```{r export}
+saveRDS(sce.nest,"output/nestorowa_normalization_sce.RDS")
+saveRDS(top.nest,"output/nestorowa_normalization_top.RDS")
+saveRDS(dec.nest,"output/nestorowa_normalization_dec.RDS")
+```
+
