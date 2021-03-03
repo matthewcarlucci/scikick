@@ -37,7 +37,7 @@ We examine the number of cells discarded for each reason.
 colSums(as.matrix(qc2))
 ```
 
-We create some diagnostic plots for each metric (Figure \@ref(fig:unref-paul-qc-dist)).
+We create some diagnostic plots for each metric.
 
 ```{r unref-paul-qc-dist, fig.wide=TRUE, fig.cap="Distribution of each QC metric across cells in the Paul HSC dataset. Each point represents a cell and is colored according to whether that cell was discarded."}
 colData(unfiltered) <- cbind(colData(unfiltered), stats)

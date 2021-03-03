@@ -17,7 +17,7 @@ sce.nest <- computeSumFactors(sce.nest, clusters=clusters)
 sce.nest <- logNormCounts(sce.nest)
 ```
 
-We examine some key metrics for the distribution of size factors, and compare it to the library sizes as a sanity check (Figure \@ref(fig:unref-nest-norm)).
+We examine some key metrics for the distribution of size factors, and compare it to the library sizes as a sanity check.
 
 ```{r}
 summary(sizeFactors(sce.nest))
@@ -30,7 +30,7 @@ plot(librarySizeFactors(sce.nest), sizeFactors(sce.nest), pch=16,
 
 # Variance modelling
 
-We use the spike-in transcripts to model the technical noise as a function of the mean (Figure \@ref(fig:unref-nest-var)).
+We use the spike-in transcripts to model the technical noise as a function of the mean.
 
 ```{r variance-modelling}
 set.seed(00010101)

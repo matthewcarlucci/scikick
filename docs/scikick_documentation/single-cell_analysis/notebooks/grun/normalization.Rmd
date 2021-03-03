@@ -17,7 +17,7 @@ sce.grun.hsc <- computeSumFactors(sce.grun.hsc, clusters=clusters)
 sce.grun.hsc <- logNormCounts(sce.grun.hsc)
 ```
 
-We examine some key metrics for the distribution of size factors, and compare it to the library sizes as a sanity check (Figure \@ref(fig:unref-hgrun-norm)).
+We examine some key metrics for the distribution of size factors, and compare it to the library sizes as a sanity check.
 
 ```{r}
 summary(sizeFactors(sce.grun.hsc))

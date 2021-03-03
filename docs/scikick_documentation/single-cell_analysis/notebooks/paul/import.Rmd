@@ -2,7 +2,7 @@
 title: Import
 ---
 
-This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with MARS-seq [@paul2015transcriptional].
+This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with MARS-seq [Paul et al., 2015](https://doi.org/10.1016/j.cell.2015.11.013).
 Cells were extracted from multiple mice under different experimental conditions (i.e., sorting protocols) and libraries were prepared using a series of 384-well plates.
 
 # Data loading

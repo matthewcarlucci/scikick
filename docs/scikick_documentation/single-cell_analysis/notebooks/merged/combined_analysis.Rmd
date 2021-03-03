@@ -25,7 +25,7 @@ stopifnot(median(tab[,"Grun"])==0)
 ```
 
 While I prefer $t$-SNE plots, 
-we'll switch to a UMAP plot to highlight some of the trajectory-like structure across clusters (Figure \@ref(fig:unref-umap-merged-hsc)).
+we'll switch to a UMAP plot to highlight some of the trajectory-like structure across clusters.
 
 ```{r unref-umap-merged-hsc, fig.width=10, fig.height=5, fig.cap="Obligatory UMAP plot of the merged HSC datasets, where each point represents a cell and is colored by the batch of origin (left) or its assigned cluster (right)."}
 library(scater)
@@ -39,7 +39,7 @@ gridExtra::grid.arrange(
 ```
 
 In fact, we might as well compute a trajectory right now.
-`r Biocpkg("TSCAN")` constructs a reasonable minimum spanning tree but the path choices are somewhat incongruent with the UMAP coordinates (Figure \@ref(fig:unref-umap-traj-hsc)).
+`r Biocpkg("TSCAN")` constructs a reasonable minimum spanning tree but the path choices are somewhat incongruent with the UMAP coordinates.
 This is most likely due to the fact that `r Biocpkg("TSCAN")` operates on cluster centroids, 
 which is simple and efficient but does not consider the variance of cells within each cluster.
 It is entirely possible for two well-separated clusters to be closer than two adjacent clusters if the latter span a wider region of the coordinate space.
@@ -67,7 +67,7 @@ stopifnot(!igraph::are_adjacent(pseudo.out$mst, "9", "7"))
 To fix this, we construct the minimum spanning tree using distances based on pairs of mutual nearest neighbors between clusters.
 This focuses on the closeness of the boundaries of each pair of clusters rather than their centroids,
 ensuring that adjacent clusters are connected even if their centroids are far apart.
-Doing so yields a trajectory that is more consistent with the visual connections on the UMAP plot (Figure \@ref(fig:unref-umap-traj-hsc2)).
+Doing so yields a trajectory that is more consistent with the visual connections on the UMAP plot.
 
 ```{r unref-umap-traj-hsc2, fig.cap="Yet another UMAP plot of the merged HSC datasets, where each point represents a cell and is colored by its _TSCAN_ pseudotime. The lines correspond to the edges of the MST across cluster centers."}
 pseudo.out2 <- quickPseudotime(merged, use.dimred="corrected", 

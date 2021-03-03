@@ -2,7 +2,7 @@
 title: Import
 ---
 
-This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with Smart-seq2 [@nestorowa2016singlecell].
+This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with Smart-seq2 [Nestorowa et al., 2016](https://doi.org/10.1182/blood-2016-05-716480).
 
 # Data loading
 

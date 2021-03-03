@@ -1,0 +1,7 @@
+# Notebooks copied from nestorowa_init
+further_exploration.Rmd
+import.Rmd
+normalization.Rmd
+quality_control.Rmd
+# Then moved to this directory
+nestorowa

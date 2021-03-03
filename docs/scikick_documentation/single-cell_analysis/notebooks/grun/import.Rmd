@@ -2,7 +2,7 @@
 title: Import
 ---
 
-This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with CEL-seq [@grun2016denovo].
+This performs an analysis of the mouse haematopoietic stem cell (HSC) dataset generated with CEL-seq [Grun et al., 2016](https://doi.org/10.1016/j.stem.2016.05.010).
 Despite its name, this dataset actually contains both sorted HSCs and a population of micro-dissected bone marrow cells.
 
 # Data loading

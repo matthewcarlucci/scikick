@@ -30,7 +30,7 @@ snn.gr <- buildSNNGraph(sce.paul, use.dimred="PCA", type="jaccard")
 colLabels(sce.paul) <- factor(igraph::cluster_louvain(snn.gr)$membership)
 ```
 
-These is a strong relationship between the cluster and the experimental treatment (Figure \@ref(fig:unref-paul-heat)), which is to be expected.
+These is a strong relationship between the cluster and the experimental treatment, which is to be expected.
 Of course, this may also be attributable to some batch effect; the confounded nature of the experimental design makes it difficult to make any confident statements either way.
 
 ```{r unref-paul-heat, fig.cap="Heatmap of the distribution of cells across clusters (rows) for each experimental treatment (column)."}

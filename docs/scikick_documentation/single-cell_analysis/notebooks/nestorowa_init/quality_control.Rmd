@@ -25,7 +25,7 @@ We examine the number of cells discarded for each reason.
 colSums(as.matrix(qc))
 ```
 
-We create some diagnostic plots for each metric (Figure \@ref(fig:unref-nest-qc-dist)).
+We create some diagnostic plots for each metric.
 
 ```{r unref-nest-qc-dist, fig.wide=TRUE, fig.cap="Distribution of each QC metric across cells in the Nestorowa HSC dataset. Each point represents a cell and is colored according to whether that cell was discarded."}
 colData(unfiltered) <- cbind(colData(unfiltered), stats)
