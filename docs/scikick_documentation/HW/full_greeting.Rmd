@@ -1,0 +1,5 @@
+```{r}
+greeting1 = readRDS("greeting_part1.RDS")
+greeting2 = readRDS("greeting_part2.RDS")
+paste(greeting1,greeting2)
+```

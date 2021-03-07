@@ -15,4 +15,30 @@ reportdir: report
 # Each analysis item is executed to generate md and html files, E.g.:
 # 1. <reportdir>/out_md/first_notebook.md
 # 2. <reportdir>/out_html/first_notebook.html
-analysis: {}
+analysis: !!omap
+- index.ipynb:
+- hello_world.ipynb:
+- SCRNA_walkthrough.ipynb:
+- core_design.ipynb:
+- advanced_usage.ipynb:
+- other_notes.ipynb:
+- CLI_demo.ipynb:
+- help.ipynb:
+version_info:
+  snakemake: 5.30.1
+  ruamel.yaml: 0.16.5
+  scikick: 0.2.0rc1
+snakefile_args:
+  conda: env.yml
+output:
+  BiocStyle::html_document:
+    theme: sandstone
+    highlight: pygments
+    toc_float: true
+    toc: true
+    css: ../../style.css
+    toc_depth: 5
+    number_sections: false
+    self_contained: true
+    includes:
+      in_header: ../../header.html

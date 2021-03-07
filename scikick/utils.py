@@ -73,7 +73,9 @@ def check_version_r(package, version):
     """
     earlier_version = subprocess.run( \
         """ Rscript -e 'cat(packageVersion("%s") < "%s", "\n")' """ \
-        % (package, version), shell = True, stdout = subprocess.PIPE)
+        % (package, version), shell = True, stdout = subprocess.PIPE,
+        # supress unimportant stderr messages for the tutorial notebooks
+        stderr=subprocess.DEVNULL)
     earlier_version = earlier_version.stdout.decode().strip().split("\n")[-1]
     if earlier_version == "TRUE":
         warn(f"sk: Warning: Version of {package} needs to be at least {version}")

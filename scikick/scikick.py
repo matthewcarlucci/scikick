@@ -210,9 +210,7 @@ parser_add.add_argument("script", nargs="+", \
                         help="Script(s) to be added)")
 parser_add.add_argument("-d", "--depends-on", \
                         action='append', \
-                        help="Dependency to be added to the script(s) (can be
-                        used multiple times as sk add script.Rmd -d dep1.Rmd -d
-                        dep2.Rmd)")
+                        help="Dependency to be added to the script(s) (can be used multiple times as sk add script.Rmd -d dep1.Rmd -d dep2.Rmd)")
 parser_add.add_argument("--copy-deps", \
                         nargs=1, \
                         help="Copy the dependency list from this file")

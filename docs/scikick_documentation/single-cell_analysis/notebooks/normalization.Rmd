@@ -3,7 +3,10 @@ title: Normalization and Variance Modelling
 ---
 
 ```{r setup}
-source("src/env.R")
+library(scater)
+library(scran)
+library(BiocStyle)
+library(pheatmap)
 sce.nest <- readRDS("output/nestorowa_quality_control_sce.RDS")
 ```
 

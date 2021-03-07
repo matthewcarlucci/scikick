@@ -2,6 +2,7 @@ Welcome to Scikick's documentation!
 ===================================
 
 .. automodule:: scikick
+    :members:
 
 .. toctree::
    :maxdepth: 2

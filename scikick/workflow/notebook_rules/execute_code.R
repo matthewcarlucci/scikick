@@ -27,7 +27,9 @@
         dpi = 100,
         fig.width = 10,
         fig.height = 10,
-        fig.retina = 2,
+        # Causes knitr to use HTML img tags which causes
+        # issues with rmd output format compatibility
+        #fig.retina = 2, 
         fig.pos = "center",
         #################
         # Code reporting

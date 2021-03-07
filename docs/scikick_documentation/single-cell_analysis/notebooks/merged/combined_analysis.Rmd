@@ -3,7 +3,10 @@ title: Combined analyses
 ---
 
 ```{r}
-source("src/env.R")
+library(scater)
+library(scran)
+library(BiocStyle)
+library(pheatmap)
 merged <- readRDS("output/merged_sce.RDS")
 ```
 

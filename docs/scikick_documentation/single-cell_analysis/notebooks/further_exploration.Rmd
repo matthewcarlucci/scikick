@@ -3,7 +3,10 @@ title: Further Exploration
 ---
 
 ```{r}
-source("src/env.R")
+library(scater)
+library(scran)
+library(BiocStyle)
+library(pheatmap)
 sce.nest <- readRDS("output/nestorowa_normalization_sce.RDS")
 top.nest <- readRDS("output/nestorowa_normalization_top.RDS")
 dec.nest <- readRDS("output/nestorowa_normalization_dec.RDS")

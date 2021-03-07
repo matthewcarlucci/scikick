@@ -1,0 +1,7 @@
+A simple notebook to define the first part of our greeting.
+
+```{r}
+greeting1 = "Hello,"
+# Save the greeting1 object as a file for later use
+saveRDS(greeting1,"greeting_part1.RDS")
+```

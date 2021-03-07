@@ -3,7 +3,10 @@ title: Normalization and Variance Modelling
 ---
 
 ```{r}
-source("src/env.R")
+library(scater)
+library(scran)
+library(BiocStyle)
+library(pheatmap)
 sce.paul <- readRDS("output/paul_quality_control_sce.RDS")
 ```
 

@@ -1,3 +1,5 @@
+# Scikick currently uses sphinx for autodocs only
+
 # Minimal makefile for Sphinx documentation
 #
 

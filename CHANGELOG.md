@@ -25,6 +25,7 @@ Chronological changes to scikick are summarized below.
 - Minor changes to footer/homepage content (include scikick.yml)
 - Reduce outputs in sk init and other
 - New sk init template
+- Fix conda env usage with `sk config --conda` and `sk run -s --use-conda`
 
 ## 0.1.2 - September 9th 2020
 

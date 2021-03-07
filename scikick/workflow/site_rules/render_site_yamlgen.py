@@ -13,7 +13,7 @@ def camel_case_split(identifier):
     return [m.group(0) for m in matches]
 
 def clean_name(name):
-    words = name.replace("_"," ").replace("-"," ").split(" ")
+    words = name.replace("_"," ").split(" ")
     capitalized_words = [word[0].upper() + word[1:] if len(word) != 0 else
             word for word in words]
     ret = ' '.join(capitalized_words)

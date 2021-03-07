@@ -12,7 +12,14 @@
 #
 import os
 import sys
+import scikick
 sys.path.insert(0, os.path.abspath('../../scikick/'))
+
+
+# Testing bs4 theme
+import sphinxbootstrap4theme
+html_theme = 'sphinxbootstrap4theme'
+html_theme_path = [sphinxbootstrap4theme.get_path()]
 
 
 # -- Project information -----------------------------------------------------
@@ -22,8 +29,12 @@ copyright = '2020, Matthew Carlucci et al'
 author = 'Matthew Carlucci et al'
 
 # The full version, including alpha/beta/rc tags
-release = 'v0.0.7'
+release = scikick.__version__ 
 
+source_suffix = ['.rst', '.md']
+source_parsers = {
+   '.md': 'recommonmark.parser.CommonMarkParser',
+}
 
 # -- General configuration ---------------------------------------------------
 
@@ -50,7 +61,7 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 #html_theme = 'alabaster'
-html_theme = "sphinx_rtd_theme"
+#html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

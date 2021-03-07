@@ -1,0 +1,44 @@
+/* Styles applied to BiocStyle::html_document
+ */
+
+h1 {
+    border-bottom: 1px hsl(81deg 40% 50%) solid;
+}
+
+h1, h2, h3 {
+    color: hsl(81deg 40% 50%);
+}
+
+/* Source code formatting
+ */
+
+pre code {
+    background-color: hsl(81deg 18% 96%);
+    color: hsl(250deg 10% 25%);
+    margin: 0 10 0 0;
+}
+
+pre {
+    margin: 0 0 0 0;
+}
+
+.sourceCode {
+    overflow: auto;
+}
+
+pre.sourceCode {
+    padding-left: 65px;
+    background-color: hsl(0deg 0% 100%);
+}
+
+code.sourceCode {
+    background-color: hsl(81deg 0% 94%) !important;
+}
+
+ul.navbar-nav{
+    padding-right: 0px;
+}
+
+div.sourceCode {
+    margin: 10px 0 0 0;
+}

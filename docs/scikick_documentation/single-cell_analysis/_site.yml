@@ -1,0 +1,10 @@
+# Optional site theme customization
+output:
+  BiocStyle::html_document:
+    code_folding: hide
+    theme: readable
+    toc_float: true
+    toc: true
+    number_sections: false
+    toc_depth: 5
+    self_contained: true
