@@ -62,7 +62,11 @@ class ScikickConfig:
             yml = self.config
             if "snakefile_args" in yml.keys():
                 if arg in yml["snakefile_args"]:
-                     value = yml["snakefile_args"][arg]
+                    # Get full conda path (scikick.yml value is relative to project root)
+                    if arg == "conda":
+                        value = os.path.abspath(yml["snakefile_args"][arg])
+                    else:
+                        value = yml["snakefile_args"][arg]
         return value
 
     @property

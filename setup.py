@@ -17,7 +17,7 @@ with open("README.md", "r") as fh:
 setup(
     name='scikick',
     version=main_ns['__version__'],
-    description='Notebook collection execution tool',
+    description='Utility for executing collecitons of computational notebooks',
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=['scikick'],

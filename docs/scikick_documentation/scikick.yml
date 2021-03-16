@@ -16,7 +16,7 @@ reportdir: report
 # 1. <reportdir>/out_md/first_notebook.md
 # 2. <reportdir>/out_html/first_notebook.html
 analysis: !!omap
-- index.ipynb:
+- introduction.ipynb:
 - hello_world.ipynb:
 - SCRNA_walkthrough.ipynb:
 - core_design.ipynb:

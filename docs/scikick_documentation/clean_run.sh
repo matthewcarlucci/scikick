@@ -13,3 +13,6 @@ done
 # clearing notebook outputs updates timestamp 
 # Removes temp files during execution
 sk run -s -t
+
+# Overwrite default homepage with custom page
+cp index.html report/out_html/index.html
