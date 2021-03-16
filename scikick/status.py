@@ -143,7 +143,7 @@ def snake_status(snakefile=get_sk_snakefile(),
         print_status(config, markers, verbose)
 
 def flatten_dependency_tree(exe, skconf):
-    """Returns a list of rmd and its recursive deps"""
+    """Returns a list of exe and its recursive deps (includes exes only)"""
     file_list = [exe]
     if exe in skconf.exes and skconf.analysis[exe] is not None:
         for dep in skconf.analysis[exe]:

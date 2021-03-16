@@ -153,6 +153,8 @@ def add_check(fname, ymli, force, deps):
         return False
         # check if the file extension is supported
     fext = os.path.splitext(fname)[-1]
+    if fext.lower() == ".ipynb":
+        warn("sk: Warning: .ipynb use in Scikick is experimental and requires installation of jupyter") 
     f_exe_support = fext.lower() in [x.lower() for x in supported_extensions]
     if not f_exe_support:
         extension_list_str = ', '.join(supported_extensions)
@@ -312,7 +314,8 @@ def rm(files, deps):
             index_list = get_indexes(ymli)
             if len(index_list) == 0:
                 warn(f"sk: Using system template index.Rmd as homepage")
-                os.utime(os.path.join(get_sk_exe_dir(), "template", "index.Rmd"), None)
+                os.utime(os.path.join(get_sk_exe_dir(),
+                "workflow","notebook_rules", "index.Rmd"), None)
             elif len(index_list) == 1:
                 os.utime(index_list[0], None)
     yaml_dump(ymli)

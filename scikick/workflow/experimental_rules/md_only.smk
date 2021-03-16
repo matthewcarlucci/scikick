@@ -1,3 +1,5 @@
+# By default sk_exe_ipynb from execute_code.smk takes priority
+ruleorder: sk_exe_ipynb > sk_noexe_ipynb
 rule sk_noexe_ipynb:
     input:
         deps = lambda wildcards: ipynb_inputs[wildcards.out_base],

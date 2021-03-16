@@ -16,42 +16,68 @@ def make_dag(skconfig,engine="dot",path_from_root="",subject=""):
     skdot.attr(ranksep="0.3")
     skdot.attr(weight="10")
     skdot.attr(rankdir="LR")
-    cgraphs = {}
+
+    # Get all files/nodes
+    allfiles = []
     for exe in skconfig.exes:
-        node = skconfig.get_info(exe,"out_base")
-        dname = os.path.dirname(exe) + '/'
-        # Adjust links to start from out_md/
-        # i.e. path_from_root is the path from subject to out_md
-        link_path = os.path.join(path_from_root,node)
-        # Define subgraph
+        allfiles += [exe]
+        deps = skconfig.analysis[exe]
+        if deps is not None:
+            for dep in deps:
+                if dep not in allfiles:
+                    allfiles += [dep]
+
+    # Define all subgraphs
+    cgraphs = {}
+    for file in allfiles:
+        dname = os.path.dirname(file) + '/'
         if dname not in cgraphs.keys():
             cgraphs[dname] = Digraph(name="cluster_" + dname)
             # Styling of cluster/directory group
             cgraphs[dname].attr(label=dname, style='rounded', bgcolor='lightgrey',
                                 fontsize='10', fontname="arial", fontcolor="black")
-        # Highlight current node
-        node_color= '#ff967b' if node == subject else 'white'
-        # Styling of exe nodes
-        cgraphs[dname].node(node, label = clean_name(os.path.basename(node)),
+
+    # Define all nodes within appropriate subgraph
+    for file in allfiles:
+        dname = os.path.dirname(file) + '/'
+        if file in skconfig.exes:
+            out_base = skconfig.get_info(file,"out_base")
+            # Adjust links to start from out_md/
+            # i.e. path_from_root is the path from subject to out_md
+            link_path = os.path.join(path_from_root,out_base)
+            # Highlight current node
+            node_color= '#ff967b' if out_base == subject else 'white'
+            # Define the exe node
+            cgraphs[dname].node(file, label =
+                    clean_name(os.path.basename(out_base)),
                 URL=f'{link_path}.html',fontsize='10',margin='0.05,0.05',
                 href=f'{link_path}.html',width='0.1',height='0.1',
-                   shape="box",style="filled",fillcolor=node_color,fontname="arial")
-        # Drawing edges and non-exe nodes
-        if skconfig.analysis[exe] is not None:
-            for edge_dep in skconfig.analysis[exe]:
-                if edge_dep in skconfig.exes:
-                    # Connect two exes
-                    edge = skconfig.get_info(edge_dep,"out_base")
-                    cgraphs[dname].edge(edge, node)
-                else:
-                    # Connect exe and non-exe
-                    edge = edge_dep
-                    # Non-exe styling
-                    cgraphs[dname].node(edge, label = os.path.basename(edge),
-                                        fontsize='10',width='0.1',height='0.1',
-                                        shape="note",fillcolor="lightgrey",fontname="arial",
-                                        style="filled",dir="none")
-                    cgraphs[dname].edge(edge,node,dir="none")
+                shape="box",style="filled",fillcolor=node_color,fontname="arial")
+        else:
+            # Define non-exe node
+            cgraphs[dname].node(file, label = os.path.basename(file),
+                fontsize='10',width='0.1',height='0.1',
+                shape="note",fillcolor="lightgrey",fontname="arial",
+                style="filled",dir="none")
+    
+    # Define all edges from dependencies to exe
+    for exe in skconfig.exes:
+        dname = os.path.dirname(exe) + '/'
+        if skconfig.analysis[exe] is None:
+            continue
+        deps = skconfig.analysis[exe]
+        for dep in deps:
+            dep_dname = os.path.dirname(dep) + '/'
+            if dep in skconfig.exes:
+                dir = "forward"
+            else:
+                dir = "none"
+            # within same subgraph?
+            if dep_dname == dname:
+                cgraphs[dname].edge(dep, exe,dir=dir)
+            else:
+                skdot.edge(dep,exe,dir=dir)
+
     # Add subgraphs to main graph
     for key in cgraphs.keys():
         skdot.subgraph(cgraphs[key])

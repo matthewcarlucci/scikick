@@ -1,5 +1,4 @@
 from shutil import copyfile
-from scikick.graph import *
 import scikick
 
 # Currently depends on variables from main Snakefile
@@ -30,6 +29,8 @@ rule md_postprocess:
               out.write(orig.read())
       # Append svg - allow for failures in this step as it is non-essential
       try:
+          # Import here so that loaded graphviz library is not required 
+          from scikick.graph import make_dag 
           outdir = os.path.dirname(wildcards.out_base)
           md_root = os.path.join(skconfig.report_dir,"out_md")
           path_to_root = os.path.relpath(md_root, os.path.join(md_root,outdir))
