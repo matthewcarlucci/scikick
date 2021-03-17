@@ -118,14 +118,25 @@ def sk_layout(args):
     the order of keys of 'analysis' dict in scikick.yml.
     """
     # TODO: optimize this code, too much redundancy
-    config = yaml_in(need_pages=True)
-    tabs = get_tabs(config)
+    skconf=ScikickConfig(need_pages=True)
+    tabs = get_tabs(skconf)
 
     # modify the layout of a submenu
     if args.submenu is not None:
         rearrange_submenus(args.submenu[0], args.order, config, tabs)
     else:
-        rearrange_tabs(args.order, config, tabs)
+        if len(args.order) == 0:
+            for i in range(len(tabs.keys())):
+                print(f"{i + 1}:  {list(tabs.keys())[i]}")
+            return
+        new_config = rearrange_tabs(args.order, skconf.config, tabs)
+        # Check that all exes still exist (same keys)
+        assert skconf.analysis == new_config['analysis']
+        yaml_dump(new_config)
+        # print layout again
+        tabs = get_tabs(skconf)
+        for i in range(len(tabs.keys())):
+            print(f"{i + 1}:  {list(tabs.keys())[i]}")
 
 # Three usage modes
 # 1. sk config 			Show the full config          (get)

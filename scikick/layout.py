@@ -5,21 +5,28 @@ from scikick.yaml import yaml_in, yaml_dump, rm_commdir, get_indexes, supported_
 from scikick.utils import reterr
 
 # to allow hierarchy #232 this and everything it dependends on will need changes
-def get_tabs(config):
+def get_tabs(skconf):
     """Return a list of tab names determined from scikick.yml
     'analysis:' dict
     config -- scikick.yml as an ordereddict
     """
+    config=skconf.config
     if len(config["analysis"]) == 0:
         return {}
 
     # remove index file beforehand
-    index_list = get_indexes(config)
-    if len(index_list) == 1:
-        config["analysis"].pop(index_list[0], None)
+    # BUG: causes index to be permanently removed from scikick.yml
+    index_list = skconf.index_exes
+    #if len(index_list) == 1:
+    #    analysis.pop(index_list[0], None)
+
     # get tab strucutre
     tabs = {}
-    for i in config["analysis"].keys():
+    for i in config['analysis'].keys():
+        if len(index_list) == 1:
+            if i == index_list[0]:
+                print(i)
+                continue
         tabname = os.path.dirname(i)
         if tabname == "":
             tabname = "./"
@@ -79,26 +86,21 @@ def rearrange_tabs(order, config, tabs):
     config -- yaml_in() output
     tabs -- get_tabs(config) output
     """
-    if len(order) == 0:
-        for i in range(len(tabs.keys())):
-            print(f"{i + 1}:  {list(tabs.keys())[i]}")
-        return
     # get the new ordering based on the argument list
     order = new_tab_order(order, tabs.keys())
     if order is None:
-        reterr("sk: Wrong index list provided, " + \
-               "must be a unique list of tab indices")
+        reterr("sk: Error: Inputs must be a unique list of tab indices")
     # do the reordering of config['analysis']
     new_analysis = reordered_analysis(tabs, config['analysis'], order)
+    if new_analysis != config['analysis']:
+        print("sk: Warning: Lost an exe")
+    assert new_analysis == config['analysis']
+    config['analysis'] = new_analysis
     # copy each item one by one from the new dict to the old one
-    config['analysis'].clear()
-    for k in new_analysis.keys():
-        config['analysis'][k] = new_analysis[k]
-    yaml_dump(config)
-    # print layout again
-    tabs = get_tabs(config)
-    for i in range(len(tabs.keys())):
-        print(f"{i + 1}:  {list(tabs.keys())[i]}")
+    #config['analysis'].clear()
+    #for k in new_analysis.keys():
+    #    config['analysis'][k] = new_analysis[k]
+    return config
 
 def new_tab_order(args_order, tab_keys):
     """Get the new order of tabs based on the user input.
@@ -107,7 +109,6 @@ def new_tab_order(args_order, tab_keys):
     args_order -- order provided by the user (list of indices as strings)
     tabs -- list of tab names
     """
-
     # in case 9 or less tabs, the the order can be without spaces
     if len(args_order) == 1:
         order = list(map(lambda x: int(x) - 1, str(args_order[0])))

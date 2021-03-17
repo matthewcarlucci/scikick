@@ -25,7 +25,7 @@ def main():
     skconfig = ScikickConfig()
 
     # get tab strucutre
-    tabs = get_tabs(skconfig.config)
+    tabs = get_tabs(skconfig)
     site_yaml_files = skconfig.get_site_yaml_files()
 
     giturl = git_repo_url()
