@@ -27,9 +27,11 @@
         dpi = 100,
         fig.width = 10,
         fig.height = 10,
-        # Causes knitr to use HTML img tags which causes
-        # issues with rmd output format compatibility
-        #fig.retina = 2, 
+        # Causes knitr to use HTML img tags which can cause
+        # issues with rmarkdown::render output format compatibility
+        # fig.retina = 2, 
+        # Needed to ensure when retina=1, only user-specified captions show
+        fig.cap="", 
         fig.pos = "center",
         #################
         # Code reporting

@@ -67,6 +67,7 @@ def main():
         else:
             # TODO merge with scikick.yml
             output_yaml = yaml.load(open(join(get_sk_exe_dir(),"workflow/site_rules/default_output.yml"),"r")) 
+            output_yaml['output']['rmarkdown::html_document']['pandoc_args'] = '--resource-path=.:' + path_to_root + '/../../'
         site_yaml.update(output_yaml)
 
         yaml.indent(sequence=4, mapping=4, offset=0)
