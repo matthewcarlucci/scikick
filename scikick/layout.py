@@ -7,103 +7,37 @@ from scikick.utils import reterr
 # to allow hierarchy #232 this and everything it dependends on will need changes
 def get_tabs(skconf):
     """Return a list of tab names determined from scikick.yml
-    'analysis:' dict
-    config -- scikick.yml as an ordereddict
+    skconf -- ScikickConfig object
     """
-    config=skconf.config
-    if len(config["analysis"]) == 0:
+    if len(skconf.analysis) == 0:
         return {}
 
-    # remove index file beforehand
-    # BUG: causes index to be permanently removed from scikick.yml
-    index_list = skconf.index_exes
-    #if len(index_list) == 1:
-    #    analysis.pop(index_list[0], None)
-
-    # get tab strucutre
-    tabs = {}
-    for i in config['analysis'].keys():
-        if len(index_list) == 1:
-            if i == index_list[0]:
-                print(i)
-                continue
-        tabname = os.path.dirname(i)
-        if tabname == "":
-            tabname = "./"
+    # Start with analysis keys
+    exes = skconf.exes
+    # Remove index from menu building
+    if len(skconf.index_exes) == 1:
+         exes.remove(skconf.index_exes[0])
+    # Find common directory
+    nb_root = os.path.commonpath(list(exes))
+    # Then build menus accoring to exes order
+    tabs = ordereddict()
+    for exe in exes:
+        tabname = os.path.normpath(rm_commdir(os.path.dirname(exe),nb_root))
+        # Add unique tabs for each exe at nb_root
+        if tabname == ".":
+            out_base = skconf.get_info(exe,"out_base")
+            assert not os.path.isdir(out_base)
+            tabname = os.path.basename(out_base)
+        # Add menus for the rest
         if tabname not in tabs.keys():
             tabs[tabname] = []
-        if tabname == "./":
-            tabs[tabname].append("./%s" % os.path.splitext(i)[0])
-        else:
-            tabs[tabname].append(os.path.splitext(i)[0])
-    if tabs != {}:
-        # get the common dir suffix for all files
-        commpath = os.path.commonpath(tabs.keys())
-        tabs = ordereddict(map(lambda k: (rm_commdir(k, commpath), tabs[k]), \
-                               tabs.keys()))
-        # all files in './' have their own tab
-        if "./" in tabs.keys():
-            wd_idx = list(tabs.keys()).index("./")
-            tabs["./"].reverse()
-            for root_file in tabs["./"]:
-                fname = os.path.basename(root_file)
-                if fname in tabs.keys():
-                    fname = f"{fname}.Rmd"
-                tabs.insert(wd_idx, fname, [root_file])
-            del tabs["./"]
+        # Add exe to respective tabs
+        tabs[tabname].append(os.path.splitext(exe)[0])
     return tabs
-
-
-def rearrange_submenus(submenu, order, config, tabs):
-    """Change the order of submenus under a tab
-    submenu -- the name of the tab which to reorder
-    order -- the new order (list of indices 1...n) of the submenu
-    config -- yaml_in() output
-    tabs -- get_tabs(config) output
-    """
-    if submenu not in tabs:
-       reterr(f"sk: Error: No tab named \"{submenu}\"")
-    submenu_contents = get_submenu_items(config, submenu)
-    if len(order) == 0:
-        for i in range(len(submenu_contents)):
-            print(f"{i + 1}:  {submenu_contents[i]}")
-    else:
-        order = new_tab_order(order, submenu_contents)
-        if order is None:
-            reterr("sk: Wrong index list provided, " + \
-                   "must be a unique list of tab indices")
-        config["analysis"] = reordered_submenu(config["analysis"],
-                                               submenu_contents, order)
-        yaml_dump(config)
-        # print layout again
-        submenu_contents = get_submenu_items(config, submenu)
-        for i in range(len(submenu_contents)):
-            print(f"{i + 1}:  {submenu_contents[i]}")
-
-def rearrange_tabs(order, config, tabs):
-    """Change the order of tabs in the navigation bar
-    order -- the new order (list of indices 1...n) of the tabs
-    config -- yaml_in() output
-    tabs -- get_tabs(config) output
-    """
-    # get the new ordering based on the argument list
-    order = new_tab_order(order, tabs.keys())
-    if order is None:
-        reterr("sk: Error: Inputs must be a unique list of tab indices")
-    # do the reordering of config['analysis']
-    new_analysis = reordered_analysis(tabs, config['analysis'], order)
-    if new_analysis != config['analysis']:
-        print("sk: Warning: Lost an exe")
-    assert new_analysis == config['analysis']
-    config['analysis'] = new_analysis
-    # copy each item one by one from the new dict to the old one
-    #config['analysis'].clear()
-    #for k in new_analysis.keys():
-    #    config['analysis'][k] = new_analysis[k]
-    return config
 
 def new_tab_order(args_order, tab_keys):
     """Get the new order of tabs based on the user input.
+    Expands the user provided order to the full explicit index order.
     Returns a list of indices, which would be used to reorder the
     'analysis' keys in scikick.yml
     args_order -- order provided by the user (list of indices as strings)
@@ -122,65 +56,80 @@ def new_tab_order(args_order, tab_keys):
             if i not in order:
                 order.append(i)
         return order
-    return None
+    else:
+        reterr("sk: Error: Inputs must be a unique list of tab indices")
 
+# Top level reordering (reorder by directory)
+def rearrange_tabs(order, skconf, tabs):
+    """Change the order of tabs in the navigation bar
+    order -- the new order (list of indices 1...n) of the tabs
+    config -- ScikickConfig object
+    tabs -- get_tabs(config) output
+    """
+    # get the full set of indices
+    order = new_tab_order(order, tabs.keys())
+    # reorder analysis by with the order indices
+    new_analysis = reordered_analysis(tabs, skconf, order)
+    # Fix missing index (not included in get_tabs output)
+    if not skconf.analysis == new_analysis:
+        if len(skconf.index_exes)==1:
+            new_analysis[skconf.index_exe] = skconf.analysis[skconf.index_exe]
+    # Ensure it is fixed
+    assert new_analysis == skconf.analysis
+    skconf.config['analysis'] = new_analysis
+    return skconf
 
-def reordered_analysis(tabs, old_analysis, order):
-    """Reorder the 'analysis' dict in scikick.yml.
+def reordered_analysis(tabs, skconf, order):
+    """Reorder the 'analysis' dict in scikick.yml according to the ordering of
+    the directories output by get_tabs.
     Returns the reordered 'analysis' dict which produces
     the differently ordered tab list in all pages
     tabs -- list of tab names
-    old_analysis -- 'analysis' dict from scikick.yml
-    order -- list of indices
+    skconf -- ScikickConfig object
+    order -- list of indices for tabs
     """
     new_analysis = ordereddict()
     for ord_no in order:
-        for rmd in tabs[list(tabs.keys())[ord_no]]:
-            norm_rmd = os.path.normpath(rmd)
+        # Add each exe dict entry to new dict
+        for out_base in tabs[list(tabs.keys())[ord_no]]:
+            norm_rmd = os.path.normpath(out_base)
             curr_key = list(filter(lambda x: \
                                        os.path.splitext(x)[0] == norm_rmd, \
-                                   old_analysis.keys()))[0]
-            new_analysis[curr_key] = old_analysis[curr_key]
+                                   skconf.analysis.keys()))[0]
+            new_analysis[curr_key] = skconf.analysis[curr_key]
     return new_analysis
 
-# Submenus
+# Submenu reordering (reorder within directory)
+def rearrange_submenus(submenu, order, skconf, tabs):
+    """Change the order of submenus under a tab
+    submenu -- the name of the tab which to reorder
+    order -- the new order (list of indices 1...n) of the submenu
+    skconf -- ScikickConfig objects 
+    tabs -- get_tabs(config) output
+    """
+    # Find out_bases in submenu
+    submenu_out_bases = tabs[submenu]
+    submenu_exes = list(map(lambda out_base: skconf.get_info(out_base,"exe"), submenu_out_bases))
+    order = new_tab_order(order, submenu_out_bases)
 
-def get_submenu_items(config, submenu):
-    '''Get names of all submenu items in the same order
-    as in the submenu in the HTML
-    config -- scikick.yml dict
-    submenu -- name of tab/submenu
-    '''
-    rmds = list(config["analysis"].keys())
-    commpath = os.path.commonpath(rmds)
-    trimmed_rmds = map(lambda r: rm_commdir(r, commpath), rmds)
-    submenu_rmds = filter(lambda r:
-        os.path.dirname(r) == submenu or \
-        ((not os.path.isdir(os.path.join(commpath, r[:len(submenu)]))) and \
-        r[:len(submenu)] == submenu),
-        trimmed_rmds)
-    full_rmds = list(map(lambda r: os.path.join(commpath, r), submenu_rmds))
-    return full_rmds
-
-def reordered_submenu(analysis, submenu_contents, order):
-    '''reorder config['analysis'] based on the submenu ordering
-    config -- scikick.yml dict
-    submenu_contents -- list of rmds belonging to the submenuu
-    order -- list of integers specifying order
-    '''
-    first_item_no = list(analysis.keys()).index(submenu_contents[0])
-    new_order = list(map(lambda i: i + first_item_no, order))
-    new_analysis = analysis.copy()
+    ### Build new analysis dict
+    new_analysis = skconf.analysis.copy()
     new_analysis.clear()
-    for i in range(0, len(analysis.keys())):
-        key = list(analysis.keys())[i]
-        if i < first_item_no:
-            new_analysis[key] = analysis[key]
-        elif i < first_item_no + len(new_order):
-            neword_key = list(analysis.keys())[new_order[i - first_item_no]]
-            new_analysis[neword_key] = analysis[neword_key]
+    # Insert until first submenu is encountered
+    for exe in skconf.exes:
+        if exe not in submenu_exes:
+            new_analysis[exe] = skconf.analysis[exe]
         else:
-            new_analysis[key] = analysis[key]
-    return new_analysis
+            break
+    # Insert all submenu content in new order
+    submenu_exes_neword = [submenu_exes[i] for i in order]
+    for exe in submenu_exes_neword:
+        new_analysis[exe] = skconf.analysis[exe]
+    # Insert rest
+    for exe in skconf.exes:
+        if exe not in submenu_out_bases and exe not in new_analysis.keys():
+            new_analysis[exe] = skconf.analysis[exe]
+    skconf.config['analysis'] = new_analysis
+    return skconf
 
 

@@ -117,23 +117,25 @@ def sk_layout(args):
     """Manipulate the tab order in resulting htmls by changing
     the order of keys of 'analysis' dict in scikick.yml.
     """
-    # TODO: optimize this code, too much redundancy
     skconf=ScikickConfig(need_pages=True)
     tabs = get_tabs(skconf)
-
     # modify the layout of a submenu
     if args.submenu is not None:
-        rearrange_submenus(args.submenu[0], args.order, config, tabs)
+        if args.submenu[0] not in tabs:
+            reterr(f"sk: Error: No menu named \"{args.submenu[0]}\"")
+        if len(args.order) != 0:
+            skconf = rearrange_submenus(args.submenu[0], args.order, skconf, tabs)
+            yaml_dump(skconf.config)
+        tabs = get_tabs(skconf)
+        submenu_contents = tabs[args.submenu[0]]
+        submenu_text = list(map(lambda r: os.path.basename(r), submenu_contents))
+        for i in range(len(submenu_text)):
+            print(f"{i + 1}:  {submenu_text[i]}")
     else:
-        if len(args.order) == 0:
-            for i in range(len(tabs.keys())):
-                print(f"{i + 1}:  {list(tabs.keys())[i]}")
-            return
-        new_config = rearrange_tabs(args.order, skconf.config, tabs)
-        # Check that all exes still exist (same keys)
-        assert skconf.analysis == new_config['analysis']
-        yaml_dump(new_config)
-        # print layout again
+        if len(args.order) != 0:
+            skconf = rearrange_tabs(args.order, skconf, tabs)
+            yaml_dump(skconf.config)
+        # print layout
         tabs = get_tabs(skconf)
         for i in range(len(tabs.keys())):
             print(f"{i + 1}:  {list(tabs.keys())[i]}")
