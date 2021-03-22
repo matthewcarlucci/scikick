@@ -9,14 +9,15 @@ def get_tabs(skconf):
     """Return a list of tab names determined from scikick.yml
     skconf -- ScikickConfig object
     """
-    if len(skconf.analysis) == 0:
-        return {}
 
     # Start with analysis keys
     exes = skconf.exes
     # Remove index from menu building
     if len(skconf.index_exes) == 1:
          exes.remove(skconf.index_exes[0])
+    # If empty or homepage only, exit
+    if len(exes) == 0:
+        return {}
     # Find common directory
     nb_root = os.path.commonpath(list(exes))
     # Then build menus accoring to exes order
