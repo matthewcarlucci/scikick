@@ -1,45 +1,35 @@
 ##### Project Execution Overview 
 # This script contains:
-#   - Commands to handle data imports
-#   - Various commands to execute scikick
+#   - Commands to handle scRNAseq (project-specific) data imports
+#   - Various commands to execute Scikick
 #      - Using singularity + SLURM (default)
 #      - Using singularity
-# NOTE: This script is not yet ready for direct execution
-
 #### Data Import
 # For every project it is necessary to determine how
-# to get the data. For this project data comes from
-# R packages with built in caching mechanisms
-### Copying Bioc data cache into container
+# to get the data. For this project, data comes from
+# R packages with built-in caching mechanisms
+### Copying Bioconductor data cache into container
 # Currently it is necessary to reroute a directory
-# to /home/cache since the docker container did not
-# give read/write permissions and singularity does
-# not have elevated permissions.
-# Using the system cache dir to avoid re-downloads
-ehub=$(Rscript -e "cat(Sys.getenv('EXPERIMENT_HUB_CACHE'))")
-ahub=$(Rscript -e "cat(Sys.getenv('ANNOTATION_HUB_CACHE'))")
-# TODO if these variables don't exist in .Renviron an empty directory should be
-# provided. This will allow for running on a generic machine
-# that is not configured for ExperimentHub or AnnotationHub cache.
-# It will still allow for project-instance-level caching.
-# Additionally this will check for reproducibility on a naive machine
-# and could catch errors from data updates.
+# to /home/cache since the docker container does not
+# have read/write permissions and singularity does
+# not have elevated permissions. Directories are passed to 
+# singularity with the -B/--bind argument.
+## Best is to use the system cache dir to avoid re-downloads
+# ehub=$(Rscript -e "cat(Sys.getenv('EXPERIMENT_HUB_CACHE'))")
+# ahub=$(Rscript -e "cat(Sys.getenv('ANNOTATION_HUB_CACHE'))")
+## For ease, creating dedicated directories for data downloads
+mkdir -p input/cache/ExperimentHub
+mkdir -p input/cache/AnnotationHub
 
-# Works with scikick>0.1.2
-# sk run -vs --use-singularity \
-#	--singularity-args "'-B $ehub:/home/cache/ExperimentHub -B $ahub:/home/cache/AnnotationHub'"
-
-# Run ipynb steps first since singularity is missing these dependencies
-# Not longer used
-# sk run workflow.ipynb
-
-# Run all with singularity and cluster
-sk run -vs --use-singularity -j 10 \
-	--singularity-args "'-B $ehub:/home/cache/ExperimentHub -B $ahub:/home/cache/AnnotationHub'" \
+### Analysis Execution Commands
+## Run all with Singularity and on a SLURM cluster
+# Note that the singularity pull can require tmp space which can be set prior to the run with:
+#   TMPDIR = /tmpdir/with/space
+# The snakemake profile "slurm" must be confiugured prior to executing this command
+sk run -v -s --use-singularity \
+	--singularity-args "'-B input/cache/ExperimentHub:/home/cache/ExperimentHub -B input/cache/AnnotationHub:/home/cache/AnnotationHub'" \
 	--profile slurm
 
-# Works but has hardcoded sk path
-#sk run -s --use-singularity --singularity-args "'-B /external/EPIGENETICS/SCRATCH/mcarlucci/cache:/home/cache -B /external/EPIGENETICS/SCRATCH/ARCHIVE/SOFTWARE/miniconda3/envs/scikick_dev/lib/python3.7/site-packages/scikick-0.1.2.dev0-py3.7.egg/scikick'"
-
-# Run with cluster
-# sk run -vs --profile slurm 
+## Singularity usage
+# sk run -v -s --use-singularity \
+#	--singularity-args "'-B input/cache/ExperimentHub:/home/cache/ExperimentHub -B input/cache/AnnotationHub:/home/cache/AnnotationHub'"

@@ -42,7 +42,7 @@ dec.grun.hsc <- modelGeneVarByPoisson(sce.grun.hsc)
 top.grun.hsc <- getTopHVGs(dec.grun.hsc, prop=0.1)
 ```
 
-The lack of a typical "bump" shape in Figure \@ref(fig:unref-hgrun-var) is caused by the low counts.
+The lack of a typical "bump" shape is caused by the low counts.
 
 ```{r unref-hgrun-var, fig.cap="Per-gene variance as a function of the mean for the log-expression values in the Grun HSC dataset. Each point represents a gene (black) with the mean-variance trend (blue) fitted to the simulated Poisson-distributed noise."}
 plot(dec.grun.hsc$mean, dec.grun.hsc$total, pch=16, cex=0.5,

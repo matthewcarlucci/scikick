@@ -27,6 +27,7 @@ sce.paul
 ```
 
 ```{r export}
+dir.create("output",showWarnings = FALSE)
 saveRDS(sce.paul,"output/paul_import_sce.RDS")
 ```
 

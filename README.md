@@ -2,7 +2,6 @@
 
 # Scikick - Notebook-Centric Analysis Workflows <img src="docs/scikick_documentation/icon.svg" align="right" width="120" />
 
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/scikick)](https://pypistats.org/packages/scikick)
 [](https://pypi.python.org/pypi/scikick/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scikick.svg)](https://pypi.python.org/pypi/scikick/)
 ![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)

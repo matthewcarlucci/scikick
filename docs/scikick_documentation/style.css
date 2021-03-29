@@ -1,13 +1,20 @@
 /* Styles applied to BiocStyle::html_document
  */
 
-h1 {
-    border-bottom: 1px hsl(81deg 40% 50%) solid;
+h1.title {
+    color: hsl(40deg 50% 50%);
 }
 
-h1, h2, h3 {
-    color: hsl(81deg 40% 50%);
+h1 {
+    border-bottom: 1px hsl(40deg 50% 50%) solid;
 }
+
+h1, h2, h3, a {
+    color: hsl(40deg 50% 50%);
+}
+
+
+
 
 /* Source code formatting
  */
@@ -32,7 +39,7 @@ pre.sourceCode {
 }
 
 code.sourceCode {
-    background-color: hsl(81deg 0% 94%) !important;
+    background-color: hsl(218deg 35% 94%) !important;
 }
 
 ul.navbar-nav{

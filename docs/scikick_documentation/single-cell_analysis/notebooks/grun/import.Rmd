@@ -27,6 +27,7 @@ sce.grun.hsc
 ```
 
 ```{r export}
+dir.create("output",showWarnings = FALSE)
 saveRDS(sce.grun.hsc,"output/grun_import_sce.RDS")
 ```
 

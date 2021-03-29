@@ -1,0 +1,24 @@
+# Stage 1 - Run the analysis and store results on GitLab
+analysis:
+ stage: build
+ # This task is executed on each push of new code to the GitLab server
+ script:
+ - conda activate scikick # activate a preconfigured environment with scikick and dependencies installed
+ - bash run.sh # script calls scikick to run the analysis with singularity on a SLURM cluster
+ cache:
+   paths:
+   - .snakemake/singularity # Avoid pulling containers from DockerHub on each build
+ artifacts:
+  paths:
+  - report/ # keep the Scikick analysis archive files
+  - "*.out" # keep SLURM cluster log files
+  when: always # keep these artifacts on failure to investigate cluster error logs
+
+# Stage 2 - On successful build, send the report to a server for sharing
+deploy:
+ stage: deploy
+ script:
+ - mkdir -p .ci-deploy-dir/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME/ # prepare a directory based on GitLab project path
+ - rsync -av report/out_html/* .ci-deploy-dir/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME/ # put the site in the directory
+ - rsync -Pav .ci-deploy-dir/ admin@myserver.com:/home/admin/webroot/html/ # send to a dedicated gitlab-ci dir on webserver
+

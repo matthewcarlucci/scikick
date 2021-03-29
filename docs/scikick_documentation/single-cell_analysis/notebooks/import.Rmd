@@ -26,7 +26,7 @@ sce.nest
 ```
 
 ```{r export}
-dir.create("output",showWarnings = F)
+dir.create("output",showWarnings = FALSE)
 saveRDS(sce.nest,"output/nestorowa_import_sce.RDS")
 ```
 

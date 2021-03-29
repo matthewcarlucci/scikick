@@ -24,6 +24,8 @@ To install the bash kernel.
 scRNAseq analysis dependencies must also be installed.
 
 Stored notebook source files are not intended for inspection (outputs are cleared for git commits).
+
+Note that on Linux it seems that conda environments are not active in jupyter notebook bash kernels and scikick installations may not be found.
  
 ### Commiting changes
 

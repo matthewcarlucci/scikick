@@ -1,0 +1,62 @@
+### Scikick Project Workflow Configuration File
+
+# Directory where Scikick will store all standard notebook outputs
+reportdir: report
+
+# --- Content below here is best modified by using the Scikick CLI ---
+
+# Notebook Execution Configuration (format summarized below)
+# analysis:
+#  first_notebook.Rmd:
+#  second_notebook.Rmd: 
+#  - first_notebook.Rmd 	# must execute before second_notebook.Rmd
+#  - functions.R 	        # file is used by second_notebook.Rmd
+#
+# Each analysis item is executed to generate md and html files, E.g.:
+# 1. <reportdir>/out_md/first_notebook.md
+# 2. <reportdir>/out_html/first_notebook.html
+analysis: !!omap
+- index.Rmd:
+- notebooks/nestorowa/import.Rmd:
+- notebooks/nestorowa/quality_control.Rmd:
+  - notebooks/nestorowa/import.Rmd
+- notebooks/nestorowa/normalization.Rmd:
+  - notebooks/nestorowa/quality_control.Rmd
+- notebooks/nestorowa/further_exploration.Rmd:
+  - notebooks/nestorowa/normalization.Rmd
+- notebooks/grun/import.Rmd:
+- notebooks/grun/quality_control.Rmd:
+  - notebooks/grun/import.Rmd
+- notebooks/grun/normalization.Rmd:
+  - notebooks/grun/quality_control.Rmd
+- notebooks/grun/further_exploration.Rmd:
+  - notebooks/grun/normalization.Rmd
+- notebooks/paul/import.Rmd:
+- notebooks/paul/quality_control.Rmd:
+  - notebooks/paul/import.Rmd
+- notebooks/paul/normalization.Rmd:
+  - notebooks/paul/quality_control.Rmd
+- notebooks/paul/further_exploration.Rmd:
+  - notebooks/paul/normalization.Rmd
+- notebooks/merged/merge.Rmd:
+  - notebooks/grun/quality_control.Rmd
+  - notebooks/paul/quality_control.Rmd
+  - notebooks/nestorowa/normalization.Rmd
+- notebooks/merged/combined_analysis.Rmd:
+  - notebooks/merged/merge.Rmd
+version_info:
+  snakemake: 5.30.1
+  ruamel.yaml: 0.16.5
+  scikick: 0.2.0rc1
+# Optional site theme customization
+output:
+  BiocStyle::html_document:
+    code_folding: hide
+    theme: readable
+    toc_float: true
+    toc: true
+    number_sections: false
+    toc_depth: 5
+    self_contained: true
+snakefile_args:
+  singularity: docker://bioconductor/orchestratingsinglecellanalysis:RELEASE_3_12
