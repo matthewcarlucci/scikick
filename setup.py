@@ -24,7 +24,8 @@ setup(
     zip_safe=False,
     install_requires=[
         'snakemake>=5.9.0',
-        'ruamel.yaml>=0.16.5'
+        'ruamel.yaml>=0.16.5',
+        'graphviz>=0.16'
         ],
     include_package_data = True,
     entry_points={
