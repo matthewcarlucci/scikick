@@ -5,7 +5,7 @@ import scikick
 
 yaml_gen_script = os.path.join(workflow_dir, 'site_rules','render_site_yamlgen.py')
 
-localrules: generate_html, generate_site_files
+localrules: generate_html, generate_site_files, md_postprocess
 
 # Generate all _site.yml files
 rule generate_site_files:
