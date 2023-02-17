@@ -15,7 +15,7 @@ rule sk_exe_rmd:
     conda: skconfig.snakefile_arg("conda")
     singularity: skconfig.snakefile_arg("singularity")
     threads: skconfig.snakefile_arg("threads")
-    benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
+    benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else os.path.join(skconfig.report_dir,'benchmark','{out_base}')
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
     shell: "Rscript %s '{input.exe}' '{output.md}' > '{log}' 2>&1" \
         % os.path.join(workflow_dir,"notebook_rules", "execute_code.R")
@@ -31,7 +31,7 @@ rule sk_exe_r:
     conda: skconfig.snakefile_arg("conda")
     singularity: skconfig.snakefile_arg("singularity")
     threads: skconfig.snakefile_arg("threads")
-    benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
+    benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else os.path.join(skconfig.report_dir,'benchmark','{out_base}')
     # 'script:' section causes directories to not get found when using singularity, so 'shell:' is used
     shell: "Rscript %s '{input.exe}' '{output.md}' > '{log}' 2>&1" \
         % os.path.join(workflow_dir,"notebook_rules", "execute_code.R")
@@ -46,7 +46,7 @@ rule sk_exe_ipynb:
     conda: skconfig.snakefile_arg("conda")
     singularity: skconfig.snakefile_arg("singularity")
     threads: skconfig.snakefile_arg("threads")
-    benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else ""
+    benchmark: skconfig.snakefile_arg("benchmark") + "{out_base}" if skconfig.snakefile_arg("benchmark") != "" else os.path.join(skconfig.report_dir,'benchmark','{out_base}')
     params:
         outdir=lambda wildcards, output: os.path.dirname(output[0])
     log: '%s/logs/{out_base}_logs.txt' % skconfig.report_dir
