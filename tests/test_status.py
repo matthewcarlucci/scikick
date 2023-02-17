@@ -39,23 +39,23 @@ class TestStatus(unittest.TestCase):
 
     def test_status_touch(self):
         os.system("sk run")
-        os.system("touch code/page1.Rmd")
+        os.system("echo 'trigger rerun' >> code/page1.Rmd")
         self.output_check("output3.txt")
 
     def test_status_touch_v(self):
         os.system("sk run")
-        os.system("touch code/page1.Rmd")
+        os.system("echo 'trigger rerun' >> code/page1.Rmd")
         self.output_check("output3_v.txt", True)
 
     def test_status_touch_rm(self):
         os.system("sk run")
-        os.system("touch code/page1.Rmd")
+        os.system("echo 'trigger rerun' >> code/page1.Rmd")
         os.system("rm code/page2.Rmd")
         self.output_check("output4.txt", True)
 
     def test_status_touch_config(self):
         os.system("sk run")
-        os.system("touch scikick.yml")
+        os.system("echo '# trigger rerun' >> scikick.yml")
         self.output_check("output5.txt")
 
     def test_status_nohtml(self):
@@ -65,7 +65,7 @@ class TestStatus(unittest.TestCase):
 
     def test_status_touch_md(self):
         os.system("sk run")
-        os.system("touch report/out_md/code/page1.md")
+        os.system("echo 'trigger rerun' >> report/out_md/code/page1.md")
         self.output_check("output7.txt", True)
 
     def test_status_rm_md(self):
