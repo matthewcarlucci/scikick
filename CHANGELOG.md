@@ -2,7 +2,17 @@
 
 Chronological changes to scikick are summarized below.
 
-## 0.2.0 - TBD
+## 0.2.1 - February 17th 2023
+
+### Fixes
+
+- Add support for new snakemake versions requiring wildcards in benchmark
+
+### Changes
+
+- Benchmark directory now created by default under `report/benchmark`
+
+## 0.2.0 - March 30th 2021
 
 ### New Features
 
