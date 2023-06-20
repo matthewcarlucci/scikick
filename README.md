@@ -15,7 +15,7 @@ Collections of computational notebooks often lose coherence during complex and b
 
 -----------------------------------------------------
 
-## Getting Started
+## Demonstrations and Documentation
 
 [Read the introduction](https://petronislab.camh.ca/pub/scikick/stable/docs/report/out_html/introduction.html) for further details and installation requirements.
 
@@ -25,4 +25,13 @@ See the [tutorial](https://petronislab.camh.ca/pub/scikick/stable/docs/report/ou
 
 Use the [issue board](https://github.com/matthewcarlucci/scikick/issues) to provide feedback on Scikick (feature requests, bugs, and further software-related comments).
 
+## Quick-Start
+
+Scikick is currently tested and working on Unix systems (i.e. macOS, Linux etc.) and can be installed with:
+
+```
+pip install scikick
+```
+
+Initializing a Scikick project with `sk init` will identify any further missing software requirements. 
 
