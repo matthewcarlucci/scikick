@@ -6,14 +6,27 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scikick.svg)](https://pypi.python.org/pypi/scikick/)
 ![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.9.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+[![](https://img.shields.io/badge/doi-10.1371/journal.pone.0289171/btz834-green.svg)](https://doi.org/10.1371/journal.pone.0289171)
 
 ## Overview
 
+Collections of computational notebooks often lose coherence as projects grow. Scikick is a command line utility for managing this growth with simple commands for workflow configuration, report generation, and state management.
+
 ![](docs/scikick_documentation/figure1.svg)
 
-Collections of computational notebooks often lose coherence during complex and branching investigations. Scikick is a command line utility for managing ensembles of computational notebooks developed throughout a project by providing simple commands for workflow configuration, report generation, and state management.
+*Figure 1b from [Carlucci M. et al, 2023](https://doi.org/10.1371/journal.pone.0289171).*
 
 -----------------------------------------------------
+
+## Quick-Start
+
+Scikick is currently tested on Unix systems (i.e. macOS, Linux etc.) and can be installed with:
+
+```
+pip install scikick
+```
+
+Initializing a Scikick project with `sk init` will create a `scikick.yml` file and identify any further missing software requirements. 
 
 ## Demonstrations and Documentation
 
@@ -25,13 +38,8 @@ See the [tutorial](https://petronislab.camh.ca/pub/scikick/stable/docs/report/ou
 
 Use the [issue board](https://github.com/matthewcarlucci/scikick/issues) to provide feedback on Scikick (feature requests, bugs, and further software-related comments).
 
-## Quick-Start
+## Citation
 
-Scikick is currently tested and working on Unix systems (i.e. macOS, Linux etc.) and can be installed with:
+See further discussion about Scikick in the accompanying article:
 
-```
-pip install scikick
-```
-
-Initializing a Scikick project with `sk init` will identify any further missing software requirements. 
-
+>Carlucci M, Bareikis T, Koncevičius K, Gibas P, Kriščiūnas A, Petronis A, et al. (2023) Scikick: A sidekick for workflow clarity and reproducibility during extensive data analysis. PLoS ONE 18(7): e0289171. https://doi.org/10.1371/journal.pone.0289171
